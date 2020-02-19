@@ -2,7 +2,7 @@
 library(predictsFunctions)
 library(StatisticalModels)
 
-predicts.path <-"//ad.ucl.ac.uk/homec/zcbtpmc/Documents/Predicts/R/database.rds"
+predicts.path <-"Your predicts database path"
 predicts <- readRDS(predicts.path)
 
 
@@ -14,8 +14,7 @@ insect_sites <- create_sites(insects_predicts)
 
 
 ##This should be the file location for output of the climate_percNH script
-predicts.climate.data.path <- "//ad.ucl.ac.uk/homec/zcbtpmc/Documents/Predicts/pollinator_taxonomic_geographic_dist_text-analysis-master/pollinator_taxonomic_geographic_dist_text-analysis-master/data_my_project/predicts_sites_6.csv"
-
+predicts.climate.data.path <- "Your path for output of percNH.r script"
 
 #Organise Land use, calculate scaled abundance, find climate data for insect sites
 insect_sites <- organize_land_use_find_climate(insect_sites, predicts.climate.data.path)
