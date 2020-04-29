@@ -12,6 +12,9 @@ predicts <- ReadPREDICTS(predicts.path)
 
 predicts <- predicts[(predicts$Class=="Insecta"),]
 
+# hosts <- read.csv(paste0(dataDir,"HostSpecies_PREDICTS.csv"))
+# predicts <- predicts[(predicts$Best_guess_binomial %in% hosts$Host.binomial),]
+
 # Correct effort-sensitive abundance measures (assumes linear relationship between effort and recorded abundance)
 predicts <- CorrectSamplingEffort(diversity = predicts)
 

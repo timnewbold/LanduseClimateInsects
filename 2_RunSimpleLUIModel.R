@@ -74,7 +74,7 @@ par(tck=-0.01)
 errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00","#CC79A7")
 
 errbar(x = 1:5,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
-       col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,2),xaxt="n",
+       col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(s.preds.lower),max(s.preds.upper)),xaxt="n",
        ylab="Species richness (%)",xlab="Land use",bty="l")
 
 axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
@@ -82,7 +82,7 @@ axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
 abline(h=0,col="#00000077",lty=2)
 
 errbar(x = 1:5,y = a.preds.median,yplus = a.preds.upper,yminus = a.preds.lower,
-       col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,2),xaxt="n",
+       col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(a.preds.lower),max(a.preds.upper)),xaxt="n",
        ylab="Total abundance (%)",xlab="Land use",bty="l")
 
 axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
