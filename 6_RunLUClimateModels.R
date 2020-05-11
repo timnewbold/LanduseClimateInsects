@@ -69,6 +69,10 @@ exclQuantiles <- c(0.025,0.975)
 pdf(file = paste0(outDir,"LUClimateAnomalyInteractions.pdf"),width = 17.5/2.54,height = 16/2.54)
 
 par(mfrow=c(2,2))
+par(las=1)
+par(mgp=c(1.6,0.2,0))
+par(mar=c(2.6,2.6,0.2,0.2))
+par(tck=-0.01)
 
 nd <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
@@ -148,6 +152,14 @@ if(!is.null(MeanAnomalyModelAbund$model)){
   abline(v=1,lty=1,col="#00000022")
   abline(v=2,lty=1,col="#00000022")
   
+  legend(
+    x = -0.6,y = 120,bty="n",
+    legend = c("Primary","Secondary",
+               "Agriculture_extensive",
+               "Agriculture_intensive"),
+    col = c("#009E73", "#0072B2",
+            "#E69F00", "#D55E00"),
+    lty=1,lwd=2)
   
 } else {
   frame()
@@ -220,9 +232,11 @@ if(!is.null(MeanAnomalyModelRich$model)){
   abline(v=2,lty=1,col="#00000022")
   
   
+} else {
+  frame()
 }
 
-frame()
+
 
 
 nd <- expand.grid(
