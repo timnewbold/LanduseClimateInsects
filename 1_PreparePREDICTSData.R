@@ -82,3 +82,35 @@ sites <- droplevels(sites)
 sites$LogAbund <- log(sites$Total_abundance+1)
 
 saveRDS(object = sites,file = paste0(outDir,"PREDICTSSiteData.rds"))
+
+
+
+# basic map of PREDICTS sites
+
+library(ggplot2)
+
+# plot the raster in ggplot
+map.world <- map_data('world')
+
+
+# map of sites
+ggplot() +
+  geom_map(data=map.world, map=map.world,
+           aes(x=long, y=lat, group=group, map_id=region),
+           fill= "grey", colour="grey", size=0.2) +
+  geom_point(data = sites, aes(x = Longitude, y = Latitude), col = c("#1E90FF"), fill = c("#104E8B"), shape = 21) +
+  theme(axis.title = element_blank(), 
+        plot.background = element_blank(), 
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank()) +
+ggtitle("a.")
+  
+
+
+ggsave(filename = paste0(outDir, "/PREDICTS_points_map.pdf"), height = 4, width = 8)
+
+
+
+
+
