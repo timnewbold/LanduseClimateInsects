@@ -108,18 +108,24 @@ mean.temp.2069.2071 <- stackApply(x = mean.temp.2069.2071,indices = rep(1,3),fun
 tmp2069_71_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1905mean)
 tmp2069_71std_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1905mean)  / tmp1901_1905sd
 
-brks <- c(-50,-5,-2,-1,-0.5,-0.2,-0.1,0,0.1,0.2,0.5,1,2,5,50)
+brks <- c(-50,-5,-2,-1,-0.5,-0.2,-0.1,0,0.1,0.2,0.5,0.75,1,1.5,2,5,50)
 brks2 <- c(-1,-0.75,-0.5,-0.25,-0.1,0,0.1,0.25,0.5,0.75,1,1.5,3.1)
 cols <- c(rev(brewer.pal(n = 9,name = "Greens"))[3:9],
-          (brewer.pal(n = 9,name = "Purples"))[3:6],
-          (brewer.pal(n = 9,name = "Oranges"))[7:9])
+          (brewer.pal(n = 9,name = "Purples"))[4:8],
+          (brewer.pal(n = 9,name = "Oranges"))[6:9])
 cols2 <- c(rev(brewer.pal(n = 9,name = "Blues"))[5:9],
           (brewer.pal(n = 9,name = "Reds"))[3:9])
 
-pdf(file = paste0(outDir,"ClimateIndexMaps.pdf"),width = 12.5/2.54,height = 19.84/2.54)
+pdf(file = paste0(outDir,"ClimateIndexMaps.pdf"),width = 8.5/2.54,height = 14.77/2.54)
+
+par(ps=10)
+par(cex=1)
+par(cex.lab=1)
+par(cex.axis=1)
+par(cex.main=1)
 
 layout.mat <- matrix(data = 1:5,nrow = 5,ncol = 1,byrow = TRUE)
-layout(mat = layout.mat,widths = 17.5,heights = c(2,5.28,5.28,5.28,2))
+layout(mat = layout.mat,widths = 8.5,heights = c(2,3.59,3.59,3.59,2))
 
 # par(mfrow=c(3,1))
 
@@ -127,20 +133,20 @@ par(mar=c(0,0,0,0))
 
 # image(tmp1970std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
 plot.new()
-legend(0.1,1,c("< -0.75","-0.75 : -0.5","-0.5 : -0.25","-0.25 : -0.1","-0.1 : 0",
+legend(0,1,c("< -0.75","-0.75 : -0.5","-0.5 : -0.25","-0.25 : -0.1","-0.1 : 0",
        "0 : 0.1","0.1 : 0.25","0.25 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","> 1.5"),
-       ncol=5,fill=cols2,bty="n")
+       ncol=4,fill=cols2,bty="n",cex=1)
 image(tmp2004_6_climate_anomaly,breaks=brks2,col=cols2,xaxt="n",yaxt="n",bty="n",
       xlim=c(-180,180),ylim=c(-68,84))
-text(-175,-20,"2005 (Absolute)",pos=4)
+text(-175,-20,"2005\n(Absolute)",pos=4)
 image(tmp2004_6std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
-text(-175,-20,"2005 (Standardised)",pos=4)
+text(-175,-20,"2005\n(Standardised)",pos=4)
 image(tmp2069_71std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
-text(-175,-20,"2070 - RCP 8.5\n (Standardised)",pos=4)
+text(-175,-20,"2070 - RCP 8.5\n(Standardised)",pos=4)
 plot.new()
-legend(0.1,1,c("< -5","-5 : -2","-2 : -1","-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-             "0 : 0.1","0.1 : 0.2","0.2 : 0.5","0.5 : 1","1 : 2","2 : 5","> 5"),
-       ncol=5,fill=cols,bty="n")
+legend(0,1,c("< -5","-5 : -2","-2 : -1","-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+             "0 : 0.1","0.1 : 0.2","0.2 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5"),
+       ncol=4,fill=cols,bty="n",cex=1)
 # image(tmp2016_18std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
 
 invisible(dev.off())
