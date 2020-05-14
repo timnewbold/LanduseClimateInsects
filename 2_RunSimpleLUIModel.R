@@ -68,7 +68,7 @@ pdf(file = paste0(outDir,"LUI_Plot.pdf"),width = 17.5/2.54,height = 6/2.54)
 par(mfrow=c(1,2))
 par(las=1)
 par(mgp=c(1.6,0.2,0))
-par(mar=c(2.6,2.6,0.2,0.2))
+par(mar=c(2.6,2.6,0.5,0.5))
 par(tck=-0.01)
 
 errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00","#CC79A7")
