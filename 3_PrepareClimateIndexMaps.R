@@ -7,6 +7,9 @@ library(dismo)
 library(rgdal)
 library(RColorBrewer)
 library(ncdf4)
+library(rasterVis)
+library(gridExtra)
+
 
 dataDir <- "0_data/"
 
@@ -150,3 +153,43 @@ legend(0,1,c("< -5","-5 : -2","-2 : -1","-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1",
 # image(tmp2016_18std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
 
 invisible(dev.off())
+
+
+
+# manuscript figures for 2005 absolute and standardised anomaly
+
+# use info above to set the plot themes
+ab_theme <- rasterTheme(region = cols2)
+ca_theme <- rasterTheme(region = cols)
+
+# edit lattice options for blank space around plot
+lattice.options(
+  layout.heights=list(bottom.padding=list(x=0), top.padding=list(x=0)),
+  layout.widths=list(left.padding=list(x=0.2), right.padding=list(x=0))
+)
+
+# absolute change map
+p1 <- levelplot(tmp2004_6_climate_anomaly, 
+                xlab=NULL,
+                ylab=NULL, 
+                scales=list(draw=FALSE),
+                at = brks2,
+                par.settings = ab_theme,
+                main = list("A.", cex = 0.8, just = 12))
+
+# standardised change map
+p2 <- levelplot(tmp2004_6std_climate_anomaly,
+                xlab=NULL,
+                ylab=NULL, 
+                scales=list(draw=FALSE),
+                at = brks,
+                par.settings = ca_theme, 
+                main = list("B.", cex = 0.8, just = 12))
+
+
+pdf(paste0(outDir, "/Maps_absolute_and_anomaly.pdf"), height = 7, width = 4)
+
+grid.arrange(p1, p2, nrow = 2)
+
+dev.off()
+
