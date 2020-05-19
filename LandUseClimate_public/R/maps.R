@@ -37,8 +37,42 @@ warming2004_6 <- calc(tmp2004_6, base::mean)-tmp1901_1905mean
 breaks2 <- c(0,0.25,0.5,0.75, 1 ,1.5,2,2.5,3, 4)
 length(breaks2)
 pallete2 <- colorRampPalette(c("lightblue","red", "black"))
-plot(warming2004_6, breaks=breaks2, col=pallete2(11), main="Mean warming 2004 to 2006 Since 1901")
+plot(warming2004_6, breaks=breaks2, col=pallete2(11), main="Mean absolute warming 2004 to 2006 Since 1901")
 
+
+##Comparison plot
+
+library(rasterVis)
+myColorkey <- list(at=breaks[1:12], ## where the colors change
+                   labels=list(
+                     at=round(breaks, 2)[1:12] ## where to print labels
+                   ))  
+myColorkey
+SCA <- rasterVis::levelplot(tmp2004_6std_climate_anomaly,col.regions=pallete2(100), main="Standardized Climate Anomaly", 
+                     at=breaks[1:12], colorkey=myColorkey)
+
+CA <- rasterVis::levelplot(warming2004_6, col.regions=pallete2(100), main="Absolute Warming")
+SCA
+CA
+#910, 796
+
+w <- 910*4
+h <-796*4
+dev.new()
+png(filename="maps/sca.png", width =w, height=h, res=500)
+SCA
+dev.off()
+dev.new()
+png(filename="maps/ca.png", width =w, height=h, res=500)
+CA
+dev.off()
+###
+
+colorkey
+length(breaks)
+round(breaks, 1)[1:12]
+
+breaks
 ##1970
 
 names(tmp)[829:840] ##1970
