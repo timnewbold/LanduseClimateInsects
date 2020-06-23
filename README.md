@@ -1,7 +1,7 @@
 TO DO LIST
 1. Make Natural habitat figure clearer (add figure legends etc)
 2. Update Standardised Climate anomaly figure to correct scale
-
+3. Test wider climate baselines? Do they influence results?
 
 
 
