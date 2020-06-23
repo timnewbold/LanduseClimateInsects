@@ -1,3 +1,11 @@
+TO DO LIST
+1. Make Natural habitat figure clearer (add figure legends etc)
+2. Update Standardised Climate anomaly figure to correct scale
+
+
+
+
+
 
 For these scripts to run you will need the CRUv4.03 climate data and the Hoskins (2016) land use data. 
 
