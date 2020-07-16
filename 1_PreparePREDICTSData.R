@@ -1,6 +1,20 @@
+##%######################################################%##
+#                                                          #
+####         Organise PREDICTS data for insects         ####
+#                                                          #
+##%######################################################%##
 
+# This script takes the complete PREDICTS database, selects those entries for
+# insects, and organises the data for analysis.
+
+
+rm(list = ls())
+
+# load required libraries
 library(predictsFunctions)
+library(ggplot2)
 
+# directories
 dataDir <- "0_data/"
 outDir <- "1_PreparePREDICTSData/"
 
@@ -10,6 +24,7 @@ predicts.path <- paste0(dataDir,"database.rds")
 # Read in the PREDICTS data
 predicts <- ReadPREDICTS(predicts.path)
 
+# Select only data for insects
 predicts <- predicts[(predicts$Class=="Insecta"),]
 
 # hosts <- read.csv(paste0(dataDir,"HostSpecies_PREDICTS.csv"))
@@ -28,19 +43,24 @@ sites <- SiteMetrics(diversity = predicts,
 
 # First, we will rearrange the land-use classification a bit
 sites$LandUse <- paste(sites$Predominant_land_use)
+
 # Drop classification where land use could not be identified
 sites$LandUse[(sites$LandUse=="Cannot decide")] <- NA
+
 # Drop classification where the stage of recovery of secondary vegetation is unknown
 # sites$LandUse[(sites$LandUse=="Secondary vegetation (indeterminate age)")] <- NA
+
 # Now make the variable a factor, and set the reference level to primary vegetation
 sites$LandUse <- factor(sites$LandUse)
 sites$LandUse <- relevel(sites$LandUse,ref="Primary vegetation")
 
 sites$Use_intensity[sites$Use_intensity=="Cannot decide"] <- NA
 
+# combine LU and UI 
 sites$UI <- paste0(sites$LandUse,'_',sites$Use_intensity)
 sites$UI[grep("NA",sites$UI)] <- NA
 
+# recode according to land use and use intensity combinations
 sites$UI2 <- dplyr::recode(sites$UI,
                            'Primary vegetation_Minimal use' = 'Primary vegetation',
                            'Cropland_Light use' = 'Agriculture_High',
@@ -70,6 +90,7 @@ sites$UI2 <- dplyr::recode(sites$UI,
                            'Intermediate secondary vegetation_Intense use' = 'Secondary vegetation',
                            'Intermediate secondary vegetation_Light use' = 'Secondary vegetation')
 
+# 
 sites$Use_intensity[((sites$LandUse=="Mature secondary vegetation") & 
                        (sites$Use_intensity=="Intense use"))] <- "Light use"
 sites$Use_intensity[((sites$LandUse=="Intermediate secondary vegetation") & 
@@ -79,35 +100,34 @@ sites$Use_intensity[((sites$LandUse=="Young secondary vegetation") &
 
 sites <- droplevels(sites)
 
+# transform abundance values 
 sites$LogAbund <- log(sites$Total_abundance+1)
 
+# save the prepared dataset
 saveRDS(object = sites,file = paste0(outDir,"PREDICTSSiteData.rds"))
 
 
 
-# basic map of PREDICTS sites
-
-library(ggplot2)
+#### basic map of PREDICTS sites ####
 
 # plot the raster in ggplot
 map.world <- map_data('world')
 
-
 # map of sites
-ggplot() +
-  geom_map(data=map.world, map=map.world,
+p1 <-ggplot() +
+         geom_map(data=map.world, map=map.world,
            aes(x=long, y=lat, group=group, map_id=region),
            fill= "grey", colour="grey", size=0.2) +
-  geom_point(data = sites, aes(x = Longitude, y = Latitude), col = c("#1E90FF"), fill = c("#104E8B"), shape = 21) +
-  theme(axis.title = element_blank(), 
-        plot.background = element_blank(), 
-        panel.background = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank()) +
-ggtitle("a.")
-  
+         geom_point(data = sites, aes(x = Longitude, y = Latitude), col = c("#1E90FF"), fill = c("#104E8B"), shape = 21) +
+         theme(axis.title = element_blank(), 
+               plot.background = element_blank(), 
+               panel.background = element_blank(),
+               axis.text = element_blank(),
+               axis.ticks = element_blank()) +
+         ggtitle("a.")
+   
 
-
+# save plot
 ggsave(filename = paste0(outDir, "/PREDICTS_points_map.pdf"), height = 4, width = 8)
 
 
