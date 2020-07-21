@@ -1,6 +1,12 @@
-###Map of standardized anomaly
+##%######################################################%##
+#                                                          #
+####        Organising and mapping climate data         ####
+#                                                          #
+##%######################################################%##
 
-##Packages
+# This script explores the climate data, produces anomalies and associated maps.
+
+# load required libraries
 library(raster)
 library(sp)
 library(dismo)
@@ -10,42 +16,62 @@ library(ncdf4)
 library(rasterVis)
 library(gridExtra)
 
-
+# directories
 dataDir <- "0_data/"
-
 outDir <- "3_PrepareClimateIndexMaps/"
 
+# load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
+# take values for 1901 to 1905
 tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
 
+# calculate the mean and sd of the baseline values
 tmp1901_1905mean <- calc(tmp1901_1905, base::mean)
 tmp1901_1905sd <- calc(tmp1901_1905, stats::sd)
 
-###2005 is mean year for insect data
+### Note: 2005 is the mean year for insect data
 
 par(mfrow=c(1,1))
 par(oma=c(5,5,5,5))
 
-###2004 to 2006 maps
+
+
+##### 2004 to 2006 maps #####
+
 tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 
-#Standardised climate anomaly
-tmp2004_6mean <-  calc(tmp[[names(tmp)[1237:1272]]], base::mean)
+
+### Calculate the standardised anomaly ###
+
+# calc the mean for present time period
+tmp2004_6mean <- calc(tmp[[names(tmp)[1237:1272]]], base::mean)
+
+# calc mean for baseline
 tmp2004_6_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1905mean)
+
+# standardise the baseline
 tmp2004_6std_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1905mean)  / tmp1901_1905sd
+
+# info for map
 breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5, 10)
 pallete <- colorRampPalette(c("lightblue","red", "black"))
+
+# plot map
 plot(tmp2004_6std_climate_anomaly, breaks=breaks, col=pallete(12), main="Mean Standardized Climate Anomaly 2004 to 2006")
 
-#Climate anomaly (non standardised, for comparison)
+
+
+## Climate anomaly (non standardised, for comparison) ##
 warming2004_6 <- calc(tmp2004_6, base::mean)-tmp1901_1905mean
 breaks2 <- c(0,0.25,0.5,0.75, 1 ,1.5,2,2.5,3, 4)
 length(breaks2)
 pallete2 <- colorRampPalette(c("lightblue","red", "black"))
 plot(warming2004_6, breaks=breaks2, col=pallete2(11), main="Mean warming 2004 to 2006 Since 1901")
 
-##1970
+
+
+## anomaly in 1970 ##
 
 names(tmp)[829:840] ##1970
 tmp1970sd <-  calc(tmp[[names(tmp)[829:840]]], stats::sd)
@@ -57,7 +83,7 @@ plot(tmp1970std_climate_anomaly, breaks=breaks, col=pallete(12), main="1970")
 
 
 
-##2016 to 2018
+## anomaly, present 2016 to 2018 ##
 
 names(tmp)[1381:1416] ## 2016 to 2018 
 tmp2016_18sd <-  calc(tmp[[names(tmp)[1381:1416]]], stats::sd)
@@ -68,6 +94,9 @@ breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5, 15)
 pallete <- colorRampPalette(c("lightblue","red", "black"))
 plot(tmp2016_18std_climate_anomaly, breaks=breaks, col=pallete(12), main="2016_18")
 
+
+#### Calculating future anomalies ####
+
 months.1979.2013 <- 937:1356
 
 hist.mean.temp.1979.2013 <- stack(stackApply(x = tmp[[months.1979.2013]],
@@ -75,14 +104,19 @@ hist.mean.temp.1979.2013 <- stack(stackApply(x = tmp[[months.1979.2013]],
 hist.mean.temp.1979.2013 <- stackApply(x = hist.mean.temp.1979.2013,indices = rep(1,35),
                                        fun = mean)
 
-futureClimateDir <- "0_data/ISIMIPAnomalies/"
+# future temperature estimates from ISIMIP
+futureClimateDir <- "0_data/ISIMIPAnomalies"
 
+# selection of years
 years <- 2069:2071
 
+# file path for ISIMIP data
 all.files <- dir(path = futureClimateDir,recursive = TRUE,full.names = TRUE)
 
+# Behrman projection 
 behrCRS <- CRS('+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs')
 
+# using RCP 8.5
 mean.temp.2069.2071 <- stack(lapply(X = years,FUN = function(yr){
   
   print(yr)
@@ -94,6 +128,9 @@ mean.temp.2069.2071 <- stack(lapply(X = years,FUN = function(yr){
     X = gsub("0_data/ISIMIPAnomalies/","",all.model.files),function(f) return(strsplit(x = f,split = "[-_]",fixed = FALSE)[[1]][1]))==
       c("GFDL","HadGEM2","IPSL","MIROC5")))
   
+  # what are each of these files?
+  
+  # 
   meant.anom <- mean(stack(lapply(X = all.model.files,function(f){
     
     ras <- stack(f)$"X0.1"
@@ -108,6 +145,7 @@ mean.temp.2069.2071 <- stack(lapply(X = years,FUN = function(yr){
 
 mean.temp.2069.2071 <- stackApply(x = mean.temp.2069.2071,indices = rep(1,3),fun = mean)
 
+# calc the anomalies for the future years
 tmp2069_71_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1905mean)
 tmp2069_71std_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1905mean)  / tmp1901_1905sd
 
@@ -156,7 +194,19 @@ invisible(dev.off())
 
 
 
-# manuscript figures for 2005 absolute and standardised anomaly
+
+#### Figures for manuscript: 2005 absolute and standardised anomaly ####
+
+
+# info for maps
+brks <- c(-10,-5,-2,-1,-0.5,-0.2,-0.1,0,0.1,0.2,0.5,0.75,1,1.5,2,5,10)
+brks2 <- c(-1,-0.75,-0.5,-0.25,-0.1,0,0.1,0.25,0.5,0.75,1,1.5,3.1)
+cols <- c(rev(brewer.pal(n = 9,name = "Greens"))[3:9],
+          (brewer.pal(n = 9,name = "Purples"))[4:8],
+          (brewer.pal(n = 9,name = "Oranges"))[6:9])
+cols2 <- c(rev(brewer.pal(n = 9,name = "Blues"))[5:9],
+           (brewer.pal(n = 9,name = "Reds"))[3:9])
+
 
 # use info above to set the plot themes
 ab_theme <- rasterTheme(region = cols2)
@@ -170,16 +220,16 @@ lattice.options(
 
 # absolute change map
 p1 <- levelplot(tmp2004_6_climate_anomaly, 
-                xlab=NULL,
+                xlab= "Absolute change in climate",
                 ylab=NULL, 
                 scales=list(draw=FALSE),
                 at = brks2,
                 par.settings = ab_theme,
-                main = list("A.", cex = 0.8, just = 12))
+                main = list("A.", cex = 0.8, just = 12),margin = F)
 
 # standardised change map
 p2 <- levelplot(tmp2004_6std_climate_anomaly,
-                xlab=NULL,
+                xlab= "Standardised Climate Anomaly (SCA)",
                 ylab=NULL, 
                 scales=list(draw=FALSE),
                 at = brks,
@@ -187,9 +237,161 @@ p2 <- levelplot(tmp2004_6std_climate_anomaly,
                 main = list("B.", cex = 0.8, just = 12))
 
 
+
+
 pdf(paste0(outDir, "/Maps_absolute_and_anomaly.pdf"), height = 7, width = 4)
 
 grid.arrange(p1, p2, nrow = 2)
 
 dev.off()
+
+
+
+### Alternative plots with marginal density plots ###
+
+
+library(cowplot)
+
+
+### first , the absolute change ###
+
+# convert raster to dataframe
+plot_data <- as.data.frame(tmp2004_6_climate_anomaly, xy = TRUE)
+
+# plot the raster
+p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) + 
+          geom_raster(aes(x = x, y = y, fill = layer), na.rm = TRUE) +
+          scale_fill_continuous( type = "viridis") + 
+          xlab("") +
+          ylab("") +
+          labs(fill = "Absolute Temperature Change") +
+          theme_bw() +
+          theme(legend.position = 'bottom', 
+                panel.border = element_blank(), 
+                panel.grid = element_blank(),
+                axis.text = element_blank(),
+                legend.key.width = unit(3, "cm"),
+                axis.ticks = element_blank()) +
+          guides(fill = guide_colorbar(title.position = "top")) + 
+  ggtitle("a.")
+
+# get the mean climate value for each row of the dataset
+rows <- init(tmp2004_6_climate_anomaly, v='row')
+ravg <- zonal(tmp2004_6_climate_anomaly, rows, fun = 'mean', na.rm = T)
+ravg <- as.data.frame(ravg)
+
+# plot the marginal plot
+p2 <- ggplot(data = ravg) +
+        geom_line( aes(x = zone, y = mean), col = c("#473C8B")) +
+        geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B")) +
+        theme_bw() + 
+        scale_x_reverse(limits = c(360, 1), expand = c(0,0)) +
+        scale_y_continuous(limits = c(min(ravg$mean, na.rm = T), max(ravg$mean, na.rm = T)), expand = c(0,0)) +
+        theme(panel.border = element_blank(), 
+              panel.grid = element_blank(),
+              axis.text = element_blank(),
+              axis.title = element_blank(),
+              axis.ticks = element_blank()) + 
+              coord_flip()
+
+
+
+#### now the standardised anomaly ####
+
+# convert raster to dataframe
+plot_data2 <- as.data.frame(tmp2004_6std_climate_anomaly, xy = TRUE)
+
+# plot the raster
+p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) + 
+  geom_raster(aes(x = x, y = y, fill = layer), na.rm = TRUE) +
+  scale_fill_continuous( type = "viridis") + 
+  xlab("") +
+  ylab("") +
+  labs(fill = "Standardised Climate Anomaly") +
+  theme_bw() +
+  theme(legend.position = 'bottom', 
+        panel.border = element_blank(), 
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        legend.key.width = unit(3, "cm"),
+        axis.ticks = element_blank()) +
+  guides(fill = guide_colorbar(title.position = "top"))+
+  ggtitle("b.")
+
+# get the mean climate value for each row of the dataset
+rows2 <- init(tmp2004_6std_climate_anomaly, v='row')
+ravg2 <- zonal(tmp2004_6std_climate_anomaly, rows2, fun = 'mean', na.rm = T)
+ravg2 <- as.data.frame(ravg2)
+
+# plot the marginal plot
+p4 <- ggplot(data = ravg2) +
+  geom_line( aes(x = zone, y = mean), col = c("#473C8B")) +
+  geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B")) +
+  theme_bw() + 
+  scale_x_reverse(limits = c(360, 1), expand = c(0,0)) +
+  scale_y_continuous(limits = c(min(ravg$mean, na.rm = T), max(ravg$mean, na.rm = T)), expand = c(0,0)) +
+  theme(panel.border = element_blank(), 
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank()) + 
+  coord_flip()
+
+
+
+# setting up a black plot to fill the gap
+p0 <- ggplot() +
+  theme_bw() +
+  theme(panel.border = element_blank(), 
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank()) 
+  
+
+
+# organise the plots and legends into one object
+
+
+final_plot <- plot_grid(
+plot_grid(
+  plot_grid(
+    p1 + theme(legend.position = "none")
+    , p2
+    , nrow = 1
+    , align = "hv"
+    , rel_widths = c(3,1))
+  , plot_grid(
+    get_legend(p1)
+    , p0
+    , ncol = 2
+    , rel_widths = c(3,1))
+
+ , nrow = 2
+ , rel_heights = c(3, 1)
+),
+plot_grid(
+  plot_grid(
+    p3 + theme(legend.position = "none")
+    , p4
+    , nrow = 1
+    , align = "hv"
+    , rel_widths = c(3,1))
+  , plot_grid(
+    get_legend(p3)
+    , p0
+    , ncol = 2
+    , rel_widths = c(3,1))
+  
+  , nrow = 2
+  , rel_heights = c(3, 1)
+),
+nrow = 2
+)
+
+# save as a pdf
+ggsave(filename = paste0(outDir, "/Figure2_mapsonly.pdf"), plot = last_plot(), width = 8, height = 10)
+
+# save final_plot as an rdata file to be used in later scripts
+save(final_plot, file = paste0(outDir, "/ans_and_anom_maps.rdata"))
 
