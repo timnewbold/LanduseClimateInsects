@@ -1,19 +1,31 @@
-###Calculate proportion NH surrounding each site in PREDICTS at multiple spatial scales, 1,3,5 and 10km.
+##%######################################################%##
+#                                                          #
+####      Organise Natural habitat info for sites       ####
+#                                                          #
+##%######################################################%##
 
+
+# This script calculates the proportion NH surrounding each site 
+# in PREDICTS at multiple spatial scales, 1,3,5 and 10km.
+
+# load libraries
 library(raster)
 library(sp)
 library(predictsFunctions)
 library(snow)
 
+# directories
 dataDir <- "0_data/"
 predictsDir <- "4_PREDICTSMatchClimateIndex/"
-
 outDir <- "5_PREDICTSMatchPropNatHab/"
 
+# required crs
 wgs84 <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
 
+# read in the predicts data with climate info
 predicts_sp <- readRDS(paste0(predictsDir,"PREDICTSSitesWithClimateData.rds"))
 
+# load the NH raster layers
 PV <- raster(paste0(
   dataDir,"PRI_1km_2005_0ice.bil"), 
   crs=wgs84)
@@ -21,16 +33,21 @@ SV <- raster(paste0(
   dataDir,"SEC_1km_2005_0ice.bil"), 
   crs=wgs84)
 
+# run in parallel
 nCores <- parallel::detectCores()
 
 st1 <- Sys.time()
 
 cl <- snow::makeCluster(nCores-1)
 
+# export data to cores
 snow::clusterExport(
   cl = cl,
   list = c('predicts_sp','PV','SV','buffer','crop','cellStats'),envir = environment())
 
+# Time difference of 31.47568 mins
+
+# for each site, get the proportion of NH surrounding the site
 natHabitat <- data.frame(t(parSapply(cl = cl,X = (1:nrow(predicts_sp)),FUN = function(i){
   cat(paste0("Processing site ",i," of ",nrow(predicts_sp),"\r"))
   
