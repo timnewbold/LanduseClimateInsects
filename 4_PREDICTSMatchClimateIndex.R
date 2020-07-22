@@ -1,3 +1,12 @@
+##%######################################################%##
+#                                                          #
+####      Match climate values with PREDICTS sites      ####
+#                                                          #
+##%######################################################%##
+
+# This script organises the climate data associated with each PREDICTS site
+
+
 ##Read in packages
 library(raster)
 library(sp)
@@ -8,9 +17,9 @@ library(Rfast)
 library(snow)
 source("Functions.R")
 
+# directories
 dataDir <- "0_data/"
 predictsDir <- "1_PreparePREDICTSData/"
-
 outDir <- "4_PREDICTSMatchClimateIndex/"
 
 ##Path for monthly mean temperature from CRUv4.03
@@ -27,7 +36,9 @@ tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname = "tmp")
 ##Both cru data and predicts is in WGS84
 wgs84 <- crs(tmp)
 
+# read in the predicts sites - insect subset
 predicts_sites <- readRDS(paste0(predictsDir,"PREDICTSSiteData.rds"))
+
 # Remove sites without coordinates
 predicts_sites2 <- predicts_sites[!is.na(predicts_sites$Latitude), ]
 
@@ -57,6 +68,7 @@ st1 <- Sys.time()
 
 cl <- snow::makeCluster(nCores-1)
 
+# Time difference of 8.01447 mins
 snow::clusterExport(
   cl = cl,
   list = c('predicts_sp','names_sub','names',
@@ -143,6 +155,7 @@ names_sub_tmx <- substr(names_tmx, 2, 8)
 
 st1 <- Sys.time()
 
+# Time difference of 7.953608 mins
 cl <- snow::makeCluster(nCores-1)
 
 snow::clusterExport(
