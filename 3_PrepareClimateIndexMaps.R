@@ -393,5 +393,5 @@ nrow = 2
 ggsave(filename = paste0(outDir, "/Figure2_mapsonly.pdf"), plot = last_plot(), width = 8, height = 10)
 
 # save final_plot as an rdata file to be used in later scripts
-save(final_plot, file = paste0(outDir, "/ans_and_anom_maps.rdata"))
+save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
 
