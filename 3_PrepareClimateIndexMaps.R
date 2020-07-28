@@ -272,8 +272,8 @@ p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) +
                 axis.text = element_blank(),
                 legend.key.width = unit(3, "cm"),
                 axis.ticks = element_blank(), 
-                legend.text = element_text(size = 8), 
-                legend.title = element_text(size = 8), legend.key.size = unit(0.5,"cm")) +
+                legend.text = element_text(size = 6), 
+                legend.title = element_text(size = 8), legend.key.size = unit(0.2,"cm")) +
           guides(fill = guide_colorbar(title.position = "top")) + 
   ggtitle("a.")
 
@@ -317,9 +317,9 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) +
         axis.text = element_blank(),
         legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
-        legend.text = element_text(size = 8), 
+        legend.text = element_text(size = 6), 
         legend.title = element_text(size = 8), 
-        legend.key.size = unit(0.5,"cm")) +
+        legend.key.size = unit(0.2,"cm")) +
   guides(fill = guide_colorbar(title.position = "top")) +
   ggtitle("b.")
 
@@ -368,8 +368,8 @@ plot_grid(
     , rel_widths = c(3,1))
   , plot_grid(
     get_legend(p1)
-    , p0
-    , ncol = 2
+    #, p0
+    #, ncol = 2
     , rel_widths = c(2,1))
 
  , nrow = 2
@@ -384,12 +384,13 @@ plot_grid(
     , rel_widths = c(3,1))
   , plot_grid(
     get_legend(p3)
-    , p0
-    , ncol = 2
-    , rel_widths = c(2,1))
+  #  , NULL
+  #  , ncol = 2
+    , rel_widths = c(1,1))
   
   , nrow = 2
   , rel_heights = c(3, 1)
+  
 ),
 nrow = 2
 )
