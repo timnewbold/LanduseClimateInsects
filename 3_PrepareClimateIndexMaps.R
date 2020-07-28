@@ -273,7 +273,7 @@ p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) +
                 legend.key.width = unit(3, "cm"),
                 axis.ticks = element_blank(), 
                 legend.text = element_text(size = 8), 
-                legend.title = element_text(size = 8)) +
+                legend.title = element_text(size = 8), legend.key.size = unit(0.5,"cm")) +
           guides(fill = guide_colorbar(title.position = "top")) + 
   ggtitle("a.")
 
@@ -318,8 +318,9 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) +
         legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
         legend.text = element_text(size = 8), 
-        legend.title = element_text(size = 8)) +
-  guides(fill = guide_colorbar(title.position = "top"))+
+        legend.title = element_text(size = 8), 
+        legend.key.size = unit(0.5,"cm")) +
+  guides(fill = guide_colorbar(title.position = "top")) +
   ggtitle("b.")
 
 # get the mean climate value for each row of the dataset
@@ -369,7 +370,7 @@ plot_grid(
     get_legend(p1)
     , p0
     , ncol = 2
-    , rel_widths = c(3,1))
+    , rel_widths = c(2,1))
 
  , nrow = 2
  , rel_heights = c(3, 1)
@@ -385,7 +386,7 @@ plot_grid(
     get_legend(p3)
     , p0
     , ncol = 2
-    , rel_widths = c(3,1))
+    , rel_widths = c(2,1))
   
   , nrow = 2
   , rel_heights = c(3, 1)
