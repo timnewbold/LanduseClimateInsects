@@ -1,19 +1,31 @@
+##%######################################################%##
+#                                                          #
+####         Run models including percentage NH         ####
+#                                                          #
+##%######################################################%##
 
+# This script runs the more complex models looking at the buffering effect
+# of natural habitat on climate effects across land uses.
+
+# load libraries
 library(StatisticalModels)
 library(predictsFunctions)
 source("Functions.R")
 
-###Create Models for all insects in predicts for standardised climate anomaly and Land interactions
-
+# directories
 predictsDataDir <- "6_RunLUClimateModels/"
-
 outDir <- "7_RunLUClimateNHModels/"
+
+
+###Create Models for all insects in predicts for standardised climate anomaly and Land interactions
 
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
+# remove any NAs
 modelData <- na.omit(predictsSites[,c(
   'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
+# run models with and without NH interaction, abundance models
 AbundMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
                 fixedStruct = "UI2 * StdTmeanAnomalyRS",
                 randomStruct = "(1|SS)+(1|SSB)")
@@ -23,6 +35,7 @@ AbundMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",f
 
 print(anova(AbundMeanAnomalyModel0$model,AbundMeanAnomalyModel1$model))
 
+# run models with and without NH interaction, species richness models
 modelData <- na.omit(predictsSites[,c(
   'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
@@ -35,6 +48,7 @@ RichMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_rich
 
 print(anova(RichMeanAnomalyModel0$model,RichMeanAnomalyModel1$model))
 
+# run models with and without NH interaction, abundance models, max anomaly
 modelData <- na.omit(predictsSites[,c(
   'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
@@ -47,6 +61,7 @@ AbundMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",fi
 
 print(anova(AbundMaxAnomalyModel0$model,AbundMaxAnomalyModel1$model))
 
+# run models with and without NH interaction, species richness models, max anomaly
 modelData <- na.omit(predictsSites[,c(
   'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
@@ -73,6 +88,7 @@ print(anova(RichMaxAnomalyModel0$model,RichMaxAnomalyModel1$model))
 # 75% NH cover = 0.8498366 in rescaled values
 # 100% NH cover = 1.834235 in rescaled values
 
+# create matrix for predictions
 nd <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
                         to = max(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
@@ -81,20 +97,28 @@ nd <- expand.grid(
              levels = levels(AbundMeanAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
   # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
+
+# back transform the climate data range
 nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
   transformedX = nd$StdTmeanAnomalyRS,
   originalX = predictsSites$StdTmeanAnomaly)
+
+# back transform NH data range
 nd$NH_5000 <- round(BackTransformCentreredPredictor(
   transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+
+# set values for richness and abundance
 nd$LogAbund <- 0
 nd$Species_richness <- 0
 
+# set the reference row
 refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & 
                   (nd$NH_5000==100))
 
+# quantiles for presenting results
 exclQuantiles <- c(0.025,0.975)
 
-pdf(file = paste0(outDir,"AbundanceMeanAnomaly.pdf"),width = 17.5/2.54,height = 8/2.54)
+pdf(file = paste0(outDir,"AbundanceMeanAnomaly.pdf"),width = 20/2.54,height = 10/2.54)
 
 QPV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   AbundMeanAnomalyModel1$data$UI2=="Primary vegetation"],
@@ -109,11 +133,16 @@ QAH <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   AbundMeanAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
+# predict results 
 a.preds.tmean <- PredictGLMERRandIter(model = AbundMeanAnomalyModel1$model,data = nd)
+
+# transform results
 a.preds.tmean <- exp(a.preds.tmean)-0.01
 
+# convert to percentage of reference row
 a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
 
+# set anything outside the desired quantiles to NA
 a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
 a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
 a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
@@ -123,6 +152,7 @@ a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]
 a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
 a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
 
+# get the median and upper/lower intervals for plots
 nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
 nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
@@ -131,6 +161,9 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 par(mfrow=c(1,2))
+
+
+## 1. plot for abundance response to mean anomaly wuth 
 
 ylims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(PredLower,na.rm = TRUE),max(PredUpper,na.rm = TRUE)))
@@ -155,6 +188,7 @@ invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
     
     points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
     
+    
   },split(x = preds.lu,f = preds.lu$NH_5000),c("#a50026","#f46d43","#74add1","#313695")))
   
   
@@ -168,7 +202,18 @@ invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
   abline(v=2,lty=1,col="#00000022")
   
   
+  # add a legend to the second plot
+  
+
+  
 }))
+
+# add legend to righthand plot
+legend(
+  x = -0.6,y = 115,bty="n",
+  legend = c("25%", "50%", "75%", "100%"),
+  col = c("#a50026","#f46d43","#74add1","#313695"),
+  lty=1,lwd=2, cex = 1, title = "% NH", title.adj = 1)
 
 invisible(dev.off())
 
