@@ -70,6 +70,9 @@ MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Lo
                                 fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
                                 saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
 
+# save the model output
+save(MeanAnomalyModelAbund, file = paste0(outDir, "/MeanAnomalyModelAbund.rdata"))
+
 # 2. Richness, mean anomaly
 MeanAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
                                      fitFamily = "poisson",fixedFactors = "UI2",
@@ -77,6 +80,9 @@ MeanAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Spe
                                      randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
                                      fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
                                      saveVars = c("Total_abundance", "SSBS", "NH_3000"))
+
+# save model output
+save(MeanAnomalyModelRich, file = paste0(outDir, "/MeanAnomalyModelRich.rdata"))
 
 # 3. Abundance, max anomaly
 MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
@@ -86,6 +92,9 @@ MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Log
                                      fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)"),
                                      saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
 
+# save model output
+save(MaxAnomalyModelAbund, file = paste0(outDir, "/MaxAnomalyModelAbund.rdata"))
+
 # 4. Richness, max anomaly
 MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
                                     fitFamily = "poisson",fixedFactors = "UI2",
@@ -94,12 +103,19 @@ MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Spec
                                     fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)"),
                                     saveVars = c("Total_abundance", "SSBS", "NH_3000"))
 
-
-
+# save model output
+save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich.rdata"))
 
 #### Plot results ####
 
+#predictsSites <- readRDS(file = paste0(outDir,"PREDICTSSiteData.rds"))
+#load(paste0(outDir, "/MeanAnomalyModelAbund.rdata"))
+#load(paste0(outDir, "/MeanAnomalyModelRich.rdata"))
+#load(paste0(outDir, "/MaxAnomalyModelAbund.rdata"))
+#load(paste0(outDir, "/MaxAnomalyModelRich.rdata"))
 
+
+# set quantiles of predicted result to be presented in the plots
 exclQuantiles <- c(0.025,0.975)
 
 
@@ -108,7 +124,7 @@ pdf(file = paste0(outDir,"LUClimateAnomalyInteractions.pdf"),width = 17.5/2.54,h
 par(mfrow=c(2,2))
 par(las=1)
 par(mgp=c(1.6,0.2,0))
-par(mar=c(2.6,2.6,0.2,0.2))
+par(mar=c(2.6,2.6,1.0,0.2))
 par(tck=-0.01)
 
 # create matrix for predictions
@@ -206,14 +222,20 @@ if(!is.null(MeanAnomalyModelAbund$model)){
   abline(v=1,lty=1,col="#00000022")
   abline(v=2,lty=1,col="#00000022")
   
+  # add legend
   legend(
-    x = -0.6,y = 120,bty="n",
+    x = -0.6,y = 115,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_extensive",
                "Agriculture_intensive"),
     col = c("#009E73", "#0072B2",
             "#E69F00", "#D55E00"),
     lty=1,lwd=2)
+  
+  # add title
+  #title("c.", adj = 0)
+  
+  p1 <- recordPlot()
   
 } else {
   frame()
@@ -285,6 +307,8 @@ if(!is.null(MeanAnomalyModelRich$model)){
   abline(v=1,lty=1,col="#00000022")
   abline(v=2,lty=1,col="#00000022")
   
+  
+  p2 <- recordPlot()
   
 } else {
   frame()
@@ -371,6 +395,9 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   abline(v=1,lty=1,col="#00000022")
   abline(v=2,lty=1,col="#00000022")
   
+  p3 <- recordPlot()
+  
+  
 } else {
   frame()
 }
@@ -441,6 +468,9 @@ if(!is.null(MaxAnomalyModelRich$model)){
   abline(v=1,lty=1,col="#00000022")
   abline(v=2,lty=1,col="#00000022")
   
+  p4 <- recordPlot()
+  
+  
 } else {
   frame()
 }
@@ -452,9 +482,121 @@ invisible(dev.off())
 
 ### Organise figure for manuscript ###
 
-# read in the rdata file containing the maps
-load(file = paste0(getwd(), "/3_PrepareClimateIndexMaps/abs_and_anom_maps.rdata"))
 
-final_plot
+
+library(cowplot)
+library(ggplot2)
+
+par(mfrow=c(1,1))
+par(las=1)
+par(mgp=c(1.6,0.3,0)) # 
+par(mar=c(2.6,2.6,1,1)) # margins around plot
+par(tck=-0.01) # tick mark size
+#par(pty="s") # set plot type to be square
+
+
+# adjust plot 1: mean anomaly and abundance
+
+QPV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+  MeanAnomalyModelAbund$data$UI2=="Primary vegetation"],
+  probs = exclQuantiles)
+QSV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+  MeanAnomalyModelAbund$data$UI2=="Secondary vegetation"],
+  probs = exclQuantiles)
+QAL <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+  MeanAnomalyModelAbund$data$UI2=="Agriculture_Low"],
+  probs = exclQuantiles)
+QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+  MeanAnomalyModelAbund$data$UI2=="Agriculture_High"],
+  probs = exclQuantiles)
+
+  # predict the results
+  a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelAbund$model,data = nd)
+  
+  # back transform the abundance values
+  a.preds.tmean <- exp(a.preds.tmean)-0.01
+  
+  # convert to relative to reference
+  a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
+  
+  # remove anything above and below the quantiles
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+  
+  # Get the median, upper and lower quants for the plot
+  nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                           FUN = median,na.rm=TRUE))*100)-100
+  nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+  nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+  
+  # plot #
+  
+  # set up plotting window
+  plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),max(nd$StdTmeanAnomaly)),
+       ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
+       xlab="Mean temperature anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
+  
+  invisible(mapply(FUN = function(preds,col){
+    
+    preds <- na.omit(preds)
+    
+    X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
+               rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
+    Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
+               rev(preds$PredUpper), (preds$PredLower)[1])
+    
+    polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
+    
+    points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
+    
+  },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+  
+  # add some gridlines
+  abline(h=150,lty=1,col="#00000022")
+  abline(h=100,lty=1,col="#00000022")
+  abline(h=50,lty=1,col="#00000022")
+  abline(h=0,lty=1,col="#00000022")
+  abline(h=-50,lty=1,col="#00000022")
+  abline(v=0,lty=1,col="#00000022")
+  abline(v=1,lty=1,col="#00000022")
+  abline(v=2,lty=1,col="#00000022")
+  
+  # add legend
+  legend(
+    x = -0.6,y = 115,bty="n",
+    legend = c("Primary","Secondary",
+               "Agriculture_extensive",
+               "Agriculture_intensive"),
+    col = c("#009E73", "#0072B2",
+            "#E69F00", "#D55E00"),
+    lty=1,lwd=2, cex = 0.6)
+  
+  # add title
+  title("c.", adj = 0, cex = 1, font.main = 1)
+  
+  p1 <- recordPlot()
+
+  
+  
+# read in the rdata file containing the maps
+  load(file = paste0(getwd(), "/3_PrepareClimateIndexMaps/abs_and_anom_maps.rdata"))
+  
+  
+# organise plots 
+p5 <- plot_grid(final_plot ,
+          plot_grid(p1, NULL, nrow = 1, rel_widths = c(2.5,1)),
+          ncol = 1, rel_heights = c(1.8,1), scale = 0.85)
+
+
+# save as pdf
+save_plot(filename = paste0(outDir, "/Figure_2.pdf") , plot = p5, base_height = 11, base_width = 10)
 
 
