@@ -271,7 +271,9 @@ p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) +
                 panel.grid = element_blank(),
                 axis.text = element_blank(),
                 legend.key.width = unit(3, "cm"),
-                axis.ticks = element_blank()) +
+                axis.ticks = element_blank(), 
+                legend.text = element_text(size = 8), 
+                legend.title = element_text(size = 8)) +
           guides(fill = guide_colorbar(title.position = "top")) + 
   ggtitle("a.")
 
@@ -314,7 +316,9 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) +
         panel.grid = element_blank(),
         axis.text = element_blank(),
         legend.key.width = unit(3, "cm"),
-        axis.ticks = element_blank()) +
+        axis.ticks = element_blank(), 
+        legend.text = element_text(size = 8), 
+        legend.title = element_text(size = 8)) +
   guides(fill = guide_colorbar(title.position = "top"))+
   ggtitle("b.")
 
