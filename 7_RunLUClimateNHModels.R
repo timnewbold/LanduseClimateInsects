@@ -118,7 +118,6 @@ refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd
 # quantiles for presenting results
 exclQuantiles <- c(0.025,0.975)
 
-pdf(file = paste0(outDir,"AbundanceMeanAnomaly.pdf"),width = 20/2.54,height = 10/2.54)
 
 QPV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   AbundMeanAnomalyModel1$data$UI2=="Primary vegetation"],
@@ -160,8 +159,12 @@ nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
 nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
+pdf(file = paste0(outDir,"AbundanceMeanAnomaly.pdf"),width = 20/2.54,height = 10/2.54)
+
 par(mfrow=c(1,2))
 
+
+nd_ab_mean <- nd
 
 ## 1. plot for abundance response to mean anomaly wuth 
 
@@ -173,7 +176,7 @@ xlims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
 invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
   
   plot(-9e99,-9e99,xlim=xlims,ylim=ylims,
-       xlab="Mean temperature anomaly",ylab="Abundance (%)")
+       xlab="Mean temperature anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -202,18 +205,16 @@ invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
   abline(v=2,lty=1,col="#00000022")
   
   
-  # add a legend to the second plot
-  
 
-  
 }))
 
 # add legend to righthand plot
 legend(
-  x = -0.6,y = 115,bty="n",
+  x = 1.5,y = 112, bty="n",
   legend = c("25%", "50%", "75%", "100%"),
   col = c("#a50026","#f46d43","#74add1","#313695"),
-  lty=1,lwd=2, cex = 1, title = "% NH", title.adj = 1)
+  lty=1,lwd=2, cex = 0.7, title = "% NH", title.adj = 0.2)
+
 
 invisible(dev.off())
 
@@ -480,4 +481,32 @@ invisible(dev.off())
 
 
 
+###### figures for manuscript ######
 
+# abundance response to mean anomaly only, all LUs
+
+
+library(ggplot2)
+
+# set factor levels
+nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+
+nd$NH_5000 <- factor(nd$NH_5000, levels = c("100", "75", "50", "25"))
+
+# plot
+ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = NH_5000), size = 1) +
+  geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = NH_5000), alpha = 0.2) +
+  scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  facet_wrap(~UI2, ncol = 2) + 
+  theme_bw() + 
+  labs(fill = "% NH", col = "% NH") + 
+  ylab("Abundance (%)") +
+  xlab("Mean temperature anomaly") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 200)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 15))
+
+# save
+ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 8, width = 8)
