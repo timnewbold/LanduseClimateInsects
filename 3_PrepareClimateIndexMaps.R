@@ -15,6 +15,9 @@ library(RColorBrewer)
 library(ncdf4)
 library(rasterVis)
 library(gridExtra)
+library(cowplot)
+library(ggplot2)
+library(viridis)
 
 # directories
 dataDir <- "0_data/"
@@ -23,7 +26,7 @@ outDir <- "3_PrepareClimateIndexMaps/"
 # load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
-# take values for 1901 to 1905
+# take names of values for 1901 to 1905
 tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
 
 # calculate the mean and sd of the baseline values
@@ -32,10 +35,10 @@ tmp1901_1905sd <- calc(tmp1901_1905, stats::sd)
 
 ### Note: 2005 is the mean year for insect data
 
+
+
 par(mfrow=c(1,1))
 par(oma=c(5,5,5,5))
-
-
 
 ##### 2004 to 2006 maps #####
 
@@ -250,7 +253,6 @@ dev.off()
 ### Alternative plots with marginal density plots ###
 
 
-library(cowplot)
 
 
 ### first , the absolute change ###
@@ -400,4 +402,114 @@ ggsave(filename = paste0(outDir, "/Figure2_mapsonly.pdf"), plot = last_plot(), w
 
 # save final_plot as an rdata file to be used in later scripts
 save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
+
+
+
+
+
+##### Manuscript, Figure 4, present and future anomaly #####
+
+### Option 1: 2 separate figures ###
+
+
+## anomaly, present 2016 to 2018 ##
+
+# convert raster to dataframe
+plot_data_pres <- as.data.frame(tmp2016_18std_climate_anomaly, xy = TRUE)
+plot_data_pres <- plot_data_pres[!is.na(plot_data_pres$layer), ]
+
+# plot the raster
+p5 <- ggplot(plot_data_pres) + 
+  geom_raster(aes(x = x, y = y, fill = layer)) +
+  scale_fill_viridis_c(option = "magma", values = c(0,0.15,1), end = 0.7) + 
+  xlab("") +
+  ylab("") +
+  labs(fill = "Standardised\nClimate\nAnomaly") +
+  theme_bw() +
+  theme(legend.position = 'right', 
+        #panel.border = element_blank(), 
+        #panel.grid = element_blank(),
+        #axis.text = element_blank(),
+        #legend.key.width = unit(3, "cm"),
+       # axis.ticks = element_blank(), 
+        legend.text = element_text(size = 8), 
+        legend.title = element_text(size = 10) #, 
+        #legend.key.size = unit(0.2,"cm")
+        ) +
+  guides(fill = guide_colorbar(title.position = "top")) +
+  ggtitle("a. 2018")
+
+
+
+
+## future anomaly, 2069 - 2071 ##
+
+
+plot_data_fut<- as.data.frame(tmp2069_71std_climate_anomaly, xy = TRUE)
+plot_data_fut <- plot_data_fut[!is.na(plot_data_fut$layer), ]
+
+# plot the raster
+p6 <- ggplot(plot_data_fut) + 
+  geom_raster(aes(x = x, y = y, fill = layer)) +
+  scale_fill_viridis_c(option = "magma", values = c(0,0.3,1), begin = 0.18) + 
+  xlab("") +
+  ylab("") +
+  labs(fill = "Standardised\nClimate\nAnomaly") +
+  theme_bw() +
+  theme(legend.position = 'right', 
+        #panel.border = element_blank(), 
+        #panel.grid = element_blank(),
+        #axis.text = element_blank(),
+        #legend.key.width = unit(3, "cm"),
+        # axis.ticks = element_blank(), 
+        legend.text = element_text(size = 8), 
+        legend.title = element_text(size = 10) #, 
+        #legend.key.size = unit(0.2,"cm")
+  ) +
+  guides(fill = guide_colorbar(title.position = "top")) +
+  ggtitle("b. 2070")
+
+
+plot_grid(p5, p6, ncol = 1)
+
+
+
+### Option 2 : facet grid the two plots together so  ###
+### they are on the same colour scale                ###
+
+# add years to data table
+plot_data_pres$year <- 2018
+plot_data_fut$year <- 2070
+
+# combine the two together
+all_plot <- rbind(plot_data_pres, plot_data_fut)
+
+ggplot(all_plot) + 
+  geom_raster(aes(x = x, y = y, fill = layer)) +
+  scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
+  facet_grid(~ year) +
+  xlab("") +
+  ylab("") +
+  labs(fill = "Standardised\nClimate\nAnomaly") +
+  theme_bw() +
+  theme(legend.position = 'bottom', 
+        #panel.border = element_blank(), 
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        #legend.key.width = unit(3, "cm"),
+        axis.ticks = element_blank(), 
+        legend.text = element_text(size = 10), 
+        legend.title = element_text(size = 10), 
+        #legend.key.size = unit(0.2,"cm",
+        panel.border = element_rect(size = 0.2),
+        strip.background = element_rect(size = 0.2),
+        strip.text = element_text(size = 10))
+ 
+
+# save plot as pdf
+ggsave(filename = paste0(outDir, "/Current_Future_panel_plot.pdf"), width = 8, height = 4)
+
+
+
+
 
