@@ -409,74 +409,6 @@ save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
 
 ##### Manuscript, Figure 4, present and future anomaly #####
 
-### Option 1: 2 separate figures ###
-
-
-## anomaly, present 2016 to 2018 ##
-
-# convert raster to dataframe
-plot_data_pres <- as.data.frame(tmp2016_18std_climate_anomaly, xy = TRUE)
-plot_data_pres <- plot_data_pres[!is.na(plot_data_pres$layer), ]
-
-# plot the raster
-p5 <- ggplot(plot_data_pres) + 
-  geom_raster(aes(x = x, y = y, fill = layer)) +
-  #scale_fill_viridis_c(option = "magma", values = c(0,0.15,1), end = 0.7) + 
-  scale_fill_gradient2(midpoint = 0)
-  xlab("") +
-  ylab("") +
-  labs(fill = "Standardised\nClimate\nAnomaly") +
-  theme_bw() +
-  theme(legend.position = 'right', 
-        #panel.border = element_blank(), 
-        #panel.grid = element_blank(),
-        #axis.text = element_blank(),
-        #legend.key.width = unit(3, "cm"),
-       # axis.ticks = element_blank(), 
-        legend.text = element_text(size = 8), 
-        legend.title = element_text(size = 10) #, 
-        #legend.key.size = unit(0.2,"cm")
-        ) +
-  guides(fill = guide_colorbar(title.position = "top")) +
-  ggtitle("a. 2018")
-
-
-
-
-## future anomaly, 2069 - 2071 ##
-
-
-plot_data_fut<- as.data.frame(tmp2069_71std_climate_anomaly, xy = TRUE)
-plot_data_fut <- plot_data_fut[!is.na(plot_data_fut$layer), ]
-
-# plot the raster
-p6 <- ggplot(plot_data_fut) + 
-  geom_raster(aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c(option = "magma", values = c(0,0.3,1), begin = 0.18) + 
-  xlab("") +
-  ylab("") +
-  labs(fill = "Standardised\nClimate\nAnomaly") +
-  theme_bw() +
-  theme(legend.position = 'right', 
-        #panel.border = element_blank(), 
-        #panel.grid = element_blank(),
-        #axis.text = element_blank(),
-        #legend.key.width = unit(3, "cm"),
-        # axis.ticks = element_blank(), 
-        legend.text = element_text(size = 8), 
-        legend.title = element_text(size = 10) #, 
-        #legend.key.size = unit(0.2,"cm")
-  ) +
-  guides(fill = guide_colorbar(title.position = "top")) +
-  ggtitle("b. 2070")
-
-
-plot_grid(p5, p6, ncol = 1)
-
-
-
-### Option 2 : facet grid the two plots together so  ###
-### they are on the same colour scale                ###
 
 # add years to data table
 plot_data_pres$year <- 2018
@@ -485,6 +417,7 @@ plot_data_fut$year <- 2070
 # combine the two together
 all_plot <- rbind(plot_data_pres, plot_data_fut)
 
+# organise breaks, colours and labels
 brks <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,50)
 cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:8],
           (brewer.pal(n = 8,name = "Purples"))[4:7],
@@ -492,13 +425,13 @@ cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:8],
 labs <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
           "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5")
 
+# assign values into bins
 all_plot$bins <- cut(all_plot$layer, 
                      breaks = brks, 
                      labels = labs,
                      include.lowest = TRUE)
 
-
-
+# plot
 ggplot(all_plot) + 
   geom_raster(aes(x = x, y = y, fill = bins)) +
   #scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
@@ -518,7 +451,7 @@ ggplot(all_plot) +
         legend.title = element_text(size = 10), 
         #legend.key.size = unit(0.2,"cm",
         panel.border = element_rect(size = 0.2),
-        strip.background = element_rect(size = 0.2),
+        strip.background = element_rect(size = 0.2, fill = "transparent"),
         strip.text = element_text(size = 10))
  
 
