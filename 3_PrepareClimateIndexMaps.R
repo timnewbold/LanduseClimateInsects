@@ -421,7 +421,8 @@ plot_data_pres <- plot_data_pres[!is.na(plot_data_pres$layer), ]
 # plot the raster
 p5 <- ggplot(plot_data_pres) + 
   geom_raster(aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c(option = "magma", values = c(0,0.15,1), end = 0.7) + 
+  #scale_fill_viridis_c(option = "magma", values = c(0,0.15,1), end = 0.7) + 
+  scale_fill_gradient2(midpoint = 0)
   xlab("") +
   ylab("") +
   labs(fill = "Standardised\nClimate\nAnomaly") +
@@ -484,9 +485,24 @@ plot_data_fut$year <- 2070
 # combine the two together
 all_plot <- rbind(plot_data_pres, plot_data_fut)
 
+brks <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,50)
+cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:8],
+          (brewer.pal(n = 8,name = "Purples"))[4:7],
+          (brewer.pal(n = 8,name = "Oranges"))[6:8])
+labs <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5")
+
+all_plot$bins <- cut(all_plot$layer, 
+                     breaks = brks, 
+                     labels = labs,
+                     include.lowest = TRUE)
+
+
+
 ggplot(all_plot) + 
-  geom_raster(aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
+  geom_raster(aes(x = x, y = y, fill = bins)) +
+  #scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
+  scale_fill_manual(values = cols) +
   facet_grid(~ year) +
   xlab("") +
   ylab("") +
@@ -507,7 +523,7 @@ ggplot(all_plot) +
  
 
 # save plot as pdf
-ggsave(filename = paste0(outDir, "/Current_Future_panel_plot.pdf"), width = 8, height = 4)
+ggsave(filename = paste0(outDir, "/Figure4_Current_Future_panel_plot.pdf"), width = 8, height = 4)
 
 
 
