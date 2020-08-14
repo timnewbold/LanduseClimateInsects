@@ -260,10 +260,24 @@ dev.off()
 # convert raster to dataframe
 plot_data <- as.data.frame(tmp2004_6_climate_anomaly, xy = TRUE)
 
+# organise breaks, colours and labels
+brks <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3.1)
+cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:6],
+          (brewer.pal(n = 8,name = "Purples"))[4:8],
+          (brewer.pal(n = 8,name = "Oranges"))[3:4])
+labs <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3")
+
+# assign values into bins
+plot_data$bins <- cut(plot_data$layer, 
+                     breaks = brks, 
+                     labels = labs,
+                     include.lowest = TRUE)
+
 # plot the raster
 p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) + 
-          geom_raster(aes(x = x, y = y, fill = layer), na.rm = TRUE) +
-          scale_fill_continuous( type = "viridis") + 
+          geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
+          scale_fill_manual(values = cols) + 
           xlab("") +
           ylab("") +
           labs(fill = "Absolute Temperature Change") +
@@ -272,11 +286,11 @@ p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) +
                 panel.border = element_blank(), 
                 panel.grid = element_blank(),
                 axis.text = element_blank(),
-                legend.key.width = unit(3, "cm"),
+                #legend.key.width = unit(3, "cm"),
                 axis.ticks = element_blank(), 
                 legend.text = element_text(size = 6), 
                 legend.title = element_text(size = 8), legend.key.size = unit(0.2,"cm")) +
-          guides(fill = guide_colorbar(title.position = "top")) + 
+          #guides(fill = guide_colorbar(title.position = "top")) + 
   ggtitle("a.")
 
 # get the mean climate value for each row of the dataset
@@ -305,10 +319,24 @@ p2 <- ggplot(data = ravg) +
 # convert raster to dataframe
 plot_data2 <- as.data.frame(tmp2004_6std_climate_anomaly, xy = TRUE)
 
+# organise breaks, colours and labels
+brks2 <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3, 5, 10.4)
+cols2 <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:6],
+          (brewer.pal(n = 8,name = "Purples"))[4:8],
+          (brewer.pal(n = 8,name = "Oranges"))[3:6])
+labs2 <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", "3 : 5", "> 5")
+
+# assign values into bins
+plot_data2$bins <- cut(plot_data2$layer, 
+                      breaks = brks2, 
+                      labels = labs2,
+                      include.lowest = TRUE)
+
 # plot the raster
 p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) + 
-  geom_raster(aes(x = x, y = y, fill = layer), na.rm = TRUE) +
-  scale_fill_continuous( type = "viridis") + 
+  geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
+  scale_fill_manual(values = cols2) + 
   xlab("") +
   ylab("") +
   labs(fill = "Standardised Climate Anomaly") +
@@ -317,12 +345,12 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) +
         panel.border = element_blank(), 
         panel.grid = element_blank(),
         axis.text = element_blank(),
-        legend.key.width = unit(3, "cm"),
+        #legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
         legend.text = element_text(size = 6), 
         legend.title = element_text(size = 8), 
         legend.key.size = unit(0.2,"cm")) +
-  guides(fill = guide_colorbar(title.position = "top")) +
+  #guides(fill = guide_colorbar(title.position = "top")) +
   ggtitle("b.")
 
 # get the mean climate value for each row of the dataset
