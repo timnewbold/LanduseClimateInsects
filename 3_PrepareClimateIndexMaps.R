@@ -197,62 +197,11 @@ invisible(dev.off())
 
 
 
-
-#### Figures for manuscript: 2005 absolute and standardised anomaly ####
-
-
-# info for maps
-brks <- c(-10,-5,-2,-1,-0.5,-0.2,-0.1,0,0.1,0.2,0.5,0.75,1,1.5,2,5,10)
-brks2 <- c(-1,-0.75,-0.5,-0.25,-0.1,0,0.1,0.25,0.5,0.75,1,1.5,3.1)
-cols <- c(rev(brewer.pal(n = 9,name = "Greens"))[3:9],
-          (brewer.pal(n = 9,name = "Purples"))[4:8],
-          (brewer.pal(n = 9,name = "Oranges"))[6:9])
-cols2 <- c(rev(brewer.pal(n = 9,name = "Blues"))[5:9],
-           (brewer.pal(n = 9,name = "Reds"))[3:9])
-
-
-# use info above to set the plot themes
-ab_theme <- rasterTheme(region = cols2)
-ca_theme <- rasterTheme(region = cols)
-
-# edit lattice options for blank space around plot
-lattice.options(
-  layout.heights=list(bottom.padding=list(x=0), top.padding=list(x=0)),
-  layout.widths=list(left.padding=list(x=0.2), right.padding=list(x=0))
-)
-
-# absolute change map
-p1 <- levelplot(tmp2004_6_climate_anomaly, 
-                xlab= "Absolute change in climate",
-                ylab=NULL, 
-                scales=list(draw=FALSE),
-                at = brks2,
-                par.settings = ab_theme,
-                main = list("A.", cex = 0.8, just = 12),margin = F)
-
-# standardised change map
-p2 <- levelplot(tmp2004_6std_climate_anomaly,
-                xlab= "Standardised Climate Anomaly (SCA)",
-                ylab=NULL, 
-                scales=list(draw=FALSE),
-                at = brks,
-                par.settings = ca_theme, 
-                main = list("B.", cex = 0.8, just = 12))
-
-
-
-
-pdf(paste0(outDir, "/Maps_absolute_and_anomaly.pdf"), height = 7, width = 4)
-
-grid.arrange(p1, p2, nrow = 2)
-
-dev.off()
-
-
-
-### Alternative plots with marginal density plots ###
-
-
+##%######################################################%##
+#                                                          #
+####                 Manuscript Figures                 ####
+#                                                          #
+##%######################################################%##
 
 
 ### first , the absolute change ###
@@ -288,8 +237,9 @@ p1 <- ggplot(plot_data[!is.na(plot_data$layer),]) +
                 axis.text = element_blank(),
                 #legend.key.width = unit(3, "cm"),
                 axis.ticks = element_blank(), 
-                legend.text = element_text(size = 6), 
-                legend.title = element_text(size = 8), legend.key.size = unit(0.2,"cm")) +
+                legend.text = element_text(size = 10), 
+                legend.title = element_text(size = 12), 
+                legend.key.size = unit(0.2,"cm")) +
           #guides(fill = guide_colorbar(title.position = "top")) + 
   ggtitle("a.")
 
@@ -301,15 +251,16 @@ ravg <- as.data.frame(ravg)
 # plot the marginal plot
 p2 <- ggplot(data = ravg) +
         geom_line( aes(x = zone, y = mean), col = c("#473C8B")) +
-        geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B")) +
+        geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B"), alpha = 0.7) +
         theme_bw() + 
-        scale_x_reverse(limits = c(360, 1), expand = c(0,0)) +
+        scale_x_reverse(limits = c(300, 1), expand = c(0,0)) +
         scale_y_continuous(limits = c(min(ravg$mean, na.rm = T), max(ravg$mean, na.rm = T)), expand = c(0,0)) +
         theme(panel.border = element_blank(), 
               panel.grid = element_blank(),
               axis.text = element_blank(),
               axis.title = element_blank(),
-              axis.ticks = element_blank()) + 
+              axis.ticks = element_blank()
+              ) + 
               coord_flip()
 
 
@@ -347,8 +298,8 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) +
         axis.text = element_blank(),
         #legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
-        legend.text = element_text(size = 6), 
-        legend.title = element_text(size = 8), 
+        legend.text = element_text(size = 10), 
+        legend.title = element_text(size = 12), 
         legend.key.size = unit(0.2,"cm")) +
   #guides(fill = guide_colorbar(title.position = "top")) +
   ggtitle("b.")
@@ -361,15 +312,16 @@ ravg2 <- as.data.frame(ravg2)
 # plot the marginal plot
 p4 <- ggplot(data = ravg2) +
   geom_line( aes(x = zone, y = mean), col = c("#473C8B")) +
-  geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B")) +
+  geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B"), alpha = 0.7) +
   theme_bw() + 
-  scale_x_reverse(limits = c(360, 1), expand = c(0,0)) +
+  scale_x_reverse(limits = c(300, 1), expand = c(0,0)) +
   scale_y_continuous(limits = c(min(ravg$mean, na.rm = T), max(ravg$mean, na.rm = T)), expand = c(0,0)) +
   theme(panel.border = element_blank(), 
     panel.grid = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
-    axis.ticks = element_blank()) + 
+    axis.ticks = element_blank()
+    ) + 
   coord_flip()
 
 
@@ -426,7 +378,7 @@ nrow = 2
 )
 
 # save as a pdf
-ggsave(filename = paste0(outDir, "/Figure2_mapsonly.pdf"), plot = last_plot(), width = 8, height = 10)
+ggsave(filename = paste0(outDir, "/Extended_Data1_maps.pdf"), plot = last_plot(), width = 9, height = 10)
 
 # save final_plot as an rdata file to be used in later scripts
 save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
