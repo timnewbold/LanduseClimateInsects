@@ -478,14 +478,14 @@ if(!is.null(MaxAnomalyModelRich$model)){
 invisible(dev.off())
 
 
+##%######################################################%##
+#                                                          #
+####                 Manuscript Figures                 ####
+#                                                          #
+##%######################################################%##
 
 
-### Organise figure for manuscript ###
-
-
-
-library(cowplot)
-library(ggplot2)
+pdf(file = paste0(outDir, "/Figure2_MeanAnom_Abun.pdf"), width = 4, height = 4)
 
 par(mfrow=c(1,1))
 par(las=1)
@@ -542,7 +542,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   # set up plotting window
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),max(nd$StdTmeanAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Mean temperature anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
+       xlab="Standardised Climate Anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -579,24 +579,6 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
             "#E69F00", "#D55E00"),
     lty=1,lwd=2, cex = 0.6)
   
-  # add title
-  title("c.", adj = 0, cex = 1, font.main = 1)
-  
-  p1 <- recordPlot()
 
-  
-  
-# read in the rdata file containing the maps
-  load(file = paste0(getwd(), "/3_PrepareClimateIndexMaps/abs_and_anom_maps.rdata"))
-  
-  
-# organise plots 
-p5 <- plot_grid(final_plot ,
-          plot_grid(p1, NULL, nrow = 1, rel_widths = c(2.5,1)),
-          ncol = 1, rel_heights = c(1.8,1), scale = 0.85)
-
-
-# save as pdf
-save_plot(filename = paste0(outDir, "/Figure_2.pdf") , plot = p5, base_height = 11, base_width = 10)
-
-
+  dev.off()
+ 
