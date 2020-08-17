@@ -11,6 +11,8 @@
 library(StatisticalModels)
 library(predictsFunctions)
 source("Functions.R")
+library(ggplot2)
+
 
 # directories
 predictsDataDir <- "6_RunLUClimateModels/"
@@ -481,17 +483,90 @@ invisible(dev.off())
 
 
 
-###### figures for manuscript ######
+##%######################################################%##
+#                                                          #
+####               Figure for manuscript                ####
+#                                                          #
+##%######################################################%##
 
+nd <- expand.grid(
+  StdTmeanAnomalyRS=seq(from = min(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
+                        to = max(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
+                        length.out = 100),
+  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(AbundMeanAnomalyModel1$data$UI2)),
+  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
+# NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
+
+# back transform the climate data range
+nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd$StdTmeanAnomalyRS,
+  originalX = predictsSites$StdTmeanAnomaly)
+
+# back transform NH data range
+nd$NH_5000 <- round(BackTransformCentreredPredictor(
+  transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+
+# set values for richness and abundance
+nd$LogAbund <- 0
+nd$Species_richness <- 0
+
+# set the reference row
+refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & 
+                  (nd$NH_5000==100))
+
+# quantiles for presenting results
+exclQuantiles <- c(0.025,0.975)
+
+
+QPV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  AbundMeanAnomalyModel1$data$UI2=="Primary vegetation"],
+  probs = exclQuantiles)
+QSV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  AbundMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
+  probs = exclQuantiles)
+QAL <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  AbundMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
+  probs = exclQuantiles)
+QAH <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  AbundMeanAnomalyModel1$data$UI2=="Agriculture_High"],
+  probs = exclQuantiles)
+
+# predict results 
+a.preds.tmean <- PredictGLMERRandIter(model = AbundMeanAnomalyModel1$model,data = nd)
+
+# transform results
+a.preds.tmean <- exp(a.preds.tmean)-0.01
+
+# convert to percentage of reference row
+a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
+
+# set anything outside the desired quantiles to NA
+a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+
+# get the median and upper/lower intervals for plots
+nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                         FUN = median,na.rm=TRUE))*100)-100
+nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                        FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                        FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 # abundance response to mean anomaly only, all LUs
-
-
-library(ggplot2)
 
 # set factor levels
 nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
 
 nd$NH_5000 <- factor(nd$NH_5000, levels = c("100", "75", "50", "25"))
+
+# just take agriculture values
+nd <- nd[nd$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
 ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
@@ -503,10 +578,10 @@ ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Abundance (%)") +
-  xlab("Mean temperature anomaly") +
+  xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 200)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 15))
+  ylim(c(-100, 150)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12))
 
 # save
-ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 8, width = 8)
+ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
