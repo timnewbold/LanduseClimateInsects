@@ -26,6 +26,11 @@ sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds"))
 # remove NAs in the specified columns
 model_data <- na.omit(sites[,c('Species_richness','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
+# summaries
+length(unique(model_data$SS)) # 276
+length(unique(model_data$SSBS)) # 6671
+
+
 # look at the spread of land use/use intensity categories
 print(table(model_data$UI2))
 
@@ -54,6 +59,15 @@ print(AIC(sm0$model,sm1$model,sm2$model,sm3$model,sm4$model))
 
 model_data <- na.omit(sites[,c('LogAbund','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
+# summaries
+length(unique(model_data$SS)) # 276
+length(unique(model_data$SSBS)) # 6671
+
+# look at the spread of land use/use intensity categories
+print(table(model_data$UI2))
+
+
+# run set of simple models with different fixed effects structures
 am0 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "1",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 
@@ -69,6 +83,7 @@ am3 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussi
 am4 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "LandUse*Use_intensity",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 #fixed-effect model matrix is rank deficient so dropping 3 columns / coefficients
+
 
 
 # take a look at the AICs
@@ -132,7 +147,7 @@ p1 <-ggplot() +
         panel.background = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        plot.title = element_text(hjust=0.05)) +
+        plot.title = element_text(hjust=0.05, size = 11, face = 'bold')) +
   ggtitle("a.")
 
 
@@ -163,7 +178,7 @@ axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
 
 abline(h=0,col="#00000077",lty=2)
 
-title(main = "b.", adj = 0, cex.main = 1, line = 1)
+title(main = "b.", adj = 0, cex.main = 0.8, line = 1)
 
 p2 <- recordPlot()
 
@@ -177,7 +192,7 @@ axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
 
 abline(h=0,col="#00000077",lty=2)
 
-title(main = "c.", adj = 0, cex.main = 1, line = 1)
+title(main = "c.", adj = 0, cex.main = 0.8, line = 1)
 
 p3 <- recordPlot()
 
