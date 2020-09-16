@@ -132,5 +132,13 @@ ggsave(filename = paste0(outDir, "/PREDICTS_points_map.pdf"), height = 4, width 
 
 
 
+### Basic summaries ###
 
+# nstudies/ nsites - all
+length(unique(sites$SS)) # 292
+length(unique(sites$SSBS)) # 7800
+
+# nstudies/nsites - abun
+length(unique(sites[!is.na(sites$LogAbund) , 'SS'])) # 271
+length(unique(sites[!is.na(sites$LogAbund) , 'SSBS'])) # 7402
 
