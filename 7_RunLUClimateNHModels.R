@@ -37,6 +37,10 @@ AbundMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",f
 
 print(anova(AbundMeanAnomalyModel0$model,AbundMeanAnomalyModel1$model))
 
+# save for use in predictions script
+save(AbundMeanAnomalyModel1, file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rdata"))
+
+
 # run models with and without NH interaction, species richness models
 modelData <- na.omit(predictsSites[,c(
   'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
