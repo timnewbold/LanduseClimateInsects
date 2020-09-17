@@ -496,6 +496,24 @@ par(mar=c(2.6,2.6,1,1)) # margins around plot
 par(tck=-0.01) # tick mark size
 #par(pty="s") # set plot type to be square
 
+nd <- expand.grid(
+  StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+                        to = max(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+                        length.out = 100),
+  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(MeanAnomalyModelAbund$data$UI2)))
+
+# back transform the predictors
+nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd$StdTmeanAnomalyRS,
+  originalX = predictsSites$StdTmeanAnomaly)
+
+# set richness and abundance to 0 - to be predicted
+nd$LogAbund <- 0
+nd$Species_richness <- 0
+
+# reference for % difference = primary vegetation and positive anomaly closest to 0
+refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))))
 
 # adjust plot 1: mean anomaly and abundance
 
@@ -596,6 +614,24 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   par(tck=-0.01) # tick mark size
   #par(pty="s") # set plot type to be square
   
+  nd <- expand.grid(
+    StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+                          to = max(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+                          length.out = 100),
+    UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+               levels = levels(MeanAnomalyModelAbund$data$UI2)))
+  
+  # back transform the predictors
+  nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+    transformedX = nd$StdTmeanAnomalyRS,
+    originalX = predictsSites$StdTmeanAnomaly)
+  
+  # set richness and abundance to 0 - to be predicted
+  nd$LogAbund <- 0
+  nd$Species_richness <- 0
+  
+  # reference for % difference = primary vegetation and positive anomaly closest to 0
+  refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))))
   
   # adjust plot 1: mean anomaly and abundance
   
@@ -616,7 +652,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd)
   
   # back transform the abundance values
-  a.preds.tmean <- exp(a.preds.tmean)-0.01
+  a.preds.tmean <- exp(a.preds.tmean)
   
   # convert to relative to reference
   a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
