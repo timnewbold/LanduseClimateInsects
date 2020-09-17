@@ -8,6 +8,8 @@
 # change and landuse/use intensity.
 
 # load libraries
+library(devtools)
+install_github("timnewbold/StatisticalModels")
 library(StatisticalModels)
 library(predictsFunctions)
 source("Functions.R")
@@ -581,4 +583,106 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
 
   dev.off()
+  
+
+######## Extended data fig 2 - Mean Anom - SR ############
+  
+  pdf(file = paste0(outDir, "/Extended_Data2_MeanAnomSR.pdf"), width = 4, height = 4)
+  
+  par(mfrow=c(1,1))
+  par(las=1)
+  par(mgp=c(1.6,0.3,0)) # 
+  par(mar=c(2.6,2.6,1,1)) # margins around plot
+  par(tck=-0.01) # tick mark size
+  #par(pty="s") # set plot type to be square
+  
+  
+  # adjust plot 1: mean anomaly and abundance
+  
+  QPV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+    MeanAnomalyModelRich$data$UI2=="Primary vegetation"],
+    probs = exclQuantiles)
+  QSV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+    MeanAnomalyModelRich$data$UI2=="Secondary vegetation"],
+    probs = exclQuantiles)
+  QAL <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+    MeanAnomalyModelRich$data$UI2=="Agriculture_Low"],
+    probs = exclQuantiles)
+  QAH <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+    MeanAnomalyModelRich$data$UI2=="Agriculture_High"],
+    probs = exclQuantiles)
+  
+  # predict the results
+  a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd)
+  
+  # back transform the abundance values
+  a.preds.tmean <- exp(a.preds.tmean)-0.01
+  
+  # convert to relative to reference
+  a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
+  
+  # remove anything above and below the quantiles
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+  
+  # Get the median, upper and lower quants for the plot
+  nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                           FUN = median,na.rm=TRUE))*100)-100
+  nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+  nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+  
+  # plot #
+  
+  # set up plotting window
+  plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),max(nd$StdTmeanAnomaly)),
+       ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
+       xlab="Standardised Climate Anomaly",ylab="Species Richness (%)", cex.lab = 0.8, cex.axis = 0.8)
+  
+  invisible(mapply(FUN = function(preds,col){
+    
+    preds <- na.omit(preds)
+    
+    X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
+               rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
+    Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
+               rev(preds$PredUpper), (preds$PredLower)[1])
+    
+    polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
+    
+    points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
+    
+  },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+  
+  # add some gridlines
+  abline(h=150,lty=1,col="#00000022")
+  abline(h=100,lty=1,col="#00000022")
+  abline(h=50,lty=1,col="#00000022")
+  abline(h=0,lty=1,col="#00000022")
+  abline(h=-50,lty=1,col="#00000022")
+  abline(v=0,lty=1,col="#00000022")
+  abline(v=1,lty=1,col="#00000022")
+  abline(v=2,lty=1,col="#00000022")
+  
+  # add legend
+  legend(
+    x = -0.6,y = 135,bty="n",
+    legend = c("Primary","Secondary",
+               "Agriculture_extensive",
+               "Agriculture_intensive"),
+    col = c("#009E73", "#0072B2",
+            "#E69F00", "#D55E00"),
+    lty=1,lwd=2, cex = 0.6)
+  
+  
+  dev.off()
+  
+  
  
