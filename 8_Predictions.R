@@ -10,8 +10,21 @@
 rm(list = ls())
 
 # load libraries
+library(StatisticalModels)
+library(predictsFunctions)
 
 
+source('Functions.R')
+
+
+# directories
+predictsDataDir <- "6_RunLUClimateModels/"
+moddir <- "6_RunLUClimateModels/"
+outdir <- "8_Predictions/"
+dir.create(outdir)
+
+# read in the predicts data
+predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 
 ### Hyp 1: land use effect only ###
@@ -20,8 +33,15 @@ rm(list = ls())
 # used the median values that were used for plotting of Figure 1.
 
 
+
+
 ### Hyp 2: Land use and climate anomaly interaction ###
 
+# load in models
+load(file = paste0(moddir, "/MeanAnomalyModelAbund.rdata"))
+load(file = paste0(moddir, "/MeanAnomalyModelRich.rdata"))
+#load(file = paste0(moddir, "/MaxAnomalyModelAbund.rdata"))
+#load(file = paste0(moddir, "/MaxAnomalyModelRich.rdata"))
 
 # create matrix for predictions
 # Primary, Low, High
@@ -31,22 +51,95 @@ rm(list = ls())
 # what is the resscaled value of SCA of 1
 BackTransformCentreredPredictor(transformedX = 1.4, originalX = predictsSites$StdTmeanAnomaly) # 1.4 gives about 1 
 
+# reference is primary with 0 climate change so have 0 for that row
+
 data_tab <- data.frame(UI2 = c("Primary vegetation", "Agriculture_Low", "Agriculture_High"), 
-                       StdTmeanAnomalyRS = c(1.4,1.4,1.4),
+                       StdTmeanAnomalyRS = c(0,1.4,1.4),
                        LogAbund = 0,
                        Species_richness = 0)
 
-
+# factor the LU info
 data_tab$UI2 <- factor(data_tab$UI2, levels = levels(predictsSites$UI2))
 
+# predict the results
 result.sr <- PredictGLMER(model = MeanAnomalyModelRich$model, data = data_tab, se.fit = TRUE, seMultiplier = 1.96)
 
+# backtransform
 result.sr <- exp(result.sr)
 
+# add in the LU info
 result.sr$UI2 <- data_tab$UI2
 
 # express as a percentage of primary
-result$perc <- 
+result.sr$perc <- ((result.sr$y/result.sr$y[1]) * 100) - 100
 
+  
+# now for the abundance model  
 result.ab <- PredictGLMER(model = MeanAnomalyModelAbund$model, data = data_tab, se.fit = TRUE, seMultiplier = 1.96)
+
+# backtransform
+result.ab <- exp(result.ab)-0.01
+
+# add in the LU info
+result.ab$UI2 <- data_tab$UI2
+
+# express as a percentage of primary
+result.ab$perc <- ((result.ab$y/result.ab$y[1]) * 100) - 100
+
+
+# combine results into a table for saving
+all_res <- rbind(result.ab, result.sr)
+
+all_res$measure <- c(rep("ab", 3), rep("sr", 3))
+
+# save table
+write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC.csv"))
+
+
+
+### Hyp 3:  Land use, climate and natural habitat interactions ###
+
+# 25% NH cover = -1.015469 in rescaled values
+# 50% NH cover = 0.01493712 in rescaled values
+# 75% NH cover = 1.045653 in rescaled values
+# 100% NH cover = 2.073849 in rescaled values
+
+# what is the reference here
+# primary vegetation, SCA = 0, NH = 100
+
+load(file = "7_RunLUClimateNHModels/MeanAnomalyModelAbun_NH.rdata")
+
+
+
+data_tab <- data.frame(UI2 = c("Primary vegetation", rep("Agriculture_Low", 2)), 
+                       StdTmeanAnomalyRS = c(0,1.4,1.4),
+                       NH_5000.rs = c(2.073849, 1.045653, -1.015469 ), #100, 75, 25
+                       LogAbund = 0,
+                       Species_richness = 0)
+
+# factor the LU info
+data_tab$UI2 <- factor(data_tab$UI2, levels = levels(predictsSites$UI2))
+
+
+# now for the abundance model  
+result.ab <- PredictGLMER(model = AbundMeanAnomalyModel1$model, data = data_tab, se.fit = TRUE, seMultiplier = 1.96)
+
+# backtransform
+result.ab <- exp(result.ab)-0.01
+
+# add in the LU info
+result.ab$UI2 <- data_tab$UI2
+
+result.ab$NH <- c(100, 75, 25)
+result.ab$CC <- c(0, 1, 1)
+
+# express as a percentage of primary
+result.ab$perc <- ((result.ab$y/result.ab$y[1]) * 100) - 100
+
+result.ab$metric <- "ab"
+
+# save table
+write.csv(result.ab, file = paste0(outdir, "/percentage_change_LU_CC_NH.csv"))
+
+
 
