@@ -9,8 +9,9 @@
 
 # load libraries
 library(devtools)
-install_github("timnewbold/StatisticalModels")
+#install_github("timnewbold/StatisticalModels")
 library(StatisticalModels)
+#install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions", force = T)
 library(predictsFunctions)
 source("Functions.R")
 
@@ -121,9 +122,12 @@ save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich.rdata"))
 exclQuantiles <- c(0.025,0.975)
 
 
-pdf(file = paste0(outDir,"LUClimateAnomalyInteractions.pdf"),width = 17.5/2.54,height = 16/2.54)
+pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
+#pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
+#pdf(file = paste0(outDir,"Extended_Data3_MaxAnom.pdf"),width = 17.5,height = 8)
 
 par(mfrow=c(2,2))
+#par(mfrow=c(1,2))
 par(las=1)
 par(mgp=c(1.6,0.2,0))
 par(mar=c(2.6,2.6,1.0,0.2))
