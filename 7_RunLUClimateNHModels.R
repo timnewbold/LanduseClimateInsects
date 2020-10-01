@@ -5,13 +5,14 @@
 ##%######################################################%##
 
 # This script runs the more complex models looking at the buffering effect
-# of natural habitat on climate effects across land uses.
+# of natural habitat on climate effects across land2 uses.
 
 # load libraries
 library(StatisticalModels)
 library(predictsFunctions)
 source("Functions.R")
 library(ggplot2)
+library(cowplot)
 
 
 # directories
@@ -19,64 +20,64 @@ predictsDataDir <- "6_RunLUClimateModels/"
 outDir <- "7_RunLUClimateNHModels/"
 
 
-###Create Models for all insects in predicts for standardised climate anomaly and Land interactions
+###Create Models for all insects in predicts for stand2ardised climate anomaly and2 Land2 interactions
 
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 # remove any NAs
 modelData <- na.omit(predictsSites[,c(
-  'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
+  'LogAbund2','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
-# run models with and without NH interaction, abundance models
-AbundMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
+# run models with and2 without NH interaction, abund2ance models
+Abund2MeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund2",fitFamily = "gaussian",
                 fixedStruct = "UI2 * StdTmeanAnomalyRS",
-                randomStruct = "(1|SS)+(1|SSB)")
-AbundMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
+                rand2omStruct = "(1|SS)+(1|SSB)")
+Abund2MeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund2",fitFamily = "gaussian",
                 fixedStruct = "UI2 * StdTmeanAnomalyRS * NH_5000.rs",
-                randomStruct = "(1|SS)+(1|SSB)")
+                rand2omStruct = "(1|SS)+(1|SSB)")
 
-print(anova(AbundMeanAnomalyModel0$model,AbundMeanAnomalyModel1$model))
+print(anova(Abund2MeanAnomalyModel0$model,Abund2MeanAnomalyModel1$model))
 
 # save for use in predictions script
-save(AbundMeanAnomalyModel1, file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rdata"))
+save(Abund2MeanAnomalyModel1, file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rdata"))
 
 
-# run models with and without NH interaction, species richness models
+# run models with and2 without NH interaction, species richness models
 modelData <- na.omit(predictsSites[,c(
   'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
 RichMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmeanAnomalyRS",
-                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+                               rand2omStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
 RichMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmeanAnomalyRS * NH_5000.rs",
-                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+                               rand2omStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
 
 print(anova(RichMeanAnomalyModel0$model,RichMeanAnomalyModel1$model))
 
-# run models with and without NH interaction, abundance models, max anomaly
+# run models with and2 without NH interaction, abund2ance models, max anomaly
 modelData <- na.omit(predictsSites[,c(
-  'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
+  'LogAbund2','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
-AbundMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
+Abund2MaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund2",fitFamily = "gaussian",
                                 fixedStruct = "UI2 * StdTmaxAnomalyRS",
-                                randomStruct = "(1|SS)+(1|SSB)")
-AbundMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
+                                rand2omStruct = "(1|SS)+(1|SSB)")
+Abund2MaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund2",fitFamily = "gaussian",
                                 fixedStruct = "UI2 * StdTmaxAnomalyRS * NH_5000.rs",
-                                randomStruct = "(1|SS)+(1|SSB)")
+                                rand2omStruct = "(1|SS)+(1|SSB)")
 
-print(anova(AbundMaxAnomalyModel0$model,AbundMaxAnomalyModel1$model))
+print(anova(Abund2MaxAnomalyModel0$model,Abund2MaxAnomalyModel1$model))
 
-# run models with and without NH interaction, species richness models, max anomaly
+# run models with and2 without NH interaction, species richness models, max anomaly
 modelData <- na.omit(predictsSites[,c(
   'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
 
 RichMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmaxAnomalyRS",
-                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+                               rand2omStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
 RichMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmaxAnomalyRS * NH_5000.rs",
-                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+                               rand2omStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
 
 print(anova(RichMaxAnomalyModel0$model,RichMaxAnomalyModel1$model))
 
@@ -95,51 +96,51 @@ print(anova(RichMaxAnomalyModel0$model,RichMaxAnomalyModel1$model))
 # 100% NH cover = 1.834235 in rescaled values
 
 # create matrix for predictions
-nd <- expand.grid(
-  StdTmeanAnomalyRS=seq(from = min(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
-                        to = max(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
+nd2 <- expand2.grid(
+  StdTmeanAnomalyRS=seq(from = min(Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS),
+                        to = max(Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS),
                         length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(AbundMeanAnomalyModel1$data$UI2)),
+  UI2=factor(c("Primary vegetation","Second2ary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(Abund2MeanAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
   # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
 
 # back transform the climate data range
-nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd$StdTmeanAnomalyRS,
+nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmeanAnomalyRS,
   originalX = predictsSites$StdTmeanAnomaly)
 
 # back transform NH data range
-nd$NH_5000 <- round(BackTransformCentreredPredictor(
-  transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$NH_5000 <- round2(BackTransformCentreredPredictor(
+  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
 
-# set values for richness and abundance
-nd$LogAbund <- 0
-nd$Species_richness <- 0
+# set values for richness and2 abund2ance
+nd2$LogAbund2 <- 0
+nd2$Species_richness <- 0
 
 # set the reference row
-refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & 
-                  (nd$NH_5000==100))
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & 
+                  (nd2$NH_5000==100))
 
 # quantiles for presenting results
 exclQuantiles <- c(0.025,0.975)
 
 
-QPV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Primary vegetation"],
+QPV <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
-QSV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
+QSV <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Second2ary vegetation"],
   probs = exclQuantiles)
-QAL <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
+QAL <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Agriculture_Low"],
   probs = exclQuantiles)
-QAH <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Agriculture_High"],
+QAH <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
 # predict results 
-a.preds.tmean <- PredictGLMERRandIter(model = AbundMeanAnomalyModel1$model,data = nd)
+a.preds.tmean <- PredictGLMERRand2Iter(model = Abund2MeanAnomalyModel1$model,data = nd2)
 
 # transform results
 a.preds.tmean <- exp(a.preds.tmean)-0.01
@@ -148,41 +149,41 @@ a.preds.tmean <- exp(a.preds.tmean)-0.01
 a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
 
 # set anything outside the desired quantiles to NA
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
 
-# get the median and upper/lower intervals for plots
-nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+# get the median and2 upper/lower intervals for plots
+nd2$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+nd2$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
-pdf(file = paste0(outDir,"AbundanceMeanAnomaly.pdf"),width = 20/2.54,height = 10/2.54)
+pdf(file = paste0(outDir,"Abund2anceMeanAnomaly.pdf"),width = 20/2.54,height = 10/2.54)
 
 par(mfrow=c(1,2))
 
 
-nd_ab_mean <- nd
+nd2_ab_mean <- nd2
 
-## 1. plot for abundance response to mean anomaly wuth 
+## 1. plot for abund2ance response to mean anomaly wuth 
 
-ylims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+ylims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(PredLower,na.rm = TRUE),max(PredUpper,na.rm = TRUE)))
-xlims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+xlims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(StdTmeanAnomaly,na.rm = TRUE),max(StdTmeanAnomaly,na.rm = TRUE)))
 
-invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
+invisible(lapply(X = split(x = nd2,f = nd2$UI2)[c(3,2)],FUN = function(preds.lu){
   
   plot(-9e99,-9e99,xlim=xlims,ylim=ylims,
-       xlab="Mean temperature anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
+       xlab="Mean temperature anomaly",ylab="Abund2ance (%)", cex.lab = 0.8, cex.axis = 0.8)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -214,10 +215,10 @@ invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
 
 }))
 
-# add legend to righthand plot
-legend(
+# add legend2 to righthand2 plot
+legend2(
   x = 1.5,y = 112, bty="n",
-  legend = c("25%", "50%", "75%", "100%"),
+  legend2 = c("25%", "50%", "75%", "100%"),
   col = c("#a50026","#f46d43","#74add1","#313695"),
   lty=1,lwd=2, cex = 0.7, title = "% NH", title.adj = 0.2)
 
@@ -232,7 +233,7 @@ QPV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   RichMeanAnomalyModel1$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
 QSV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  RichMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
+  RichMeanAnomalyModel1$data$UI2=="Second2ary vegetation"],
   probs = exclQuantiles)
 QAL <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   RichMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
@@ -241,35 +242,35 @@ QAH <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   RichMeanAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
-s.preds.tmean <- PredictGLMERRandIter(model = RichMeanAnomalyModel1$model,data = nd)
+s.preds.tmean <- PredictGLMERRand2Iter(model = RichMeanAnomalyModel1$model,data = nd2)
 s.preds.tmean <- exp(s.preds.tmean)
 
 s.preds.tmean <- sweep(x = s.preds.tmean,MARGIN = 2,STATS = s.preds.tmean[refRow,],FUN = '/')
 
-s.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
-s.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
 
-nd$PredMedian <- ((apply(X = s.preds.tmean,MARGIN = 1,
+nd2$PredMedian <- ((apply(X = s.preds.tmean,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper <- ((apply(X = s.preds.tmean,MARGIN = 1,
+nd2$PredUpper <- ((apply(X = s.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower <- ((apply(X = s.preds.tmean,MARGIN = 1,
+nd2$PredLower <- ((apply(X = s.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 par(mfrow=c(1,2))
 
-ylims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+ylims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(PredLower,na.rm = TRUE),max(PredUpper,na.rm = TRUE)))
-xlims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+xlims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(StdTmeanAnomaly,na.rm = TRUE),max(StdTmeanAnomaly,na.rm = TRUE)))
 
-invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
+invisible(lapply(X = split(x = nd2,f = nd2$UI2)[c(3,2)],FUN = function(preds.lu){
   
   plot(-9e99,-9e99,xlim=xlims,ylim=ylims,
        xlab="Mean temperature anomaly",ylab="Richness (%)")
@@ -305,74 +306,74 @@ invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
 invisible(dev.off())
 
 
-nd <- expand.grid(
-  StdTmaxAnomalyRS=seq(from = min(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
-                        to = max(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
+nd2 <- expand2.grid(
+  StdTmaxAnomalyRS=seq(from = min(Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS),
+                        to = max(Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS),
                         length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(AbundMaxAnomalyModel1$data$UI2)),
+  UI2=factor(c("Primary vegetation","Second2ary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(Abund2MaxAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
   # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
-nd$StdTmaxAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd$StdTmaxAnomalyRS,
+nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmaxAnomalyRS,
   originalX = predictsSites$StdTmaxAnomaly)
-nd$NH_5000 <- round(BackTransformCentreredPredictor(
-  transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
-nd$LogAbund <- 0
-nd$Species_richness <- 0
+nd2$NH_5000 <- round2(BackTransformCentreredPredictor(
+  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$LogAbund2 <- 0
+nd2$Species_richness <- 0
 
-refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomaly==min(abs(nd$StdTmaxAnomaly))) & 
-                  (nd$NH_5000==100))
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))) & 
+                  (nd2$NH_5000==100))
 
 exclQuantiles <- c(0.025,0.975)
 
-pdf(file = paste0(outDir,"AbundanceMaxAnomaly.pdf"),width = 17.5/2.54,height = 8/2.54)
+pdf(file = paste0(outDir,"Abund2anceMaxAnomaly.pdf"),width = 17.5/2.54,height = 8/2.54)
 
-QPV <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Primary vegetation"],
+QPV <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
-QSV <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Secondary vegetation"],
+QSV <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Second2ary vegetation"],
   probs = exclQuantiles)
-QAL <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Agriculture_Low"],
+QAL <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Agriculture_Low"],
   probs = exclQuantiles)
-QAH <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Agriculture_High"],
+QAH <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
-a.preds.tmax <- PredictGLMERRandIter(model = AbundMaxAnomalyModel1$model,data = nd)
+a.preds.tmax <- PredictGLMERRand2Iter(model = Abund2MaxAnomalyModel1$model,data = nd2)
 a.preds.tmax <- exp(a.preds.tmax)-0.01
 
 a.preds.tmax <- sweep(x = a.preds.tmax,MARGIN = 2,STATS = a.preds.tmax[refRow,],FUN = '/')
 
-a.preds.tmax[which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomalyRS < QPV[1])),] <- NA
-a.preds.tmax[which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomalyRS > QPV[2])),] <- NA
-a.preds.tmax[which((nd$UI2=="Secondary vegetation") & (nd$StdTmaxAnomalyRS < QSV[1])),] <- NA
-a.preds.tmax[which((nd$UI2=="Secondary vegetation") & (nd$StdTmaxAnomalyRS > QSV[2])),] <- NA
-a.preds.tmax[which((nd$UI2=="Agriculture_Low") & (nd$StdTmaxAnomalyRS < QAL[1])),] <- NA
-a.preds.tmax[which((nd$UI2=="Agriculture_Low") & (nd$StdTmaxAnomalyRS > QAL[2])),] <- NA
-a.preds.tmax[which((nd$UI2=="Agriculture_High") & (nd$StdTmaxAnomalyRS < QAH[1])),] <- NA
-a.preds.tmax[which((nd$UI2=="Agriculture_High") & (nd$StdTmaxAnomalyRS > QAH[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
 
-nd$PredMedian <- ((apply(X = a.preds.tmax,MARGIN = 1,
+nd2$PredMedian <- ((apply(X = a.preds.tmax,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper <- ((apply(X = a.preds.tmax,MARGIN = 1,
+nd2$PredUpper <- ((apply(X = a.preds.tmax,MARGIN = 1,
                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower <- ((apply(X = a.preds.tmax,MARGIN = 1,
+nd2$PredLower <- ((apply(X = a.preds.tmax,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 par(mfrow=c(1,2))
 
-ylims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+ylims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(PredLower,na.rm = TRUE),max(PredUpper,na.rm = TRUE)))
-xlims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+xlims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(StdTmaxAnomaly,na.rm = TRUE),max(StdTmaxAnomaly,na.rm = TRUE)))
 
-invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
+invisible(lapply(X = split(x = nd2,f = nd2$UI2)[c(3,2)],FUN = function(preds.lu){
   
   plot(-9e99,-9e99,xlim=xlims,ylim=ylims,
-       xlab="Maximum temperature anomaly",ylab="Abundance (%)")
+       xlab="Maximum temperature anomaly",ylab="Abund2ance (%)")
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -412,7 +413,7 @@ QPV <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
   RichMaxAnomalyModel1$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
 QSV <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  RichMaxAnomalyModel1$data$UI2=="Secondary vegetation"],
+  RichMaxAnomalyModel1$data$UI2=="Second2ary vegetation"],
   probs = exclQuantiles)
 QAL <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
   RichMaxAnomalyModel1$data$UI2=="Agriculture_Low"],
@@ -421,35 +422,35 @@ QAH <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
   RichMaxAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
-s.preds.tmax <- PredictGLMERRandIter(model = RichMaxAnomalyModel1$model,data = nd)
+s.preds.tmax <- PredictGLMERRand2Iter(model = RichMaxAnomalyModel1$model,data = nd2)
 s.preds.tmax <- exp(s.preds.tmax)-0.01
 
 s.preds.tmax <- sweep(x = s.preds.tmax,MARGIN = 2,STATS = s.preds.tmax[refRow,],FUN = '/')
 
-s.preds.tmax[which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomalyRS < QPV[1])),] <- NA
-s.preds.tmax[which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomalyRS > QPV[2])),] <- NA
-s.preds.tmax[which((nd$UI2=="Secondary vegetation") & (nd$StdTmaxAnomalyRS < QSV[1])),] <- NA
-s.preds.tmax[which((nd$UI2=="Secondary vegetation") & (nd$StdTmaxAnomalyRS > QSV[2])),] <- NA
-s.preds.tmax[which((nd$UI2=="Agriculture_Low") & (nd$StdTmaxAnomalyRS < QAL[1])),] <- NA
-s.preds.tmax[which((nd$UI2=="Agriculture_Low") & (nd$StdTmaxAnomalyRS > QAL[2])),] <- NA
-s.preds.tmax[which((nd$UI2=="Agriculture_High") & (nd$StdTmaxAnomalyRS < QAH[1])),] <- NA
-s.preds.tmax[which((nd$UI2=="Agriculture_High") & (nd$StdTmaxAnomalyRS > QAH[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
 
-nd$PredMedian <- ((apply(X = s.preds.tmax,MARGIN = 1,
+nd2$PredMedian <- ((apply(X = s.preds.tmax,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper <- ((apply(X = s.preds.tmax,MARGIN = 1,
+nd2$PredUpper <- ((apply(X = s.preds.tmax,MARGIN = 1,
                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower <- ((apply(X = s.preds.tmax,MARGIN = 1,
+nd2$PredLower <- ((apply(X = s.preds.tmax,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 par(mfrow=c(1,2))
 
-ylims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+ylims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(PredLower,na.rm = TRUE),max(PredUpper,na.rm = TRUE)))
-xlims <- with(nd[nd$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
+xlims <- with(nd2[nd2$UI2 %in% c("Agriculture_Low","Agriculture_High"),],
               c(min(StdTmaxAnomaly,na.rm = TRUE),max(StdTmaxAnomaly,na.rm = TRUE)))
 
-invisible(lapply(X = split(x = nd,f = nd$UI2)[c(3,2)],FUN = function(preds.lu){
+invisible(lapply(X = split(x = nd2,f = nd2$UI2)[c(3,2)],FUN = function(preds.lu){
   
   plot(-9e99,-9e99,xlim=xlims,ylim=ylims,
        xlab="Maximum temperature anomaly",ylab="Richness (%)")
@@ -493,51 +494,51 @@ invisible(dev.off())
 #                                                          #
 ##%######################################################%##
 
-nd <- expand.grid(
-  StdTmeanAnomalyRS=seq(from = min(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
-                        to = max(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
+nd2 <- expand2.grid(
+  StdTmeanAnomalyRS=seq(from = min(Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS),
+                        to = max(Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS),
                         length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(AbundMeanAnomalyModel1$data$UI2)),
+  UI2=factor(c("Primary vegetation","Second2ary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(Abund2MeanAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
 # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
 
 # back transform the climate data range
-nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd$StdTmeanAnomalyRS,
+nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmeanAnomalyRS,
   originalX = predictsSites$StdTmeanAnomaly)
 
 # back transform NH data range
-nd$NH_5000 <- round(BackTransformCentreredPredictor(
-  transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$NH_5000 <- round2(BackTransformCentreredPredictor(
+  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
 
-# set values for richness and abundance
-nd$LogAbund <- 0
-nd$Species_richness <- 0
+# set values for richness and2 abund2ance
+nd2$LogAbund2 <- 0
+nd2$Species_richness <- 0
 
 # set the reference row
-refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & 
-                  (nd$NH_5000==100))
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & 
+                  (nd2$NH_5000==100))
 
 # quantiles for presenting results
 exclQuantiles <- c(0.025,0.975)
 
 
-QPV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Primary vegetation"],
+QPV <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
-QSV <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
+QSV <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Second2ary vegetation"],
   probs = exclQuantiles)
-QAL <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
+QAL <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Agriculture_Low"],
   probs = exclQuantiles)
-QAH <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  AbundMeanAnomalyModel1$data$UI2=="Agriculture_High"],
+QAH <- quantile(x = Abund2MeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  Abund2MeanAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
 # predict results 
-a.preds.tmean <- PredictGLMERRandIter(model = AbundMeanAnomalyModel1$model,data = nd)
+a.preds.tmean <- PredictGLMERRand2Iter(model = Abund2MeanAnomalyModel1$model,data = nd2)
 
 # transform results
 a.preds.tmean <- exp(a.preds.tmean)-0.01
@@ -546,43 +547,43 @@ a.preds.tmean <- exp(a.preds.tmean)-0.01
 a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
 
 # set anything outside the desired quantiles to NA
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
 
-# get the median and upper/lower intervals for plots
-nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+# get the median and2 upper/lower intervals for plots
+nd2$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+nd2$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-# abundance response to mean anomaly only, all LUs
+# abund2ance response to mean anomaly only, all LUs
 
 # set factor levels
-nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Second2ary vegetation", "Agriculture_Low", "Agriculture_High" ))
 
-nd$NH_5000 <- factor(nd$NH_5000, levels = c("100", "75", "50", "25"))
+nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
 
 # just take agriculture values
-nd <- nd[nd$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
+nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
-ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = NH_5000), size = 1) +
-  geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   facet_wrap(~UI2, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  ylab("Abund2ance (%)") +
+  xlab("Stand2ardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12))
@@ -594,35 +595,35 @@ ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
 
 
 
-############ Extended data figure 3  ############ 
+############ Extend2ed data figure 4  ############ 
 
 
 
-nd <- expand.grid(
+nd2 <- expand2.grid(
   StdTmeanAnomalyRS=seq(from = min(RichMeanAnomalyModel1$data$StdTmeanAnomalyRS),
                         to = max(RichMeanAnomalyModel1$data$StdTmeanAnomalyRS),
                         length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+  UI2=factor(c("Primary vegetation","Second2ary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(RichMeanAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
 # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
 
 # back transform the climate data range
-nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd$StdTmeanAnomalyRS,
+nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmeanAnomalyRS,
   originalX = predictsSites$StdTmeanAnomaly)
 
 # back transform NH data range
-nd$NH_5000 <- round(BackTransformCentreredPredictor(
-  transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$NH_5000 <- round2(BackTransformCentreredPredictor(
+  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
 
-# set values for richness and abundance
-nd$LogAbund <- 0
-nd$Species_richness <- 0
+# set values for richness and2 abund2ance
+nd2$LogAbund2 <- 0
+nd2$Species_richness <- 0
 
 # set the reference row
-refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & 
-                  (nd$NH_5000==100))
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & 
+                  (nd2$NH_5000==100))
 
 # quantiles for presenting results
 exclQuantiles <- c(0.025,0.975)
@@ -632,7 +633,7 @@ QPV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   RichMeanAnomalyModel1$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
 QSV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-  RichMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
+  RichMeanAnomalyModel1$data$UI2=="Second2ary vegetation"],
   probs = exclQuantiles)
 QAL <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   RichMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
@@ -642,7 +643,7 @@ QAH <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   probs = exclQuantiles)
 
 # predict results 
-s.preds.tmean <- PredictGLMERRandIter(model = RichMeanAnomalyModel1$model,data = nd)
+s.preds.tmean <- PredictGLMERRand2Iter(model = RichMeanAnomalyModel1$model,data = nd2)
 
 # transform results
 s.preds.tmean <- exp(s.preds.tmean)
@@ -651,49 +652,221 @@ s.preds.tmean <- exp(s.preds.tmean)
 s.preds.tmean <- sweep(x = s.preds.tmean,MARGIN = 2,STATS = s.preds.tmean[refRow,],FUN = '/')
 
 # set anything outside the desired quantiles to NA
-s.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
-s.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
-s.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
+s.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
 
-# get the median and upper/lower intervals for plots
-nd$PredMedian <- ((apply(X = s.preds.tmean,MARGIN = 1,
+# get the median and2 upper/lower intervals for plots
+nd2$PredMedian <- ((apply(X = s.preds.tmean,MARGIN = 1,
                          FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper <- ((apply(X = s.preds.tmean,MARGIN = 1,
+nd2$PredUpper <- ((apply(X = s.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower <- ((apply(X = s.preds.tmean,MARGIN = 1,
+nd2$PredLower <- ((apply(X = s.preds.tmean,MARGIN = 1,
                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-# abundance response to mean anomaly only, all LUs
+# abund2ance response to mean anomaly only, all LUs
 
 # set factor levels
-nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Second2ary vegetation", "Agriculture_Low", "Agriculture_High" ))
 
-nd$NH_5000 <- factor(nd$NH_5000, levels = c("100", "75", "50", "25"))
+nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
 
 # just take agriculture values
-nd <- nd[nd$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
+nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
-ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = NH_5000), size = 1) +
-  geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   facet_wrap(~UI2, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Stand2ardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12))
 
 # save
-ggsave(filename = paste0(outDir, "Extended_Data3_MeanAnomSR_NH.pdf"), height = 4, width = 8)
+ggsave(filename = paste0(outDir, "Extend2ed_Data4_MeanAnomSR_NH.pdf"), height = 4, width = 8)
 
 
 
+
+
+############ Extend2ed data figure 5  ############ 
+
+# sr and2 abun plots for max anomaly
+
+nd2 <- expand2.grid(
+  StdTmaxAnomalyRS=seq(from = min(Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS),
+                       to = max(Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS),
+                       length.out = 100),
+  UI2=factor(c("Primary vegetation","Second2ary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(Abund2MaxAnomalyModel1$data$UI2)),
+  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
+# NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
+nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmaxAnomalyRS,
+  originalX = predictsSites$StdTmaxAnomaly)
+nd2$NH_5000 <- round2(BackTransformCentreredPredictor(
+  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$LogAbund2 <- 0
+nd2$Species_richness <- 0
+
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))) & 
+                  (nd2$NH_5000==100))
+
+exclQuantiles <- c(0.025,0.975)
+
+QPV <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Primary vegetation"],
+  probs = exclQuantiles)
+QSV <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Second2ary vegetation"],
+  probs = exclQuantiles)
+QAL <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Agriculture_Low"],
+  probs = exclQuantiles)
+QAH <- quantile(x = Abund2MaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  Abund2MaxAnomalyModel1$data$UI2=="Agriculture_High"],
+  probs = exclQuantiles)
+
+a.preds.tmax <- PredictGLMERRand2Iter(model = Abund2MaxAnomalyModel1$model,data = nd2)
+a.preds.tmax <- exp(a.preds.tmax)-0.01
+
+a.preds.tmax <- sweep(x = a.preds.tmax,MARGIN = 2,STATS = a.preds.tmax[refRow,],FUN = '/')
+
+a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Second2ary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
+
+nd2$PredMedian <- ((apply(X = a.preds.tmax,MARGIN = 1,
+                         FUN = median,na.rm=TRUE))*100)-100
+nd2$PredUpper <- ((apply(X = a.preds.tmax,MARGIN = 1,
+                        FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+nd2$PredLower <- ((apply(X = a.preds.tmax,MARGIN = 1,
+                        FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+
+
+# set factor levels
+nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Second2ary vegetation", "Agriculture_Low", "Agriculture_High" ))
+
+nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
+
+# just take agriculture values
+nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
+
+# plot
+p1 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = NH_5000), size = 1) +
+  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+  scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  facet_wrap(~UI2, ncol = 2) + 
+  theme_bw() + 
+  labs(fill = "% NH", col = "% NH") + 
+  ylab("Total Abund2ance (%)") +
+  xlab("Stand2ardised Climate Anomaly Maximum") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 150)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12))
+
+
+# richness model
+
+nd2 <- expand.grid(
+  StdTmaxAnomalyRS=seq(from = min(RichMaxAnomalyModel1$data$StdTmaxAnomalyRS),
+                       to = max(RichMaxAnomalyModel1$data$StdTmaxAnomalyRS),
+                       length.out = 100),
+  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+             levels = levels(RichMaxAnomalyModel1$data$UI2)),
+  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
+# NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
+nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmaxAnomalyRS,
+  originalX = predictsSites$StdTmaxAnomaly)
+nd2$NH_5000 <- round(BackTransformCentreredPredictor(
+  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$LogAbund2 <- 0
+nd2$Species_richness <- 0
+
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))) & 
+                  (nd2$NH_5000==100))
+
+exclQuantiles <- c(0.025,0.975)
+
+QPV <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  RichMaxAnomalyModel1$data$UI2=="Primary vegetation"],
+  probs = exclQuantiles)
+QSV <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  RichMaxAnomalyModel1$data$UI2=="Second2ary vegetation"],
+  probs = exclQuantiles)
+QAL <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  RichMaxAnomalyModel1$data$UI2=="Agriculture_Low"],
+  probs = exclQuantiles)
+QAH <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+  RichMaxAnomalyModel1$data$UI2=="Agriculture_High"],
+  probs = exclQuantiles)
+
+s.preds.tmax <- PredictGLMERRandIter(model = RichMaxAnomalyModel1$model,data = nd2)
+s.preds.tmax <- exp(s.preds.tmax)
+
+s.preds.tmax <- sweep(x = s.preds.tmax,MARGIN = 2,STATS = s.preds.tmax[refRow,],FUN = '/')
+
+s.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+s.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
+
+nd2$PredMedian <- ((apply(X = s.preds.tmax,MARGIN = 1,
+                         FUN = median,na.rm=TRUE))*100)-100
+nd2$PredUpper <- ((apply(X = s.preds.tmax,MARGIN = 1,
+                        FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+nd2$PredLower <- ((apply(X = s.preds.tmax,MARGIN = 1,
+                        FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+
+# set factor levels
+nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+
+nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
+
+# just take agriculture values
+nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
+
+# plot
+p2 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = NH_5000), size = 1) +
+  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+  scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  facet_wrap(~UI2, ncol = 2) + 
+  theme_bw() + 
+  labs(fill = "% NH", col = "% NH") + 
+  ylab("Species Richness (%)") +
+  xlab("Standardised Climate Anomaly Maximum") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 150)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12))
+
+
+# organise plots together
+plot_grid(p1, p2, nrow = 2)
+
+# save
+ggsave(filename = paste0(outDir, "Extended_Data5_MaxAnom_NH.pdf"), height = 8, width = 8)
