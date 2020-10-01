@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+0_data
+1_PreparePREDICTSData
+2_RunSimpleLUIModel
+3_PrepareClimateIndexMaps
+4_PREDICTSMatchClimateIndex
+5_PREDICTSMatchPropNatHab
+6_RunLUClimateModels
+7_RunLUClimateNHModels
+8_Predictions
+LanduseClimateInsects.Rproj
