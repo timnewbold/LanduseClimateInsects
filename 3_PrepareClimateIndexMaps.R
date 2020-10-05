@@ -389,6 +389,8 @@ save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
 
 ##### Manuscript, Figure 4, present and future anomaly #####
 
+plot_data_pres <- as.data.frame(tmp2016_18std_climate_anomaly, xy = TRUE)
+plot_data_fut <- as.data.frame(tmp2069_71std_climate_anomaly, xy = TRUE)
 
 # add years to data table
 plot_data_pres$year <- 2018
@@ -397,11 +399,13 @@ plot_data_fut$year <- 2070
 # combine the two together
 all_plot <- rbind(plot_data_pres, plot_data_fut)
 
+all_plot <- all_plot[!is.na(all_plot$layer), ]
+
 # organise breaks, colours and labels
 brks <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,50)
 cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:8],
-          (brewer.pal(n = 8,name = "Purples"))[4:7],
-          (brewer.pal(n = 8,name = "Oranges"))[6:8])
+          (brewer.pal(n = 8,name = "Purples"))[4:6],
+          (brewer.pal(n = 8,name = "Oranges"))[5:8])
 labs <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
           "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5")
 
@@ -413,7 +417,7 @@ all_plot$bins <- cut(all_plot$layer,
 
 # plot
 ggplot(all_plot) + 
-  geom_raster(aes(x = x, y = y, fill = bins)) +
+  geom_raster(aes(x = x, y = y, fill = bins), alpha = 0.9) +
   #scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
   scale_fill_manual(values = cols) +
   facet_grid(~ year) +
