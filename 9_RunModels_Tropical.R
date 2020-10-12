@@ -57,10 +57,21 @@ MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Lo
                                      fixedFactors = c("UI2", "Tropical"),
                                      fixedTerms = list(StdTmeanAnomalyRS=1),
                                      randomStruct = "(1|SS)+(1|SSB)",
-                                     fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)", "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
+                                     fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)",
+                                                           "UI2:Tropical",
+                                                           "Tropical:poly(StdTmeanAnomalyRS,1)",
+                                                           "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
                                      saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
 
 summary(MeanAnomalyModelAbund$model)
+
+
+# selected model:
+# LogAbund ~ UI2 + + poly(StdTmeanAnomalyRS, 1) + Tropical +
+# UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical +
+# Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
+# (1 | SS) + (1 | SSB)
+
 
 # save the model output
 save(MeanAnomalyModelAbund, file = paste0(outDir, "/MeanAnomalyModelAbund_3way.rdata"))
@@ -71,10 +82,22 @@ MeanAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Spe
                                     fixedFactors = c("UI2", "Tropical"),
                                     fixedTerms = list(StdTmeanAnomalyRS=1),
                                     randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-                                    fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)", "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
+                                    fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)",
+                                                          "UI2:Tropical",
+                                                          "Tropical:poly(StdTmeanAnomalyRS,1)",
+                                                          "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
                                     saveVars = c("Total_abundance", "SSBS", "NH_3000"))
 
 summary(MeanAnomalyModelRich$model)
+
+# selected model:
+# Species_richness ~ UI2 + Tropical + poly(StdTmeanAnomalyRS, 1) +  
+# UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical + Tropical:poly(StdTmeanAnomalyRS, 1) + 
+# Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
+# (1 | SS) +  (1 | SSB) + (1 | SSBS)
+
+# Model failed to converge with max|grad| = 0.0187175 (tol = 0.001, component 1)
+
 
 # save model output
 save(MeanAnomalyModelRich, file = paste0(outDir, "/MeanAnomalyModelRich_3way.rdata"))
@@ -86,13 +109,20 @@ MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Log
                                     fixedFactors = c("UI2", "Tropical"),
                                     fixedTerms = list(StdTmaxAnomalyRS=1),
                                     randomStruct = "(1|SS)+(1|SSB)",
-                                    fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)", "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),
+                                    fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)",
+                                                          "UI2:Tropical",
+                                                          "Tropical:poly(StdTmaxAnomalyRS,1)",
+                                                          "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),
                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
 
 summary(MaxAnomalyModelAbund$model)
 
+# selected model:
+# LogAbund ~ UI2 + UI2:Tropical + Tropical + (1 | SS) + (1 | SSB)
+
 # save model output
 save(MaxAnomalyModelAbund, file = paste0(outDir, "/MaxAnomalyModelAbund_3way.rdata"))
+
 
 # 4. Richness, max anomaly
 MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
@@ -100,10 +130,22 @@ MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Spec
                                    fixedFactors = c("UI2", "Tropical"),
                                    fixedTerms = list(StdTmaxAnomalyRS=1),
                                    randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-                                   fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)", "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),
+                                   fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)",
+                                                         "UI2:Tropical",
+                                                         "Tropical:poly(StdTmaxAnomalyRS,1)",
+                                                         "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),  
                                    saveVars = c("Total_abundance", "SSBS", "NH_3000"))
 
 summary(MaxAnomalyModelRich$model)
+
+# selected model:
+# Species_richness ~ UI2 + Tropical + poly(StdTmaxAnomalyRS, 1) + 
+# UI2:poly(StdTmaxAnomalyRS, 1) + UI2:Tropical + Tropical:poly(StdTmaxAnomalyRS, 1):UI2 +  
+# (1 | SS) + (1 | SSB) + (1 | SSBS)
+
+
+# Model failed to converge with max|grad| = 0.0118007 (tol = 0.001, component 1)
+
 
 # save model output
 save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
@@ -491,6 +533,6 @@ p4 <- ggplot(data = nd4, aes(x = StdTmaxAnomaly, y = PredMedian)) +
 plot_grid(p1, p2, p3, p4, ncol = 1)
 
 # save plot
-ggsave(filename = paste0(outDir, "Plots_climate_LU_Tropical_ALL_3way.pdf"), width = 8, height = 12, units = "in")
+ggsave(filename = paste0(outDir, "Plots_climate_LU_Tropical_ALL_allinteractions.pdf"), width = 8, height = 12, units = "in")
 
 
