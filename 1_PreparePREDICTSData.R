@@ -36,6 +36,21 @@ predicts <- CorrectSamplingEffort(diversity = predicts)
 # Merge sites that have the same coordinates (e.g. multiple traps on a single transect)
 predicts <- MergeSites(diversity = predicts)
 
+predicts.complete <- droplevels(predicts[(
+  predicts$Predominant_land_use!="Cannot decide"),])
+predicts.complete <- droplevels(predicts.complete[(
+  predicts.complete$Use_intensity!="Cannot decide"),])
+
+# 780,145 records
+
+species <- unique(predicts.complete[,c('Order','Taxon_name_entered')])
+
+order.counts <- tapply(X = species$Taxon_name_entered,
+                       INDEX = species$Order,
+                       FUN = function(sp) length(unique(sp)))
+
+
+
 # Calculate site metrics of diversity
 sites <- SiteMetrics(diversity = predicts,
                      extra.cols = c("Predominant_land_use",
