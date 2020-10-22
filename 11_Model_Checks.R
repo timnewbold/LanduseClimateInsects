@@ -10,6 +10,8 @@ rm(list = ls())
 
 # load libraries
 library(cowplot)
+library(ggplot2)
+library(roquefort)
 
 
 # directories
@@ -34,31 +36,32 @@ load(paste0(nathabmod, "RichMaxAnomalyModel_NH.rdata"))
 # try to write a function to run these checks on each model output and save a pdf of all figs.
 
 mod_list <- c("MeanAnomalyModelAbund", "MeanAnomalyModelRich", "MaxAnomalyModelAbund", "MaxAnomalyModelRich",
-              "MeanAnomalyModelAbun_NH", "RichMeanAnomalyModel_NH", "AbundMaxAnomalyModel_NH", "RichMaxAnomalyModel_NH")
+              "AbundMeanAnomalyModel1", "RichMeanAnomalyModel1", "AbundMaxAnomalyModel1", "RichMaxAnomalyModel1")
 
 
 # load dataset
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 
-x <- mod_list[1]
+#x <- mod_list[1]
 
 for(x in mod_list){
 
+# only do this one if not SR model
 if(grepl("Abun", x) ==1) {
 
+
 ## 1. Checking the fitted vs residuals relationship
-# only do this one if not SR model
 p1 <- plot(get(x)$model)
-
 }
-
+  
 ## 2. Normality of Residuals
 pdf(NULL)
 dev.control(displaylist="enable")
 qqnorm(resid(get(x)$model), main = "")
 p2 <- recordPlot()
 invisible(dev.off())
+
 
 
 ## 3. Check for spatial autocorrelation
@@ -88,6 +91,7 @@ p3 <- ggplot(data = sa_test_vals ) +
         aspect.ratio = 1)
 
 
+
 if(grepl("Abun", x) == 1) {
   
 plot_grid(p1,p2,p3,
@@ -96,10 +100,17 @@ plot_grid(p1,p2,p3,
   
 }else{
   plot_grid(p2,p3,
-            labels = c("A.", "B."))
+            labels = c("A.", "B."))#
 
 ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 5, width = 10) }
 
 rm(p1, p2, p3)
 
+
 }
+
+
+par(mfrow=c(1,1))
+p1
+p2
+print(p3, vp=vp.BottomRight)
