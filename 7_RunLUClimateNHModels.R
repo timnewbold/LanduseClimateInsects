@@ -34,7 +34,8 @@ AbundMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",f
                 randomStruct = "(1|SS)+(1|SSB)")
 AbundMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
                 fixedStruct = "UI2 * StdTmeanAnomalyRS * NH_5000.rs",
-                randomStruct = "(1|SS)+(1|SSB)")
+                randomStruct = "(1|SS)+(1|SSB)",
+                saveVars = c("SSBS"))
 
 print(anova(AbundMeanAnomalyModel0$model,AbundMeanAnomalyModel1$model))
 
@@ -51,7 +52,8 @@ RichMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_rich
                                randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
 RichMeanAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmeanAnomalyRS * NH_5000.rs",
-                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+                               saveVars = c("SSBS"))
 
 print(anova(RichMeanAnomalyModel0$model,RichMeanAnomalyModel1$model))
 
@@ -68,7 +70,8 @@ AbundMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fi
                                 randomStruct = "(1|SS)+(1|SSB)")
 AbundMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
                                 fixedStruct = "UI2 * StdTmaxAnomalyRS * NH_5000.rs",
-                                randomStruct = "(1|SS)+(1|SSB)")
+                                randomStruct = "(1|SS)+(1|SSB)",
+                               saveVars = c("SSBS"))
 
 print(anova(AbundMaxAnomalyModel0$model,AbundMaxAnomalyModel1$model))
 
@@ -86,7 +89,8 @@ RichMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richn
                                randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
 RichMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmaxAnomalyRS * NH_5000.rs",
-                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+                               randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+                              saveVars = c("SSBS"))
 
 print(anova(RichMaxAnomalyModel0$model,RichMaxAnomalyModel1$model))
 
