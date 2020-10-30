@@ -53,6 +53,26 @@ table(predictsSites$UI2, predictsSites$Tropical)
 # Secondary vegetation      1048      435
 
 
+# look into range of SCA values across landuses in tropical/temperate areas.
+
+plot_data <- predictsSites[, c("Tropical", "UI2", "StdTmaxAnomaly")]
+plot_data <- plot_data[!is.na(plot_data$UI2), ]
+#table(plot_data$UI2)
+plot_data$UI2 <- factor(plot_data$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
+
+ggplot(data = plot_data) +
+  geom_freqpoly(aes(x = StdTmaxAnomaly, col = UI2)) +
+  facet_wrap(~ Tropical) + 
+  theme_bw()
+
+
+
+#"#009E73" - green
+#"#0072B2" - blue
+#"#E69F00" - yellow
+#"#D55E00" - red
+
+
 # 1. Abundance, mean anomaly
 MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
                                      fitFamily = "gaussian",
