@@ -110,7 +110,3 @@ rm(p1, p2, p3)
 }
 
 
-par(mfrow=c(1,1))
-p1
-p2
-print(p3, vp=vp.BottomRight)
