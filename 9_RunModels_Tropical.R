@@ -173,10 +173,10 @@ summary(MaxAnomalyModelRich$model)
 save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
 
 
-#load(paste0(outDir, "/MeanAnomalyModelAbund.rdata"))
-#load(paste0(outDir, "/MeanAnomalyModelRich.rdata"))
-#load(paste0(outDir, "/MaxAnomalyModelAbund.rdata"))
-#load(paste0(outDir, "/MaxAnomalyModelRich.rdata"))
+#load(paste0(outDir, "MeanAnomalyModelAbund_3way.rdata"))
+#load(paste0(outDir, "/MeanAnomalyModelRich_3way.rdata"))
+#load(paste0(outDir, "/MaxAnomalyModelAbund_3way.rdata"))
+#load(paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
 
 
 summary(MeanAnomalyModelAbund$model)
@@ -219,7 +219,7 @@ refRow2 <- refRow2 -400
 
 # adjust plot 1: mean anomaly and abundance
 
-exclQuantiles <- c(0.025,0.975)
+exclQuantiles <- c(0.1,0.9)
 
 
 QPV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
@@ -235,6 +235,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   MeanAnomalyModelAbund$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
+
 # predict the results
 a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelAbund$model,data = nd)
 
@@ -246,28 +247,28 @@ a.preds.tmean_t <- a.preds.tmean[1:400, ] # tropical set
 a.preds.tmean <- a.preds.tmean[401:800, ] # temperate set
 
 # convert to relative to reference
-a.preds.tmean_t <- sweep(x = a.preds.tmean_t,MARGIN = 2,STATS = a.preds.tmean_t[refRow1,],FUN = '/')
-a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow2,],FUN = '/')
+a.preds.tmean_t <- sweep(x = a.preds.tmean_t,MARGIN = 2,STATS = a.preds.tmean_t[refRow1,],FUN = '/') # tropical
+a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow2,],FUN = '/') # temperate
 
 # remove anything above and below the quantiles
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Tropical"),] <- NA
+a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Tropical"),] <- NA
 
 # remove anything above and below the quantiles
-a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Temperate")-400,] <- NA
+a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Temperate")-400,] <- NA
 
 # Get the median, upper and lower quants for the plot
 nd$PredMedian[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
@@ -287,20 +288,44 @@ nd$PredLower[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
 
-p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+plot_data <- nd[nd$Tropical == "Temperate",]
+
+p1 <- ggplot(data = plot_data, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+  geom_ribbon(aes(ymin = plot_data$PredLower, ymax = plot_data$PredUpper, fill = UI2), alpha = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  facet_wrap(~Tropical, ncol = 2) + 
+  #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 750)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  ylim(c(-100, 300)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12)) +
+  ggtitle("Temperate")
 
+
+plot_data2 <- nd[nd$Tropical == "Tropical",]
+
+p2 <- ggplot(data = plot_data2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = UI2), size = 1) +
+  geom_ribbon(aes(ymin = plot_data2$PredLower, ymax = plot_data2$PredUpper, fill = UI2), alpha = 0.2) +
+  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  #facet_wrap(~Tropical, ncol = 2) + 
+  theme_bw() + 
+  labs(fill = "% NH", col = "% NH") + 
+  ylab("Total Abundance (%)") +
+  xlab("Standardised Climate Anomaly") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none") +
+  ggtitle("Tropical")
+
+
+legend <- get_legend(p1)
+p3 <- plot_grid(p1+theme(legend.position = "none"), p2, legend, ncol = 3)
 
 
 ### 2. SR mean anomaly
@@ -333,7 +358,7 @@ refRow2 <- refRow2 -400
 
 
 # quantiles of data to show on the plot
-exclQuantiles <- c(0.025,0.975)
+exclQuantiles <- c(0.1,0.90)
 
 
 QPV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
@@ -364,24 +389,24 @@ sr.preds.tmean_t <- sweep(x = sr.preds.tmean_t,MARGIN = 2,STATS = sr.preds.tmean
 sr.preds.tmean <- sweep(x = sr.preds.tmean,MARGIN = 2,STATS = sr.preds.tmean[refRow2,],FUN = '/')
 
 # remove anything above and below the quantiles
-sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Tropical"),] <- NA
 
 # remove anything above and below the quantiles
-sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Temperate")-400,] <- NA
 
 # Get the median, upper and lower quants for the plot
 nd2$PredMedian[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
@@ -401,21 +426,45 @@ nd2$PredLower[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
 
 nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
 
-p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+
+plotdata <- nd2[nd2$Tropical == "Temperate", ]
+  
+p4 <- ggplot(data = plotdata, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = UI2), alpha = 0.2) +
+  geom_ribbon(aes(ymin = plotdata$PredLower, ymax = plotdata$PredUpper, fill = UI2), alpha = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  facet_wrap(~Tropical, ncol = 2) + 
+  #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 750)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  ylim(c(-100, 300)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12))+
+  ggtitle("Temperate")
 
 
+
+plotdata2 <- nd2[nd2$Tropical == "Tropical", ]
+
+p5 <- ggplot(data = plotdata2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = UI2), size = 1) +
+  geom_ribbon(aes(ymin = plotdata2$PredLower, ymax = plotdata2$PredUpper, fill = UI2), alpha = 0.2) +
+  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  #facet_wrap(~Tropical, ncol = 2) + 
+  theme_bw() + 
+  labs(fill = "% NH", col = "% NH") + 
+  ylab("Species Richness (%)") +
+  xlab("Standardised Climate Anomaly") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none")+
+  ggtitle("Tropical")
+
+legend2 <- get_legend(p4)
+p6 <- plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 3)
 
 
 
@@ -539,7 +588,7 @@ refRow2 <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(
 refRow2 <- refRow2 -400
 
 # quantiles of data to show on the plot
-exclQuantiles <- c(0.025,0.975)
+exclQuantiles <- c(0.1,0.9)
 
 
 QPV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
@@ -570,24 +619,24 @@ sr.preds.tmean_t <- sweep(x = sr.preds.tmean_t,MARGIN = 2,STATS = sr.preds.tmean
 sr.preds.tmean <- sweep(x = sr.preds.tmean,MARGIN = 2,STATS = sr.preds.tmean[refRow2,],FUN = '/')
 
 # remove anything above and below the quantiles
-sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Tropical"),] <- NA
+sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Tropical"),] <- NA
 
 # remove anything above and below the quantiles
-sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Temperate")-400,] <- NA
 
 # Get the median, upper and lower quants for the plot
 nd4$PredMedian[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
@@ -608,33 +657,56 @@ nd4$PredLower[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
 
 nd4$UI2 <- factor(nd4$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
 
-p4 <- ggplot(data = nd4, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+plot.data <- nd4[nd4$Tropical == "Temperate",]
+
+p7 <- ggplot(data = plot.data, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = nd4$PredLower, ymax = nd4$PredUpper, fill = UI2), alpha = 0.2) +
+  geom_ribbon(aes(ymin = plot.data$PredLower, ymax = plot.data$PredUpper, fill = UI2), alpha = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  facet_wrap(~Tropical, ncol = 2) + 
+  #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly Maximum") +
+  xlab("Standardised Climate \nAnomaly Maximum") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 250)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12))+
+  ggtitle("Temperate")
+
+plot.data2 <- nd4[nd4$Tropical =="Tropical",]
+
+p8 <- ggplot(data = plot.data2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = UI2), size = 1) +
+  geom_ribbon(aes(ymin = plot.data2$PredLower, ymax = plot.data2$PredUpper, fill = UI2), alpha = 0.2) +
+  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  #facet_wrap(~Tropical, ncol = 2) + 
+  theme_bw() + 
+  labs(fill = "% NH", col = "% NH") + 
+  ylab("Species Richness (%)") +
+  xlab("Standardised Climate \nAnomaly Maximum") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none") + 
+  ggtitle("Tropical")
 
 #"#009E73" - green
 #"#0072B2" - blue
 #"#E69F00" - yellow
 #"#D55E00" - red
 
+legend3 <- get_legend(p7)
+p9 <- plot_grid(p7+theme(legend.position = "none"), p8, legend, ncol = 3)
+
 
 
 # organise plots into one document
 
-plot_grid(p1, p2,  p4, ncol = 1, 
-          labels = c("A", "B", "C"), label_size = 12)
+plot_grid(p3, p6,  p9, ncol = 1, 
+          labels = c("A", "B", "C"), label_size = 12, rel_widths = c(1,1,0.5))
 
 # save plot
-ggsave(filename = paste0(outDir, "Plots_climate_LU_Tropical_ALL_allinteractions.pdf"), width = 8, height = 12, units = "in")
+ggsave(filename = paste0(outDir, "Plots_climate_LU_Tropical_ALL_allinteractions.pdf"), width = 9, height = 9, units = "in")
 
 
