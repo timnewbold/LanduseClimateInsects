@@ -32,6 +32,9 @@ predicts <- predicts[(predicts$Class=="Insecta"),]
 
 # Correct effort-sensitive abundance measures (assumes linear relationship between effort and recorded abundance)
 predicts <- CorrectSamplingEffort(diversity = predicts)
+# Correcting 870378 values for sensitivity to sampling effort (most of these are 0s, 19184 non-zero)
+
+table(predicts$Diversity_metric)
 
 # Merge sites that have the same coordinates (e.g. multiple traps on a single transect)
 predicts <- MergeSites(diversity = predicts)
@@ -112,6 +115,11 @@ sites$Use_intensity[((sites$LandUse=="Intermediate secondary vegetation") &
                        (sites$Use_intensity=="Intense use"))] <- "Light use"
 sites$Use_intensity[((sites$LandUse=="Young secondary vegetation") & 
                        (sites$Use_intensity=="Intense use"))] <- "Light use"
+
+# remove the urban sites and NA in UI2
+sites <- sites[!sites$UI2 == "Urban", ]
+sites <- sites[!is.na(sites$UI2), ]
+
 
 sites <- droplevels(sites)
 
