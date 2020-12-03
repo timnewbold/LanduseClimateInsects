@@ -18,36 +18,36 @@ inDir <- "1_PreparePREDICTSData/"
 outDir <- "2_RunSimpleLUIModel/"
 
 # read in the formatted PREDICTS data
-sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds"))
+sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6334 rows
 
 
 ## SPECIES RICHNESS MODELS ##
 
 # remove NAs in the specified columns
-model_data <- na.omit(sites[,c('Species_richness','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
+model_data_sr <- na.omit(sites[,c('Species_richness','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
 # summaries
-length(unique(model_data$SS)) # 276
-length(unique(model_data$SSBS)) # 6671
+length(unique(model_data_sr$SS)) # 267
+length(unique(model_data_sr$SSBS)) # 6334
 
 
 # look at the spread of land use/use intensity categories
-print(table(model_data$UI2))
+print(table(model_data_sr$UI2))
 
 # run set of simple models with different fixed effects structures
-sm0 <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+sm0 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamily = "poisson",
              fixedStruct = "1",randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
 
-sm1 <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+sm1 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamily = "poisson",
              fixedStruct = "LandUse",randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
 
-sm2 <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+sm2 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamily = "poisson",
              fixedStruct = "LandUse+Use_intensity",randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
 
-sm3 <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+sm3 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamily = "poisson",
              fixedStruct = "UI2",randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
 
-sm4 <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+sm4 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamily = "poisson",
              fixedStruct = "LandUse*Use_intensity",randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
 # fixed-effect model matrix is rank deficient so dropping 3 columns / coefficients
 
@@ -57,30 +57,30 @@ print(AIC(sm0$model,sm1$model,sm2$model,sm3$model,sm4$model))
 
 ## ABUNDANCE MODELS ##
 
-model_data <- na.omit(sites[,c('LogAbund','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
+model_data_ab <- na.omit(sites[,c('LogAbund','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
 # summaries
-length(unique(model_data$SS)) # 276
-length(unique(model_data$SSBS)) # 6671
+length(unique(model_data_ab$SS)) # 247
+length(unique(model_data_ab$SSBS)) # 5998
 
 # look at the spread of land use/use intensity categories
-print(table(model_data$UI2))
+print(table(model_data_ab$UI2))
 
 
 # run set of simple models with different fixed effects structures
-am0 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
+am0 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "1",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 
-am1 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
+am1 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "LandUse",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 
-am2 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
+am2 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "LandUse+Use_intensity",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 
-am3 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
+am3 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "UI2",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 
-am4 <- GLMER(modelData = model_data,responseVar = "LogAbund",fitFamily = "gaussian",
+am4 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gaussian",
              fixedStruct = "LandUse*Use_intensity",randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
 #fixed-effect model matrix is rank deficient so dropping 3 columns / coefficients
 
@@ -94,7 +94,7 @@ print(AIC(am0$model,am1$model,am2$model,am3$model,am4$model))
 
 
 nd <- data.frame(UI2=factor(c("Primary vegetation","Secondary vegetation",
-                              "Agriculture_Low","Agriculture_High","Urban")),
+                              "Agriculture_Low","Agriculture_High")),
                  Species_richness=0,
                  LogAbund=0)
 
@@ -166,15 +166,15 @@ par(mar=c(2.6,2.6,1.5,1))
 par(tck=-0.01)
 
 # set colours
-errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00","#CC79A7")
+errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00")
 
 # species richness plot
 
-errbar(x = 1:5,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
+errbar(x = 1:4,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
        col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(s.preds.lower),max(s.preds.upper)),xaxt="n",
        ylab="Species richness (%)",xlab="Land use",bty="l")
 
-axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
+axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
 
 abline(h=0,col="#00000077",lty=2)
 
@@ -184,11 +184,11 @@ p2 <- recordPlot()
 
 # abundance plot
 
-errbar(x = 1:5,y = a.preds.median,yplus = a.preds.upper,yminus = a.preds.lower,
+errbar(x = 1:4,y = a.preds.median,yplus = a.preds.upper,yminus = a.preds.lower,
        col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(a.preds.lower),max(a.preds.upper)),xaxt="n",
        ylab="Total abundance (%)",xlab="Land use",bty="l")
 
-axis(side = 1,at = 1:5,labels = c("PV","SV","AG.Low","AG.Hi","URB"))
+axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
 
 abline(h=0,col="#00000077",lty=2)
 
@@ -206,3 +206,67 @@ p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85)
 # save figure
 save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
 
+
+##%######################################################%##
+#                                                          #
+####                    Model stats                     ####
+#                                                          #
+##%######################################################%##
+
+
+# models used = sm3 and am3
+
+summary(sm3$model)
+
+# rerun the model using GLMERSelect function to get stats
+
+sm3_2 <- GLMERSelect(modelData = model_data_sr,
+                     responseVar = "Species_richness",
+                      fitFamily = "poisson",
+                      fixedFactors = "UI2",
+                      #fixedTerms = list(StdTmeanAnomalyRS=1),
+                      randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)"#,
+                      #fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
+                      #saveVars = c("Total_abundance", "SSBS", "NH_3000")
+                      )
+
+
+am3_2 <- GLMERSelect(modelData = model_data_ab,
+                     responseVar = "LogAbund",
+                     fitFamily = "gaussian",
+                     fixedFactors = "UI2",
+                     #fixedTerms = list(StdTmeanAnomalyRS=1),
+                     randomStruct = "(1|SS)+(1|SSB)"#,
+                     #fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
+                     #saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000")
+                     )
+
+summary(sm3_2$model)
+summary(sm3$model)
+summary(am3_2$model)
+summary(am3$model)
+
+# save the stats info
+sm3stats <- as.data.frame(sm3_2$stats)
+am3stats <- as.data.frame(am3_2$stats)
+
+sm3stats$significant <- NA
+am3stats$significant <- NA
+
+
+# function to check significance
+checksig <- function(x){
+  if(x <= 0.05){ 
+    res <- "Yes" 
+  } else { 
+    res <- "No" }
+  return(res)}
+
+# add values to table
+sm3stats$significant <- sapply(X = sm3stats$P, FUN = checksig)
+am3stats$significant <- sapply(X = am3stats$P, FUN = checksig)
+
+
+# save the stats tables
+write.csv(sm3stats, file = paste0(outDir, "/SR_Stats.csv"), row.names = FALSE)
+write.csv(am3stats, file = paste0(outDir, "/Abun_Stats.csv"), row.names = FALSE)
