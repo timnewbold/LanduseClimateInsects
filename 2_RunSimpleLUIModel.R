@@ -178,7 +178,7 @@ axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
 
 abline(h=0,col="#00000077",lty=2)
 
-title(main = "b.", adj = 0, cex.main = 0.8, line = 1)
+title(main = "b.", adj = 0, cex.main = 1, line = 1)
 
 p2 <- recordPlot()
 
@@ -192,7 +192,7 @@ axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
 
 abline(h=0,col="#00000077",lty=2)
 
-title(main = "c.", adj = 0, cex.main = 0.8, line = 1)
+title(main = "c.", adj = 0, cex.main = 1, line = 1)
 
 p3 <- recordPlot()
 
@@ -205,6 +205,13 @@ p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85)
 
 # save figure
 save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
+
+
+# alternative fig 1 format
+
+p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.8), ncol = 1, rel_heights = c(0.7, 1))
+
+save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 8, base_width = 8)
 
 
 ##%######################################################%##
