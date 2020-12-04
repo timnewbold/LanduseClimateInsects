@@ -27,8 +27,8 @@ sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6334 rows
 model_data_sr <- na.omit(sites[,c('Species_richness','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
 # summaries
-length(unique(model_data_sr$SS)) # 267
-length(unique(model_data_sr$SSBS)) # 6334
+length(unique(model_data_sr$SS)) # 265
+length(unique(model_data_sr$SSBS)) # 6328
 
 
 # look at the spread of land use/use intensity categories
@@ -60,8 +60,8 @@ print(AIC(sm0$model,sm1$model,sm2$model,sm3$model,sm4$model))
 model_data_ab <- na.omit(sites[,c('LogAbund','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
 # summaries
-length(unique(model_data_ab$SS)) # 247
-length(unique(model_data_ab$SSBS)) # 5998
+length(unique(model_data_ab$SS)) # 245
+length(unique(model_data_ab$SSBS)) # 5992
 
 # look at the spread of land use/use intensity categories
 print(table(model_data_ab$UI2))
@@ -147,9 +147,7 @@ p1 <-ggplot() +
         panel.background = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        plot.title = element_text(hjust=0.05, size = 11, face = 'bold')) +
-  ggtitle("a.")
-
+        plot.title = element_text(hjust=0.05, size = 11, face = 'bold'))
 
 #pdf(file = paste0(outDir,"LUI_Plot.pdf"),width = 8.5/2.54,height = 12/2.54, onefile = T)
 
@@ -162,13 +160,14 @@ par(cex.main=1)
 par(ps=10)
 par(las=1)
 par(mgp=c(1.6,0.2,0))
-par(mar=c(2.6,2.6,1.5,1))
+par(mar=c(2.5,2.5,1,0.5))
 par(tck=-0.01)
 
 # set colours
 errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00")
 
 # species richness plot
+
 
 errbar(x = 1:4,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
        col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(s.preds.lower),max(s.preds.upper)),xaxt="n",
@@ -178,7 +177,7 @@ axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
 
 abline(h=0,col="#00000077",lty=2)
 
-title(main = "b.", adj = 0, cex.main = 1, line = 1)
+#title(main = "b.", adj = 0, cex.main = 1, line = 1)
 
 p2 <- recordPlot()
 
@@ -192,7 +191,7 @@ axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
 
 abline(h=0,col="#00000077",lty=2)
 
-title(main = "c.", adj = 0, cex.main = 1, line = 1)
+#title(main = "c.", adj = 0, cex.main = 1, line = 1)
 
 p3 <- recordPlot()
 
@@ -201,7 +200,7 @@ p3 <- recordPlot()
 
 # Organise the plots
 
-p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85)
+p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85, labels = c("a", "b", "c"), label_x = 0.1)
 
 # save figure
 save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
@@ -209,9 +208,10 @@ save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
 
 # alternative fig 1 format
 
-p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.8), ncol = 1, rel_heights = c(0.7, 1))
+p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.8, labels = c("b", "c"), label_x = 0.2), ncol = 1, rel_heights = c(0.7, 1), labels = c("a"), label_x = 0.1)
 
 save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 8, base_width = 8)
+
 
 
 ##%######################################################%##
