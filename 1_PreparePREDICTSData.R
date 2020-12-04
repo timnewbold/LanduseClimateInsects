@@ -126,6 +126,11 @@ sites <- droplevels(sites)
 # transform abundance values 
 sites$LogAbund <- log(sites$Total_abundance+1)
 
+
+# Remove sites without coordinates
+sites <- sites[!is.na(sites$Latitude), ]
+
+
 # save the prepared dataset
 saveRDS(object = sites,file = paste0(outDir,"PREDICTSSiteData.rds"))
 
@@ -158,10 +163,10 @@ ggsave(filename = paste0(outDir, "/PREDICTS_points_map.pdf"), height = 4, width 
 ### Basic summaries ###
 
 # nstudies/ nsites - all
-length(unique(sites$SS)) # 292
-length(unique(sites$SSBS)) # 7800
+length(unique(sites$SS)) # 265
+length(unique(sites$SSBS)) # 6328
 
 # nstudies/nsites - abun
-length(unique(sites[!is.na(sites$LogAbund) , 'SS'])) # 271
-length(unique(sites[!is.na(sites$LogAbund) , 'SSBS'])) # 7402
+length(unique(sites[!is.na(sites$LogAbund) , 'SS'])) # 245
+length(unique(sites[!is.na(sites$LogAbund) , 'SSBS'])) # 5992
 
