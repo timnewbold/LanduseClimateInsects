@@ -635,6 +635,8 @@ nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
 nd2$NH_5000 <- round(BackTransformCentreredPredictor(
   transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
 
+nd2$NH_5000[nd2$NH_5000 == 99] <- 100
+
 # set values for richness and Abundance
 nd2$LogAbund <- 0
 nd2$Species_richness <- 0
@@ -702,14 +704,15 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_extensive", 'Agriculture_High' = "b              Agriculture_intensive"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Abundance (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  theme(aspect.ratio = 1, text = element_text(size = 12),
+        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 # save
 ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
@@ -739,6 +742,8 @@ nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
 # back transform NH data range
 nd2$NH_5000 <- round(BackTransformCentreredPredictor(
   transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+
+nd2$NH_5000[nd2$NH_5000 == 99] <- 100
 
 # set values for richness and Abundance
 nd2$LogAbund <- 0
@@ -807,14 +812,15 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_extensive", 'Agriculture_High' = "b              Agriculture_intensive"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  theme(aspect.ratio = 1, text = element_text(size = 12),
+        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 # save
 ggsave(filename = paste0(outDir, "Extended_Data4_MeanAnomSR_NH.pdf"), height = 4, width = 8)
@@ -840,6 +846,8 @@ nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
   originalX = predictsSites$StdTmaxAnomaly)
 nd2$NH_5000 <- round(BackTransformCentreredPredictor(
   transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+
+nd2$NH_5000[nd2$NH_5000  == 99] <- 100
 nd2$LogAbund <- 0
 nd2$Species_richness <- 0
 
@@ -897,14 +905,15 @@ p1 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_extensive", 'Agriculture_High' = "b              Agriculture_intensive"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
   xlab("Standardised Climate Anomaly Maximum") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  theme(aspect.ratio = 1, text = element_text(size = 12),
+        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 
 # richness model
@@ -922,6 +931,8 @@ nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
   originalX = predictsSites$StdTmaxAnomaly)
 nd2$NH_5000 <- round(BackTransformCentreredPredictor(
   transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+nd2$NH_5000[nd2$NH_5000 == 99] <- 100
+
 nd2$LogAbund <- 0
 nd2$Species_richness <- 0
 
@@ -978,14 +989,16 @@ p2 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_extensive", 'Agriculture_High' = "d              Agriculture_intensive"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
   xlab("Standardised Climate Anomaly Maximum") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))
+  theme(aspect.ratio = 1, text = element_text(size = 12),
+        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
+
 
 
 # organise plots together
