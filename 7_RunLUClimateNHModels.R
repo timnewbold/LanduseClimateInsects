@@ -26,7 +26,7 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 # remove any NAs
 modelData <- na.omit(predictsSites[,c(
-  'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
+  'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5974 rows
 
 # run models with and without NH interaction, Abundance models
 AbundMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
@@ -45,7 +45,7 @@ save(AbundMeanAnomalyModel1, file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rda
 
 # run models with and without NH interaction, species richness models
 modelData <- na.omit(predictsSites[,c(
-  'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
+  'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6308 rows
 
 RichMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmeanAnomalyRS",
@@ -63,7 +63,7 @@ save(RichMeanAnomalyModel1, file = paste0(outDir, "/RichMeanAnomalyModel_NH.rdat
 
 # run models with and without NH interaction, Abundance models, max anomaly
 modelData <- na.omit(predictsSites[,c(
-  'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
+  'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5974 rows
 
 AbundMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
                                 fixedStruct = "UI2 * StdTmaxAnomalyRS",
@@ -82,7 +82,7 @@ save(AbundMaxAnomalyModel1, file = paste0(outDir, "/AbundMaxAnomalyModel_NH.rdat
 
 # run models with and without NH interaction, species richness models, max anomaly
 modelData <- na.omit(predictsSites[,c(
-  'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')])
+  'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6308 rows
 
 RichMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmaxAnomalyRS",
@@ -95,6 +95,113 @@ RichMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_richn
 print(anova(RichMaxAnomalyModel0$model,RichMaxAnomalyModel1$model))
 
 save(RichMaxAnomalyModel1, file = paste0(outDir, "/RichMaxAnomalyModel_NH.rdata"))
+
+
+##%######################################################%##
+#                                                          #
+####                    Model stats                     ####
+#                                                          #
+##%######################################################%##
+
+# rerun models using GLMERSelect function to extract stats
+
+# Mean Anom
+
+modelData <- na.omit(predictsSites[,c(
+  'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5974 rows
+
+# 1. Abundance, mean anomaly
+MeanAbun <- GLMERSelect(modelData = modelData,
+                        responseVar = "LogAbund",
+                        fitFamily = "gaussian",fixedFactors = "UI2",
+                        fixedTerms = list(StdTmeanAnomalyRS=1, NH_5000.rs=1),
+                        randomStruct = "(1|SS)+(1|SSB)",
+                        fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1):poly(NH_5000.rs,1)"),
+                        fitInteractions = TRUE,
+                        saveVars = c("SSBS"))
+
+
+MeanAbun_stats <- as.data.frame(MeanAbun$stats)
+MeanAbun_stats$significant <- NA
+
+# function to check significance
+checksig <- function(x){
+  if(x <= 0.05){ 
+    res <- "Yes" 
+  } else { 
+    res <- "No" }
+  return(res)}
+
+MeanAbun_stats$significant <- sapply(X = MeanAbun_stats$P, FUN = checksig)
+write.csv(MeanAbun_stats, file = paste0(outDir, "/MeanAnomAbun_Stats.csv"), row.names = FALSE)
+
+
+# 2. SR, mean anomaly
+
+modelData <- na.omit(predictsSites[,c(
+  'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6308 rows
+
+MeanRich <- GLMERSelect(modelData = modelData,
+                        responseVar = "Species_richness",
+                        fitFamily = "poisson",fixedFactors = "UI2",
+                        fixedTerms = list(StdTmeanAnomalyRS=1, NH_5000.rs=1),
+                        randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+                        fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1):poly(NH_5000.rs,1)"),
+                        fitInteractions = TRUE)
+
+
+MeanRich_stats <- as.data.frame(MeanRich$stats)
+MeanRich_stats$significant <- NA
+MeanRich_stats$significant <- sapply(X = MeanRich_stats$P, FUN = checksig)
+write.csv(MeanRich_stats, file = paste0(outDir, "/MeanAnomRich_Stats.csv"), row.names = FALSE)
+
+summary(RichMeanAnomalyModel1$model)
+summary(MeanRich$model)
+
+
+# Max Anom
+modelData <- na.omit(predictsSites[,c(
+  'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5974 rows
+
+# 3. Abundance, max anomaly
+MaxAbun <- GLMERSelect(modelData = modelData,
+                        responseVar = "LogAbund",
+                        fitFamily = "gaussian",fixedFactors = "UI2",
+                        fixedTerms = list(StdTmaxAnomalyRS=1, NH_5000.rs=1),
+                        randomStruct = "(1|SS)+(1|SSB)",
+                        fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1):poly(NH_5000.rs,1)"),
+                        fitInteractions = TRUE,
+                        saveVars = c("SSBS"))
+
+MaxAbun_stats <- as.data.frame(MaxAbun$stats)
+MaxAbun_stats$significant <- NA
+MaxAbun_stats$significant <- sapply(X = MaxAbun_stats$P, FUN = checksig)
+write.csv(MaxAbun_stats, file = paste0(outDir, "/MaxAnomAbun_Stats.csv"), row.names = FALSE)
+
+summary(AbundMaxAnomalyModel1$model)
+summary(MaxAbun$model)
+
+
+# 4. SR, max anomaly
+modelData <- na.omit(predictsSites[,c(
+  'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6308 rows
+
+
+MaxRich <- GLMERSelect(modelData = modelData,
+                        responseVar = "Species_richness",
+                        fitFamily = "poisson",fixedFactors = "UI2",
+                        fixedTerms = list(StdTmaxAnomalyRS=1, NH_5000.rs=1),
+                        randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+                        fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1):poly(NH_5000.rs,1)"),
+                        fitInteractions = TRUE)
+
+MaxRich_stats <- as.data.frame(MaxRich$stats)
+MaxRich_stats$significant <- NA
+MaxRich_stats$significant <- sapply(X = MaxRich_stats$P, FUN = checksig)
+write.csv(MaxRich_stats, file = paste0(outDir, "/MaxAnomRich_Stats.csv"), row.names = FALSE)
+
+summary(RichMaxAnomalyModel1$model)
+summary(MaxRich$model)
 
 
 # For insects
