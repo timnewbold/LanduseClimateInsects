@@ -109,6 +109,53 @@ MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Spec
 # save model output
 save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich.rdata"))
 
+
+
+##%######################################################%##
+#                                                          #
+####                  save model stats                  ####
+#                                                          #
+##%######################################################%##
+
+# save the stats tables
+
+MeanAbunStats <- as.data.frame(MeanAnomalyModelAbund$stats)
+MeanRichStats <- as.data.frame(MeanAnomalyModelRich$stats)
+MaxAbunStats <- as.data.frame(MaxAnomalyModelAbund$stats)
+MaxRichStats <- as.data.frame(MaxAnomalyModelRich$stats)
+
+
+MeanAbunStats$significant <- NA
+MeanRichStats$significant <- NA
+MaxAbunStats$significant <- NA
+MaxRichStats$significant <- NA
+
+
+# function to check significance
+checksig <- function(x){
+  if(x <= 0.05){ 
+    res <- "Yes" 
+  } else { 
+    res <- "No" }
+  return(res)}
+
+# add values to table
+MeanAbunStats$significant <- sapply(X = MeanAbunStats$P, FUN = checksig)
+MeanRichStats$significant <- sapply(X = MeanRichStats$P, FUN = checksig)
+MaxAbunStats$significant <- sapply(X = MaxAbunStats$P, FUN = checksig)
+MaxRichStats$significant <- sapply(X = MaxRichStats$P, FUN = checksig)
+
+
+# save the stats tables
+write.csv(MeanAbunStats, file = paste0(outDir, "/MeanAnomAbun_Stats.csv"), row.names = FALSE)
+write.csv(MeanRichStats, file = paste0(outDir, "/MeanAnomRich_Stats.csv"), row.names = FALSE)
+write.csv(MaxAbunStats, file = paste0(outDir, "/MaxAnomAbun_Stats.csv"), row.names = FALSE)
+write.csv(MaxRichStats, file = paste0(outDir, "/MaxAnomRich_Stats.csv"), row.names = FALSE)
+
+
+
+
+
 #### Plot results ####
 
 #predictsSites <- readRDS(file = paste0(outDir,"PREDICTSSiteData.rds"))
@@ -401,6 +448,15 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   abline(v=1,lty=1,col="#00000022")
   abline(v=2,lty=1,col="#00000022")
   
+  legend(
+    x = -0.6,y = 100,bty="n",
+    legend = c("Primary","Secondary",
+               "Agriculture_extensive",
+               "Agriculture_intensive"),
+    col = c("#009E73", "#0072B2",
+            "#E69F00", "#D55E00"),
+    lty=1,lwd=2)
+  
   p3 <- recordPlot()
   
   
@@ -595,13 +651,13 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
   # add legend
   legend(
-    x = -0.6,y = 115,bty="n",
+    x = -0.6,y = 120,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_extensive",
                "Agriculture_intensive"),
     col = c("#009E73", "#0072B2",
             "#E69F00", "#D55E00"),
-    lty=1,lwd=2, cex = 0.6)
+    lty=1,lwd=2, cex = 0.8)
   
 
   dev.off()
@@ -619,11 +675,11 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   #par(pty="s") # set plot type to be square
   
   nd <- expand.grid(
-    StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
-                          to = max(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+    StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
+                          to = max(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
                           length.out = 100),
     UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-               levels = levels(MeanAnomalyModelAbund$data$UI2)))
+               levels = levels(MeanAnomalyModelRich$data$UI2)))
   
   # back transform the predictors
   nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
@@ -713,13 +769,13 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
   # add legend
   legend(
-    x = -0.6,y = 135,bty="n",
+    x = -0.6,y = 145,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_extensive",
                "Agriculture_intensive"),
     col = c("#009E73", "#0072B2",
             "#E69F00", "#D55E00"),
-    lty=1,lwd=2, cex = 0.6)
+    lty=1,lwd=2, cex = 0.8)
   
   
   dev.off()
