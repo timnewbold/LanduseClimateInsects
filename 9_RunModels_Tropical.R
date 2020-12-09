@@ -40,9 +40,13 @@ predictsSites$Tropical <- as.factor(predictsSites$Tropical)
 table(predictsSites$Tropical)
 
 # Temperate  Tropical 
-#    5455      2339 
+#    4586      1742 
 
 table(predictsSites[!is.na(predictsSites$LogAbund), 'Tropical'])
+
+# Temperate  Tropical 
+#    4403      1589 
+
 
 table(predictsSites$UI2, predictsSites$Tropical)
 
@@ -957,7 +961,7 @@ p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         ylim(c(-100, 150)) + 
         theme(aspect.ratio = 1, text = element_text(size = 12),
               legend.title = element_blank()) + 
-        ggtitle("Temperate Realm")
+        ggtitle("a. Temperate Realm")
 
 
 
@@ -1038,7 +1042,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Tropical Realm")
+  ggtitle("b. Tropical Realm")
 
 
 
@@ -1121,7 +1125,7 @@ p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Temperate Realm")
+  ggtitle("c. Temperate Realm")
 
 
 
@@ -1202,7 +1206,7 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Tropical Realm")
+  ggtitle("d. Tropical Realm")
 
 
 
@@ -1218,11 +1222,16 @@ plot_grid(plot_grid(p1 + theme(legend.position = "none"),
           leg, nrow= 2, rel_heights = c(5,1))
 
 
-ggsave(file = paste0(outDir, "/MeanAnom_TempTrop.pdf"), width = 8, height = 8.5)
+ggsave(file = paste0(outDir, "/Extended_Data4_MeanAnom_TempTrop.pdf"), width = 8, height = 8.5)
 
 
 
-##### Run separate models for the max anomaly #####
+##%######################################################%##
+#                                                          #
+####      Run separate models for the max anomaly       ####
+#                                                          #
+##%######################################################%##
+
 
 
 
@@ -1366,7 +1375,7 @@ p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Temperate Realm")
+  ggtitle("a. Temperate Realm")
 
 
 
@@ -1447,7 +1456,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Tropical Realm")
+  ggtitle("b. Tropical Realm")
 
 
 
@@ -1530,7 +1539,7 @@ p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Temperate Realm")
+  ggtitle("c. Temperate Realm")
 
 
 
@@ -1611,7 +1620,7 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("Tropical Realm")
+  ggtitle("d. Tropical Realm")
 
 
 
@@ -1627,6 +1636,6 @@ plot_grid(plot_grid(p1 + theme(legend.position = "none"),
           leg, nrow= 2, rel_heights = c(5,1))
 
 
-ggsave(file = paste0(outDir, "/MaxAnom_TempTrop.pdf"), width = 8, height = 8.5)
+ggsave(file = paste0(outDir, "/Extended_Data5_MaxAnom_TempTrop.pdf"), width = 8, height = 8.5)
 
 
