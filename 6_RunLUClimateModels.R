@@ -176,8 +176,8 @@ pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 1
 par(mfrow=c(2,2))
 #par(mfrow=c(1,2))
 par(las=1)
-par(mgp=c(1.6,0.2,0))
-par(mar=c(2.6,2.6,1.0,0.2))
+par(mgp=c(1.8,0.4,0))
+par(mar=c(2.8,3,1.0,0.2))
 par(tck=-0.01)
 
 # create matrix for predictions
@@ -422,7 +422,9 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmaxAnomaly),max(nd$StdTmaxAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Maximum temperature anomaly",ylab="Abundance (%)")
+       xlab="Maximum temperature anomaly",ylab="Abundance (%)", cex.lab = 1.5, cex.axis = 1.5)
+  
+  title("a", adj = 0, cex.main = 1.5)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -449,13 +451,13 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   abline(v=2,lty=1,col="#00000022")
   
   legend(
-    x = -0.6,y = 100,bty="n",
+    x = -0.6,y = 95,bty="n",
     legend = c("Primary","Secondary",
-               "Agriculture_extensive",
-               "Agriculture_intensive"),
+               "Agriculture_Low",
+               "Agriculture_High"),
     col = c("#009E73", "#0072B2",
             "#E69F00", "#D55E00"),
-    lty=1,lwd=2)
+    lty=1,lwd=2, cex = 1.7)
   
   p3 <- recordPlot()
   
@@ -504,7 +506,9 @@ if(!is.null(MaxAnomalyModelRich$model)){
   
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmaxAnomaly),max(nd$StdTmaxAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Maximum temperature anomaly",ylab="Richness (%)")
+       xlab="Maximum temperature anomaly",ylab="Richness (%)", cex.lab = 1.5, cex.axis = 1.5)
+  
+  title("b", adj = 0, cex.main = 1.5)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -653,8 +657,8 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   legend(
     x = -0.6,y = 120,bty="n",
     legend = c("Primary","Secondary",
-               "Agriculture_extensive",
-               "Agriculture_intensive"),
+               "Agriculture_Low",
+               "Agriculture_High"),
     col = c("#009E73", "#0072B2",
             "#E69F00", "#D55E00"),
     lty=1,lwd=2, cex = 0.8)
@@ -771,8 +775,8 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   legend(
     x = -0.6,y = 145,bty="n",
     legend = c("Primary","Secondary",
-               "Agriculture_extensive",
-               "Agriculture_intensive"),
+               "Agriculture_Low",
+               "Agriculture_High"),
     col = c("#009E73", "#0072B2",
             "#E69F00", "#D55E00"),
     lty=1,lwd=2, cex = 0.8)
