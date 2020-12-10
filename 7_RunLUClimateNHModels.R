@@ -617,6 +617,13 @@ invisible(dev.off())
 #                                                          #
 ##%######################################################%##
 
+# load(paste0(outDir, "MeanAnomalyModelAbun_NH.rdata"))
+# load(paste0(outDir, "RichMeanAnomalyModel_NH.rdata"))
+# load(paste0(outDir, "AbundMaxAnomalyModel_NH.rdata"))
+# load(paste0(outDir, "RichMaxAnomalyModel_NH.rdata"))
+
+
+
 nd2 <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
                         to = max(AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS),
@@ -704,7 +711,7 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_extensive", 'Agriculture_High' = "b              Agriculture_intensive"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Abundance (%)") +
@@ -721,7 +728,7 @@ ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
 
 
 
-############ Extended data figure 4  ############ 
+############ Extended data figure 6  ############ 
 
 
 
@@ -812,7 +819,7 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_extensive", 'Agriculture_High' = "b              Agriculture_intensive"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
@@ -823,13 +830,13 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 # save
-ggsave(filename = paste0(outDir, "Extended_Data4_MeanAnomSR_NH.pdf"), height = 4, width = 8)
+ggsave(filename = paste0(outDir, "Extended_Data6_MeanAnomSR_NH.pdf"), height = 4, width = 8)
 
 
 
 
 
-############ Extended data figure 5  ############ 
+############ Extended data figure 7  ############ 
 
 # sr and abun plots for max anomaly
 
@@ -905,7 +912,7 @@ p1 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_extensive", 'Agriculture_High' = "b              Agriculture_intensive"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
@@ -989,7 +996,7 @@ p2 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_extensive", 'Agriculture_High' = "d              Agriculture_intensive"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_Low", 'Agriculture_High' = "d              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
@@ -1005,4 +1012,4 @@ p2 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
 plot_grid(p1, p2, nrow = 2)
 
 # save
-ggsave(filename = paste0(outDir, "Extended_Data5_MaxAnom_NH.pdf"), height = 8, width = 8)
+ggsave(filename = paste0(outDir, "Extended_Data7_MaxAnom_NH.pdf"), height = 8, width = 8)
