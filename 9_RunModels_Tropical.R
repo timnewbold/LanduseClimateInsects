@@ -14,7 +14,7 @@ library(predictsFunctions)
 source("Functions.R")
 library(ggplot2)
 library(cowplot)
-
+library(sjPlot)
 
 # directories
 predictsDataDir <- "6_RunLUClimateModels/"
@@ -878,6 +878,24 @@ save(MeanRichTrop, file = paste0(outDir, "/MeanRichTrop_output.rdata"))
 #load(file = paste0(outDir, "/MeanRichTrop_output.rdata"))
 
 
+#### save model output tables using sjPlot package ####
+
+tab_model(MeanAbundTemp$model, MeanAbundTrop$model, transform = NULL, file = paste0(outDir, "/AbunMeanAnomTempTrop_output_table.html"))
+summary(MeanAbundTemp$model)
+R2GLMER(MeanAbundTemp$model)
+summary(MeanAbundTrop$model)
+R2GLMER(MeanAbundTrop$model)
+
+tab_model(MeanRichTemp$model, MeanRichTrop$model, transform = NULL, file = paste0(outDir, "/RichMeanAnomTempTrop_output_table.html"))
+summary(MeanRichTemp$model)
+R2GLMER(MeanRichTemp$model) # use these values
+summary(MeanRichTrop$model)
+R2GLMER(MeanRichTrop$model) # use these values
+
+
+
+
+
 
 
 #### Plots ####
@@ -1290,6 +1308,22 @@ save(MaxRichTrop, file = paste0(outDir, "/MaxRichTrop_output.rdata"))
 # load(file = paste0(outDir, "/MaxAbundTrop_output.rdata"))
 # load(file = paste0(outDir, "/MaxRichTemp_output.rdata"))
 # load(file = paste0(outDir, "/MaxRichTrop_output.rdata"))
+
+
+#### save model output tables using sjPlot package ####
+
+tab_model(MaxAbundTemp$model, MaxAbundTrop$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnomTempTrop_output_table.html"))
+summary(MaxAbundTemp$model)
+R2GLMER(MaxAbundTemp$model)
+summary(MaxAbundTrop$model)
+R2GLMER(MaxAbundTrop$model)
+
+tab_model(MaxRichTemp$model, MaxRichTrop$model, transform = NULL, file = paste0(outDir, "/RichMaxAnomTempTrop_output_table.html"))
+summary(MaxRichTemp$model)
+R2GLMER(MaxRichTemp$model) # use these values
+summary(MaxRichTrop$model)
+R2GLMER(MaxRichTrop$model) # use these values
+
 
 
 
