@@ -208,7 +208,7 @@ save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
 
 # alternative fig 1 format
 
-p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.8, labels = c("b", "c"), label_x = 0.2), ncol = 1, rel_heights = c(0.7, 1), labels = c("a"), label_x = 0.1)
+p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.78, labels = c("b", "c"), label_x = 0.2), ncol = 1, rel_heights = c(0.7, 1), labels = c("a"), label_x = 0.1)
 
 save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 8, base_width = 8)
 
