@@ -14,6 +14,7 @@ library(StatisticalModels)
 #install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions", force = T)
 library(predictsFunctions)
 source("Functions.R")
+library(sjPlot)
 
 # directories 
 predictsDataDir <- "5_PREDICTSMatchPropNatHab/"
@@ -109,6 +110,25 @@ MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Spec
 # save model output
 save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich.rdata"))
 
+
+#### save model output tables for use in supplementary information ####
+# use function from sjPlot library to save neat versions of model output table.
+
+tab_model(MeanAnomalyModelAbund$model, transform = NULL, file = paste0(outDir, "/AbunMeanAnom_output_table.html"))
+summary(MeanAnomalyModelAbund$model) # check the table against the outputs
+R2GLMER(MeanAnomalyModelAbund$model) # check the R2 values 
+
+tab_model(MeanAnomalyModelRich$model, transform = NULL, file = paste0(outDir, "/RichMeanAnom_output_table.html"))
+summary(MeanAnomalyModelRich$model) # check the table against the outputs
+R2GLMER(MeanAnomalyModelRich$model) # check the R2 values (function has issues with the richness models, so use output from Tim's formula)
+
+tab_model(MaxAnomalyModelAbund$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnom_output_table.html"))
+summary(MaxAnomalyModelAbund$model) # check the table against the outputs
+R2GLMER(MaxAnomalyModelAbund$model) # check the R2 values 
+
+tab_model(MaxAnomalyModelRich$model, transform = NULL, file = paste0(outDir, "/RichMaxAnom_output_table.html"))
+summary(MaxAnomalyModelRich$model) # check the table against the outputs
+R2GLMER(MaxAnomalyModelRich$model) # check the R2 values (function has issues with the richness models, so use output from Tim's formula)
 
 
 ##%######################################################%##
