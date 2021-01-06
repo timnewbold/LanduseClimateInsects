@@ -13,6 +13,7 @@ library(predictsFunctions)
 source("Functions.R")
 library(ggplot2)
 library(cowplot)
+library(sjPlot)
 
 
 # directories
@@ -202,6 +203,26 @@ write.csv(MaxRich_stats, file = paste0(outDir, "/MaxAnomRich_Stats.csv"), row.na
 
 summary(RichMaxAnomalyModel1$model)
 summary(MaxRich$model)
+
+
+#### save model output tables using sjPlot package ####
+
+tab_model(AbundMeanAnomalyModel1$model, transform = NULL, file = paste0(outDir, "/AbunMeanAnomNH_output_table.html"))
+summary(AbundMeanAnomalyModel1$model)
+R2GLMER(AbundMeanAnomalyModel1$model)
+
+tab_model(RichMeanAnomalyModel1$model, transform = NULL, file = paste0(outDir, "/RichMeanAnomNH_output_table.html"))
+summary(RichMeanAnomalyModel1$model)
+R2GLMER(RichMeanAnomalyModel1$model) # use these values in the table
+
+tab_model(AbundMaxAnomalyModel1$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnomNH_output_table.html"))
+summary(AbundMaxAnomalyModel1$model)
+R2GLMER(AbundMaxAnomalyModel1$model)
+
+tab_model(RichMaxAnomalyModel1$model, transform = NULL, file = paste0(outDir, "/RichMaxAnomNH_output_table.html"))
+summary(RichMaxAnomalyModel1$model)
+R2GLMER(RichMaxAnomalyModel1$model) # use these values in the table
+
 
 
 # For insects
