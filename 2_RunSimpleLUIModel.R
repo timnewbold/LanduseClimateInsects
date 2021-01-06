@@ -277,3 +277,15 @@ am3stats$significant <- sapply(X = am3stats$P, FUN = checksig)
 # save the stats tables
 write.csv(sm3stats, file = paste0(outDir, "/SR_Stats.csv"), row.names = FALSE)
 write.csv(am3stats, file = paste0(outDir, "/Abun_Stats.csv"), row.names = FALSE)
+
+### save model output tables ###
+
+library(sjPlot)
+
+tab_model(am3_2$model, transform = NULL, file = paste0(outDir, "/AbunLU_output_table.html"))
+summary(am3_2$model)
+R2GLMER(am3_2$model)
+
+tab_model(sm3_2$model, transform = NULL, file = paste0(outDir, "/SRLU_output_table.html"))
+summary(sm3_2$model)
+R2GLMER(sm3_2$model)
