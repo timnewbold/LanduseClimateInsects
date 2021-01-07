@@ -259,7 +259,7 @@ exclQuantiles <- c(0.025,0.975)
 nd <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanAnomalyAbund_0120$data$anomStd_0120RS),
                         to = max(MeanAnomalyAbund_0120$data$anomStd_0120RS),
-                        length.out = 100),
+                        length.out = 300),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanAnomalyAbund_0120$data$UI2)))
 
@@ -334,9 +334,9 @@ p1 <- ggplot(data = nd, aes(x = anomStd_0120RS, y = PredMedian)) +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 9),
+  theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank(), 
-        legend.position = c(0.2, 0.85)) +
+        legend.position = c(0.3, 0.85)) +
   ggtitle("A. baseline: 1901-1920")
 
 
@@ -421,9 +421,9 @@ p2 <- ggplot(data = nd2, aes(x = anomStd_2025RS, y = PredMedian)) +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 9),
+  theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank(), 
-        legend.position = c(0.2, 0.85)) +
+        legend.position = c(0.3, 0.85)) +
   ggtitle("B. baseline: 1920-1925")
 
 
@@ -509,9 +509,9 @@ p3 <- ggplot(data = nd3, aes(x = anomStd_4045RS, y = PredMedian)) +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 9),
+  theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank(), 
-        legend.position = c(0.2, 0.85)) +
+        legend.position = c(0.3, 0.85)) +
   ggtitle("C. baseline: 1940-1945")
 
 

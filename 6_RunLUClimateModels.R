@@ -193,11 +193,13 @@ pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 1
 #pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
 #pdf(file = paste0(outDir,"Extended_Data3_MaxAnom.pdf"),width = 17.5,height = 8)
 
-par(mfrow=c(2,2))
-#par(mfrow=c(1,2))
+#par(mfrow=c(2,2))
+par(mfrow=c(1,2))
 par(las=1)
-par(mgp=c(1.8,0.4,0))
-par(mar=c(2.8,3,1.0,0.2))
+#par(mgp=c(1.8,0.4,0))
+par(mgp=c(3,1,0))
+#par(mar=c(2.8,4,1.0,0.2))
+par(mar=c(4,5,2,0.2))
 par(tck=-0.01)
 
 # create matrix for predictions
@@ -442,9 +444,9 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmaxAnomaly),max(nd$StdTmaxAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Maximum temperature anomaly",ylab="Abundance (%)", cex.lab = 1.5, cex.axis = 1.5)
+       xlab="Maximum temperature anomaly",ylab="Abundance (%)", cex.lab = 1.7, cex.axis = 1.7)
   
-  title("a", adj = 0, cex.main = 1.5)
+  title("a", adj = 0, cex.main = 1.7)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -526,9 +528,9 @@ if(!is.null(MaxAnomalyModelRich$model)){
   
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmaxAnomaly),max(nd$StdTmaxAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Maximum temperature anomaly",ylab="Richness (%)", cex.lab = 1.5, cex.axis = 1.5)
+       xlab="Maximum temperature anomaly",ylab="Richness (%)", cex.lab = 1.7, cex.axis = 1.7)
   
-  title("b", adj = 0, cex.main = 1.5)
+  title("b", adj = 0, cex.main = 1.7)
   
   invisible(mapply(FUN = function(preds,col){
     
