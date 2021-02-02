@@ -59,6 +59,7 @@ p1 <- plot(get(x)$model)
 pdf(NULL)
 dev.control(displaylist="enable")
 qqnorm(resid(get(x)$model), main = "")
+qqline(resid(get(x)$model))
 p2 <- recordPlot()
 invisible(dev.off())
 
@@ -98,14 +99,20 @@ plot_grid(p1,p2,p3,
           labels = c("A.", "B.", "C."))
   ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 10, width = 10)
   
+  rm(p1, p2, p3)
+  rm(perc_auto)
+  
+  
 }else{
   plot_grid(p2,p3,
             labels = c("A.", "B."))#
 
-ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 5, width = 10) }
+ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 5, width = 10) 
 
-rm(p1, p2, p3)
+rm(p2, p3)
+rm(perc_auto)
 
+}
 
 }
 
