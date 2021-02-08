@@ -8,8 +8,7 @@
 # In the main analysis the baseline years are 1901-1905. 
 
 # alternatives to test:
-# longer time period for baseline 1901-1920
-# different time period 1920-1925, 1940-1945
+# 5 year, 10 year and 20 year baselines
 
 # calculate the SCA and SCAM metrics using these baselines
 # rerun the model with LU and SCA/SCAM interaction 
@@ -45,25 +44,26 @@ tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
 # currently used baseline
 # take names of values for 1901 to 1905
+tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
+tmp1901_1930mean <- calc(tmp1901_1930, base::mean)
+tmp1901_1930sd <- calc(tmp1901_1930, stats::sd)
+
+
+# alternative baselines
+# 5 years
 tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
 tmp1901_1905mean <- calc(tmp1901_1905, base::mean)
 tmp1901_1905sd <- calc(tmp1901_1905, stats::sd)
 
-# take names of values for additional time frames
+# 10 years
+tmp1901_1910 <- tmp[[names(tmp)[1:120]]]
+tmp1901_1910mean <- calc(tmp1901_1910, base::mean)
+tmp1901_1910sd <- calc(tmp1901_1910, stats::sd)
+
+# 20 years
 tmp1901_1920 <- tmp[[names(tmp)[1:240]]]
-tmp1920_1925 <- tmp[[names(tmp)[229:300]]]
-tmp1940_1945 <- tmp[[names(tmp)[469:540]]]
-
-
-# calculate the mean and sd of the baseline values
 tmp1901_1920mean <- calc(tmp1901_1920, base::mean)
 tmp1901_1920sd <- calc(tmp1901_1920, stats::sd)
-
-tmp1920_1925mean <- calc(tmp1920_1925, base::mean)
-tmp1920_1925sd <- calc(tmp1920_1925, stats::sd)
-
-tmp1940_1945mean <- calc(tmp1940_1945, base::mean)
-tmp1940_1945sd <- calc(tmp1940_1945, stats::sd)
 
 
 
@@ -77,28 +77,29 @@ tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 tmp2004_6mean <- calc(tmp[[names(tmp)[1237:1272]]], base::mean)
 
 
-# standardise the baseline
+# standardise the baselines
+anom_01_30 <- (calc(tmp2004_6, base::mean)-tmp1901_1930mean)  / tmp1901_1930sd
+
 anom_01_05 <- (calc(tmp2004_6, base::mean)-tmp1901_1905mean)  / tmp1901_1905sd
+anom_01_10 <- (calc(tmp2004_6, base::mean)-tmp1901_1910mean)  / tmp1901_1910sd
 anom_01_20 <- (calc(tmp2004_6, base::mean)-tmp1901_1920mean)  / tmp1901_1920sd
-anom_20_25 <- (calc(tmp2004_6, base::mean)-tmp1920_1925mean)  / tmp1920_1925sd
-anom_40_45 <- (calc(tmp2004_6, base::mean)-tmp1940_1945mean)  / tmp1940_1945sd
 
 
 ###### maps of each anomaly ###### 
+plot_data_0130 <- as.data.frame(anom_01_30, xy = TRUE)
 plot_data_0105 <- as.data.frame(anom_01_05, xy = TRUE)
+plot_data_0110 <- as.data.frame(anom_01_10, xy = TRUE)
 plot_data_0120 <- as.data.frame(anom_01_20, xy = TRUE)
-plot_data_2025 <- as.data.frame(anom_20_25, xy = TRUE)
-plot_data_4045 <- as.data.frame(anom_40_45, xy = TRUE)
 
 
 # add details to data table
+plot_data_0130$year <- "1901-1930"
 plot_data_0105$year <- "1901-1905"
+plot_data_0110$year <- "1901-1910"
 plot_data_0120$year <- "1901-1920"
-plot_data_2025$year <- "1920-1925"
-plot_data_4045$year <- "1940-1945"
 
 # combine the two together
-all_plot <- rbind(plot_data_0105, plot_data_0120, plot_data_2025, plot_data_4045)
+all_plot <- rbind(plot_data_0130, plot_data_0105, plot_data_0110, plot_data_0120)
 
 all_plot <- all_plot[!is.na(all_plot$layer), ]
 
@@ -117,7 +118,7 @@ all_plot$bins <- cut(all_plot$layer,
                      include.lowest = TRUE)
 
 
-year_labs <- c("A. 1901-1905", "B. 1901-1920", "C. 1920-1925", "D. 1940-1945")
+year_labs <- c("A. 1901-1930", "B. 1901-1905", "C. 1901-1910", "D. 1901-1920")
 names(year_labs) <- unique(all_plot$year)
 
 # plot
@@ -153,11 +154,11 @@ ggsave(filename = paste0(outDir, "/Extended_Data_anomaly_maps.pdf"), width = 12,
 
 ##%######################################################%##
 #                                                          #
-###     Run models using new baselines for SCA           ###
+####    Run models using new baselines for SCA         ####
 #                                                          #
 ##%######################################################%##
 
-# run the clumate:LU model for abundance with each new baseline to compare results
+# run the climate:LU model for abundance with each new baseline to compare results
 
 # read in predicts data
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
@@ -171,33 +172,59 @@ predicts_sp <- SpatialPointsDataFrame(
 
 
 # extract mean and sd from baseline datasets for each predicts site
+tmpMean_0105 <- extract(tmp1901_1905mean, predicts_sp)
+tmpSd_0105 <- extract(tmp1901_1905sd, predicts_sp)
+
+tmpMean_0110 <- extract(tmp1901_1910mean, predicts_sp)
+tmpSd_0110 <- extract(tmp1901_1910sd, predicts_sp)
+
 tmpMean_0120 <- extract(tmp1901_1920mean, predicts_sp)
 tmpSd_0120 <- extract(tmp1901_1920sd, predicts_sp)
 
-tmpMean_2025 <- extract(tmp1920_1925mean, predicts_sp)
-tmpSd_2025 <- extract(tmp1920_1925sd, predicts_sp)
-
-tmpMean_4045 <- extract(tmp1940_1945mean, predicts_sp)
-tmpSd_4045 <- extract(tmp1940_1945sd, predicts_sp)
-
 
 # calc anomaly using the avgtmp column in predictsSites
+predictsSites$anomStd_0105 <- (predictsSites$avg_temp - tmpMean_0105) / tmpSd_0105
+predictsSites$anomStd_0110 <- (predictsSites$avg_temp - tmpMean_0110) / tmpSd_0110
 predictsSites$anomStd_0120 <- (predictsSites$avg_temp - tmpMean_0120) / tmpSd_0120
-predictsSites$anomStd_2025 <- (predictsSites$avg_temp - tmpMean_2025) / tmpSd_2025
-predictsSites$anomStd_4045 <- (predictsSites$avg_temp - tmpMean_4045) / tmpSd_4045
   
   
   
 # centre the predictors
+predictsSites$anomStd_0105RS <- StdCenterPredictor(predictsSites$anomStd_0105)
+predictsSites$anomStd_0110RS <- StdCenterPredictor(predictsSites$anomStd_0110)
 predictsSites$anomStd_0120RS <- StdCenterPredictor(predictsSites$anomStd_0120)
-predictsSites$anomStd_2025RS <- StdCenterPredictor(predictsSites$anomStd_2025)
-predictsSites$anomStd_4045RS <- StdCenterPredictor(predictsSites$anomStd_4045)
 
 
 
 # run abundance model using each of the anomalies
 
-# 1. Abundance, mean anomaly 1901-1920 baseline
+# 1. Abundance, mean anomaly 1901-1905 baseline
+MeanAnomalyAbund_0105 <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
+                                     fitFamily = "gaussian",fixedFactors = "UI2",
+                                     fixedTerms = list(anomStd_0105RS=1),
+                                     randomStruct = "(1|SS)+(1|SSB)",
+                                     fixedInteractions = c("UI2:poly(anomStd_0105RS,1)"),
+                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+
+# save the model output
+save(MeanAnomalyAbund_0105, file = paste0(outDir, "/MeanAnomalyAbund_0105.rdata"))
+
+
+
+
+# 2. Abundance, mean anomaly 1901-1910 baseline
+MeanAnomalyAbund_0110 <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
+                                     fitFamily = "gaussian",fixedFactors = "UI2",
+                                     fixedTerms = list(anomStd_0110RS=1),
+                                     randomStruct = "(1|SS)+(1|SSB)",
+                                     fixedInteractions = c("UI2:poly(anomStd_0110RS,1)"),
+                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+
+# save the model output
+save(MeanAnomalyAbund_0110, file = paste0(outDir, "/MeanAnomalyAbund_0110.rdata"))
+
+
+# 3. Abundance, mean anomaly  1901-1920 baseline
 MeanAnomalyAbund_0120 <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
                                      fitFamily = "gaussian",fixedFactors = "UI2",
                                      fixedTerms = list(anomStd_0120RS=1),
@@ -210,44 +237,18 @@ save(MeanAnomalyAbund_0120, file = paste0(outDir, "/MeanAnomalyAbund_0120.rdata"
 
 
 
-
-# 2. Abundance, mean anomaly 1920-1925 baseline
-MeanAnomalyAbund_2025 <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
-                                     fitFamily = "gaussian",fixedFactors = "UI2",
-                                     fixedTerms = list(anomStd_2025RS=1),
-                                     randomStruct = "(1|SS)+(1|SSB)",
-                                     fixedInteractions = c("UI2:poly(anomStd_2025RS,1)"),
-                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
-
-# save the model output
-save(MeanAnomalyAbund_2025, file = paste0(outDir, "/MeanAnomalyAbund_2025.rdata"))
-
-
-# 3. Abundance, mean anomaly  1940-1941 baseline
-MeanAnomalyAbund_4045 <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
-                                     fitFamily = "gaussian",fixedFactors = "UI2",
-                                     fixedTerms = list(anomStd_4045RS=1),
-                                     randomStruct = "(1|SS)+(1|SSB)",
-                                     fixedInteractions = c("UI2:poly(anomStd_4045RS,1)"),
-                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
-
-# save the model output
-save(MeanAnomalyAbund_4045, file = paste0(outDir, "/MeanAnomalyAbund_4045.rdata"))
-
-
-
 # take a look at model outputs
+summary(MeanAnomalyAbund_0105$model)
+summary(MeanAnomalyAbund_0110$model)
 summary(MeanAnomalyAbund_0120$model)
-summary(MeanAnomalyAbund_2025$model)
-summary(MeanAnomalyAbund_4045$model)
 
 
 
 ######## plot figures ######## 
   
-load(paste0(outDir, "/MeanAnomalyAbund_0120.rdata"))
-load(paste0(outDir, "/MeanAnomalyAbund_2025.rdata"))
-load(paste0(outDir, "/MeanAnomalyAbund_4045.rdata"))
+#load(paste0(outDir, "/MeanAnomalyAbund_0120.rdata"))
+#load(paste0(outDir, "/MeanAnomalyAbund_2025.rdata"))
+#load(paste0(outDir, "/MeanAnomalyAbund_4045.rdata"))
 
 
 
@@ -523,5 +524,7 @@ ggsave(filename = paste0(outDir, "Extended_Data_Baselines_plots.pdf"), width = 1
 
 
 
+
+#### species richness models ####
 
 
