@@ -47,11 +47,11 @@ predicts_sp <- SpatialPointsDataFrame(
   coords = cbind(predicts_sites2$Longitude, predicts_sites2$Latitude), 
   data = predicts_sites2, proj4string = wgs84)
 
-##Create a layer of mean monthly temperatures from 1901 to 1905
-tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
+##Create a layer of mean monthly temperatures from 1901 to 1930
+tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
 
 ##Calculate the mean of 1901 to 1905 mean monthly temperatUres
-tmp1901_1905mean <- raster::calc(tmp1901_1905, base::mean)
+tmp1901_1930mean <- raster::calc(tmp1901_1930, base::mean)
 
 ##Names of tmp layer, needed for subsettting
 names <- names(tmp)
@@ -110,19 +110,19 @@ st2 <- Sys.time()
 
 print(st2 - st1)
 
-#Calculate climate anomaly from sample compared with 1901 to 1905 mean
+#Calculate climate anomaly from sample compared with 1901 to 1930 mean
 predicts_sp$avg_temp <- temperatureVars$avg_temp
 predicts_sp$avg_temp_sd <- temperatureVars$sd_temp
-predicts_sp$climate_anomaly <- temperatureVars$avg_temp-extract(tmp1901_1905mean, predicts_sp)
+predicts_sp$climate_anomaly <- temperatureVars$avg_temp-extract(tmp1901_1930mean, predicts_sp)
 
 #####TMAX
 
 ##Read in tmax data
 tmx <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmx.dat.nc"))
 
-#Create raster stack for 1901 to 1905
-tmx1901_1905 <- tmx[[names(tmx)[1:60]]]
-names(tmx1901_1905)
+#Create raster stack for 1901 to 1930
+tmx1901_1930 <- tmx[[names(tmx)[1:360]]]
+names(tmx1901_1930)
 
 #Function to calculate mean of hottest quarter
 max_quarter_fast <- function(x) {
@@ -132,20 +132,50 @@ max_quarter_fast <- function(x) {
 }
 
 #Hottest quarter for each year
-tmx1901max <- calc(tmx1901_1905[[(names(tmx)[1:12])]], max_quarter_fast)
-tmx1902max <- calc(tmx1901_1905[[(names(tmx)[13:24])]], max_quarter_fast)
-tmx1903max <- calc(tmx1901_1905[[(names(tmx)[25:36])]], max_quarter_fast)
-tmx1904max <- calc(tmx1901_1905[[(names(tmx)[37:48])]], max_quarter_fast)
-tmx1905max <- calc(tmx1901_1905[[(names(tmx)[49:60])]], max_quarter_fast)
+tmx1901max <- calc(tmx1901_1930[[(names(tmx)[1:12])]], max_quarter_fast)
+tmx1902max <- calc(tmx1901_1930[[(names(tmx)[13:24])]], max_quarter_fast)
+tmx1903max <- calc(tmx1901_1930[[(names(tmx)[25:36])]], max_quarter_fast)
+tmx1904max <- calc(tmx1901_1930[[(names(tmx)[37:48])]], max_quarter_fast)
+tmx1905max <- calc(tmx1901_1930[[(names(tmx)[49:60])]], max_quarter_fast)
+tmx1906max <- calc(tmx1901_1930[[(names(tmx)[61:72])]], max_quarter_fast)
+tmx1907max <- calc(tmx1901_1930[[(names(tmx)[73:84])]], max_quarter_fast)
+tmx1908max <- calc(tmx1901_1930[[(names(tmx)[85:96])]], max_quarter_fast)
+tmx1909max <- calc(tmx1901_1930[[(names(tmx)[97:108])]], max_quarter_fast)
+tmx1910max <- calc(tmx1901_1930[[(names(tmx)[109:120])]], max_quarter_fast)
+tmx1911max <- calc(tmx1901_1930[[(names(tmx)[121:132])]], max_quarter_fast)
+tmx1912max <- calc(tmx1901_1930[[(names(tmx)[133:144])]], max_quarter_fast) 
+tmx1913max <- calc(tmx1901_1930[[(names(tmx)[145:156])]], max_quarter_fast)
+tmx1914max <- calc(tmx1901_1930[[(names(tmx)[157:168])]], max_quarter_fast)
+tmx1915max <- calc(tmx1901_1930[[(names(tmx)[169:180])]], max_quarter_fast)
+tmx1916max <- calc(tmx1901_1930[[(names(tmx)[181:192])]], max_quarter_fast)
+tmx1917max <- calc(tmx1901_1930[[(names(tmx)[193:204])]], max_quarter_fast)
+tmx1918max <- calc(tmx1901_1930[[(names(tmx)[205:216])]], max_quarter_fast)
+tmx1919max <- calc(tmx1901_1930[[(names(tmx)[217:228])]], max_quarter_fast)
+tmx1920max <- calc(tmx1901_1930[[(names(tmx)[229:240])]], max_quarter_fast)
+tmx1921max <- calc(tmx1901_1930[[(names(tmx)[241:252])]], max_quarter_fast)
+tmx1922max <- calc(tmx1901_1930[[(names(tmx)[253:264])]], max_quarter_fast)
+tmx1923max <- calc(tmx1901_1930[[(names(tmx)[265:276])]], max_quarter_fast)
+tmx1924max <- calc(tmx1901_1930[[(names(tmx)[277:288])]], max_quarter_fast)
+tmx1925max <- calc(tmx1901_1930[[(names(tmx)[289:300])]], max_quarter_fast)
+tmx1926max <- calc(tmx1901_1930[[(names(tmx)[301:312])]], max_quarter_fast)
+tmx1927max <- calc(tmx1901_1930[[(names(tmx)[313:324])]], max_quarter_fast)
+tmx1928max <- calc(tmx1901_1930[[(names(tmx)[325:336])]], max_quarter_fast)
+tmx1929max <- calc(tmx1901_1930[[(names(tmx)[337:348])]], max_quarter_fast)
+tmx1930max <- calc(tmx1901_1930[[(names(tmx)[349:360])]], max_quarter_fast)
 
 #Stack hottest quarters
-tmx1901_1905max <- stack(tmx1901max, tmx1902max, tmx1903max, tmx1904max, tmx1905max)
+tmx1901_1930max <- stack(tmx1901max, tmx1902max, tmx1903max, tmx1904max, tmx1905max,
+                         tmx1906max, tmx1907max, tmx1908max, tmx1909max, tmx1910max,
+                         tmx1911max, tmx1912max, tmx1913max, tmx1914max, tmx1915max,
+                         tmx1916max, tmx1917max, tmx1918max, tmx1919max, tmx1920max,
+                         tmx1921max, tmx1922max, tmx1923max, tmx1924max, tmx1925max,
+                         tmx1926max, tmx1927max, tmx1928max, tmx1929max, tmx1930max)
 
 #Mean of hottest quarter
-tmx1901_1905max_mean <- calc(tmx1901_1905max, mean) 
+tmx1901_1930max_mean <- calc(tmx1901_1930max, mean) 
 
 #Baseline tmax
-predicts_sp$tmax_baseline <- extract(tmx1901_1905max_mean, predicts_sp)
+predicts_sp$tmax_baseline <- extract(tmx1901_1930max_mean, predicts_sp)
 
 ##names of tmax layer needed for subsetting
 names_tmx <- names(tmx)
@@ -203,10 +233,10 @@ predicts_sp$tmax_quarter_anomaly <- predicts_sp$tmax_quarter - predicts_sp$tmax_
 
 ####### Historic variability in temperatures (Standard deviation of 1901 to 1905 Mean Monthly T )
 
-tmp1901_1905sd <- calc(tmp1901_1905, stats::sd)
-predicts_sp$historic_sd <- extract(tmp1901_1905sd, predicts_sp)
-tmx1901_1905_sd <- calc(tmx1901_1905, stats::sd)
-predicts_sp$historic_sd_tmax <- extract(tmx1901_1905_sd, predicts_sp)
+tmp1901_1930sd <- calc(tmp1901_1930, stats::sd)
+predicts_sp$historic_sd <- extract(tmp1901_1930sd, predicts_sp)
+tmx1901_1930_sd <- calc(tmx1901_1930, stats::sd)
+predicts_sp$historic_sd_tmax <- extract(tmx1901_1930_sd, predicts_sp)
 
 ##Save results
 
