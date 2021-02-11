@@ -48,16 +48,16 @@ load(file = paste0(moddir, "/MeanAnomalyModelRich.rdata"))
 # SCA = 1
 # abun and richness = 0
 
-# what is the resscaled value of SCA of 1
-BackTransformCentreredPredictor(transformedX = 1.75, originalX = predictsSites$StdTmeanAnomaly) # 1.75 gives about 1 
+# what is the rescaled value of SCA of 1
+BackTransformCentreredPredictor(transformedX = 1.68, originalX = predictsSites$StdTmeanAnomaly) # 1.68 gives about 1 
 
-# what is the resscaled value of SCA of 0
-BackTransformCentreredPredictor(transformedX = -0.99, originalX = predictsSites$StdTmeanAnomaly) # -0.99 gives about 0 
+# what is the rescaled value of SCA of 0
+BackTransformCentreredPredictor(transformedX = -0.9, originalX = predictsSites$StdTmeanAnomaly) # -0.9 gives about 0 
 
 # reference is primary with 0 climate change so have 0 for that row
 
 data_tab <- data.frame(UI2 = c("Primary vegetation", "Agriculture_Low", "Agriculture_High"), 
-                       StdTmeanAnomalyRS = c(-0.99,1.75,1.75),
+                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68),
                        LogAbund = 0,
                        Species_richness = 0)
 
@@ -119,7 +119,7 @@ load(file = "7_RunLUClimateNHModels/MeanAnomalyModelAbun_NH.rdata")
 
 
 data_tab <- data.frame(UI2 = c("Primary vegetation", rep("Agriculture_Low", 2)), 
-                       StdTmeanAnomalyRS = c(-0.99,1.75,1.75),
+                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68),
                        NH_5000.rs = c(2.073849, 1.045653, -1.015469 ), #100, 75, 25
                        LogAbund = 0,
                        Species_richness = 0)
