@@ -473,7 +473,7 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   abline(v=2,lty=1,col="#00000022")
   
   legend(
-    x = -0.6,y = 95,bty="n",
+    x = -0.2,y = 97,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_Low",
                "Agriculture_High"),
@@ -648,7 +648,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   # set up plotting window
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),max(nd$StdTmeanAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Standardised Climate Anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
+       xlab="Standardised Temperature Anomaly",ylab="Abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -677,7 +677,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
   # add legend
   legend(
-    x = -0.6,y = 120,bty="n",
+    x = -0.6,y = 102,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_Low",
                "Agriculture_High"),
@@ -766,7 +766,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   # set up plotting window
   plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),max(nd$StdTmeanAnomaly)),
        ylim=c(min(nd$PredLower,na.rm = TRUE),max(nd$PredUpper,na.rm = TRUE)),
-       xlab="Standardised Climate Anomaly",ylab="Species Richness (%)", cex.lab = 0.8, cex.axis = 0.8)
+       xlab="Standardised Temperature Anomaly",ylab="Species Richness (%)", cex.lab = 0.8, cex.axis = 0.8)
   
   invisible(mapply(FUN = function(preds,col){
     
@@ -795,7 +795,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
   # add legend
   legend(
-    x = -0.6,y = 145,bty="n",
+    x = -0.6,y = 115,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_Low",
                "Agriculture_High"),
