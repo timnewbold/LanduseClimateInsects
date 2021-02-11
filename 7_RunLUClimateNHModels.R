@@ -736,7 +736,7 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -844,7 +844,7 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -937,7 +937,7 @@ p1 <-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate Anomaly Maximum") +
+  xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -1021,7 +1021,7 @@ p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly Maximum") +
+  xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
