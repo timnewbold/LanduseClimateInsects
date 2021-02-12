@@ -59,6 +59,16 @@ table(predictsSites$UI2, predictsSites$Tropical)
 
 # look into range of SCA values across landuses in tropical/temperate areas.
 
+plot_data <- predictsSites[, c("Tropical", "UI2", "StdTmeanAnomaly")]
+plot_data <- plot_data[!is.na(plot_data$UI2), ]
+#table(plot_data$UI2)
+plot_data$UI2 <- factor(plot_data$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
+
+ggplot(data = plot_data) +
+  geom_freqpoly(aes(x = StdTmeanAnomaly, col = UI2)) +
+  facet_wrap(~ Tropical) + 
+  theme_bw()
+
 plot_data <- predictsSites[, c("Tropical", "UI2", "StdTmaxAnomaly")]
 plot_data <- plot_data[!is.na(plot_data$UI2), ]
 #table(plot_data$UI2)
@@ -68,8 +78,6 @@ ggplot(data = plot_data) +
   geom_freqpoly(aes(x = StdTmaxAnomaly, col = UI2)) +
   facet_wrap(~ Tropical) + 
   theme_bw()
-
-
 
 #"#009E73" - green
 #"#0072B2" - blue
@@ -94,7 +102,7 @@ summary(MeanAnomalyModelAbund$model)
 
 # selected model:
 # LogAbund ~ UI2 + poly(StdTmeanAnomalyRS, 1) + Tropical +
-# UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical +
+# UI2:Tropical +
 # Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
 # (1 | SS) + (1 | SSB)
 
@@ -118,11 +126,11 @@ summary(MeanAnomalyModelRich$model)
 
 # selected model:
 # Species_richness ~ UI2 + Tropical + poly(StdTmeanAnomalyRS, 1) +  
-# UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical + Tropical:poly(StdTmeanAnomalyRS, 1) + 
+# UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical +  
 # Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
 # (1 | SS) +  (1 | SSB) + (1 | SSBS)
 
-# Model failed to converge with max|grad| = 0.0187175 (tol = 0.001, component 1)
+# Model failed to converge: degenerate  Hessian with 2 negative eigenvalues
 
 
 # save model output
@@ -170,7 +178,8 @@ summary(MaxAnomalyModelRich$model)
 # (1 | SS) + (1 | SSB) + (1 | SSBS)
 
 
-# Model failed to converge with max|grad| = 0.0118007 (tol = 0.001, component 1)
+# Model failed to converge with max|grad| = 0.00613945 (tol = 0.001, component 1)
+
 
 
 # save model output
@@ -223,7 +232,7 @@ refRow2 <- refRow2 -400
 
 # adjust plot 1: mean anomaly and abundance
 
-exclQuantiles <- c(0.1,0.9)
+exclQuantiles <- c(0.025,0.975)
 
 
 QPV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
@@ -303,7 +312,7 @@ p1 <- ggplot(data = plot_data, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 300)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12)) +
@@ -329,7 +338,7 @@ p2 <- ggplot(data = plot_data2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 
 
 legend <- get_legend(p1)
-p3 <- plot_grid(p1+theme(legend.position = "none"), p2, legend, ncol = 3)
+p3 <- cowplot::plot_grid(p1+theme(legend.position = "none"), p2, legend, ncol = 3)
 
 
 ### 2. SR mean anomaly
@@ -362,7 +371,7 @@ refRow2 <- refRow2 -400
 
 
 # quantiles of data to show on the plot
-exclQuantiles <- c(0.1,0.90)
+exclQuantiles <- c(0.025,0.975)
 
 
 QPV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
@@ -592,7 +601,7 @@ refRow2 <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(
 refRow2 <- refRow2 -400
 
 # quantiles of data to show on the plot
-exclQuantiles <- c(0.1,0.9)
+exclQuantiles <- c(0.025,0.975)
 
 
 QPV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
@@ -908,7 +917,7 @@ exclQuantiles <- c(0.025,0.975)
 nd <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanAbundTemp$data$StdTmeanAnomalyRS),
                         to = max(MeanAbundTemp$data$StdTmeanAnomalyRS),
-                        length.out = 100),
+                        length.out = 200),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanAbundTemp$data$UI2)))
 
@@ -974,12 +983,12 @@ p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
         theme_bw() + 
         ylab("Total Abundance (%)") +
-        xlab("Standardised Climate Anomaly") +
+        xlab("Standardised Temperature Anomaly") +
         xlim(c(-0.5, 2)) +
         ylim(c(-100, 150)) + 
         theme(aspect.ratio = 1, text = element_text(size = 12),
               legend.title = element_blank()) + 
-        ggtitle("a. Temperate Realm")
+        ggtitle("a. Non-tropical Realm")
 
 
 
@@ -1055,7 +1064,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -1072,7 +1081,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 nd3 <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanRichTemp$data$StdTmeanAnomalyRS),
                         to = max(MeanRichTemp$data$StdTmeanAnomalyRS),
-                        length.out = 100),
+                        length.out = 200),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanRichTemp$data$UI2)))
 
@@ -1138,12 +1147,12 @@ p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("c. Temperate Realm")
+  ggtitle("c. Non-tropical Realm")
 
 
 
@@ -1219,7 +1228,7 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -1232,7 +1241,7 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 
 leg <- get_legend(p4+ theme(legend.position = "bottom"))
 
-plot_grid(plot_grid(p1 + theme(legend.position = "none"), 
+cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), 
           p2 + theme(legend.position = "none"), 
           p3+ theme(legend.position = "none"), 
           p4 + theme(legend.position = "none"),
@@ -1404,12 +1413,12 @@ p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate \nAnomaly Maximum") +
+  xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("a. Temperate Realm")
+  ggtitle("a. Non-tropical Realm")
 
 
 
@@ -1485,7 +1494,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate \nAnomaly Maximum") +
+  xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -1502,7 +1511,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 nd3 <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanRichTemp$data$StdTmeanAnomalyRS),
                         to = max(MeanRichTemp$data$StdTmeanAnomalyRS),
-                        length.out = 100),
+                        length.out = 200),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanRichTemp$data$UI2)))
 
@@ -1568,12 +1577,12 @@ p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate \nAnomaly Maximum") +
+  xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
-  ggtitle("c. Temperate Realm")
+  ggtitle("c. Non-tropical Realm")
 
 
 
@@ -1649,7 +1658,7 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   theme_bw() + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate \nAnomaly Maximum") +
+  xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -1662,7 +1671,7 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 
 leg <- get_legend(p4+ theme(legend.position = "bottom"))
 
-plot_grid(plot_grid(p1 + theme(legend.position = "none"), 
+cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), 
                     p2 + theme(legend.position = "none"), 
                     p3+ theme(legend.position = "none"), 
                     p4 + theme(legend.position = "none"),
