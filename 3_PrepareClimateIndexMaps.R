@@ -26,16 +26,14 @@ outDir <- "3_PrepareClimateIndexMaps/"
 # load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
-# take names of values for 1901 to 1905
-tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
+# take names of values for 1901 to 1930
+tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
 
 # calculate the mean and sd of the baseline values
-tmp1901_1905mean <- calc(tmp1901_1905, base::mean)
-tmp1901_1905sd <- calc(tmp1901_1905, stats::sd)
+tmp1901_1930mean <- calc(tmp1901_1930, base::mean)
+tmp1901_1930sd <- calc(tmp1901_1930, stats::sd)
 
 ### Note: 2005 is the mean year for insect data
-
-
 
 par(mfrow=c(1,1))
 par(oma=c(5,5,5,5))
@@ -51,10 +49,10 @@ tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 tmp2004_6mean <- calc(tmp[[names(tmp)[1237:1272]]], base::mean)
 
 # calc mean for baseline
-tmp2004_6_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1905mean)
+tmp2004_6_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1930mean)
 
 # standardise the baseline
-tmp2004_6std_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1905mean)  / tmp1901_1905sd
+tmp2004_6std_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1930mean)  / tmp1901_1930sd
 
 # info for map
 breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5, 10)
@@ -79,7 +77,7 @@ plot(warming2004_6, breaks=breaks2, col=pallete2(11), main="Mean warming 2004 to
 names(tmp)[829:840] ##1970
 tmp1970sd <-  calc(tmp[[names(tmp)[829:840]]], stats::sd)
 tmp1970mean <-  calc(tmp[[names(tmp)[829:840]]], base::mean)
-tmp1970std_climate_anomaly <- (tmp1970mean-tmp1901_1905mean)  / tmp1901_1905sd
+tmp1970std_climate_anomaly <- (tmp1970mean-tmp1901_1930mean)  / tmp1901_1930sd
 breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5)
 pallete <- colorRampPalette(c("lightblue","red", "black"))
 plot(tmp1970std_climate_anomaly, breaks=breaks, col=pallete(12), main="1970")
@@ -91,8 +89,8 @@ plot(tmp1970std_climate_anomaly, breaks=breaks, col=pallete(12), main="1970")
 names(tmp)[1381:1416] ## 2016 to 2018 
 tmp2016_18sd <-  calc(tmp[[names(tmp)[1381:1416]]], stats::sd)
 tmp2016_18mean <-  calc(tmp[[names(tmp)[1381:1416]]], base::mean)
-tmp2016_18std_climate_anomaly_2 <-  (tmp2016_18mean - tmp1901_1905mean) / tmp2016_18sd
-tmp2016_18std_climate_anomaly <- (tmp2016_18mean-tmp1901_1905mean)  / tmp1901_1905sd
+tmp2016_18std_climate_anomaly_2 <-  (tmp2016_18mean - tmp1901_1930mean) / tmp2016_18sd
+tmp2016_18std_climate_anomaly <- (tmp2016_18mean-tmp1901_1930mean)  / tmp1901_1930sd
 breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5, 15)
 pallete <- colorRampPalette(c("lightblue","red", "black"))
 plot(tmp2016_18std_climate_anomaly, breaks=breaks, col=pallete(12), main="2016_18")
@@ -149,8 +147,8 @@ mean.temp.2069.2071 <- stack(lapply(X = years,FUN = function(yr){
 mean.temp.2069.2071 <- stackApply(x = mean.temp.2069.2071,indices = rep(1,3),fun = mean)
 
 # calc the anomalies for the future years
-tmp2069_71_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1905mean)
-tmp2069_71std_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1905mean)  / tmp1901_1905sd
+tmp2069_71_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1930mean)
+tmp2069_71std_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1930mean)  / tmp1901_1930sd
 
 brks <- c(-50,-5,-2,-1,-0.5,-0.2,-0.1,0,0.1,0.2,0.5,0.75,1,1.5,2,5,50)
 brks2 <- c(-1,-0.75,-0.5,-0.25,-0.1,0,0.1,0.25,0.5,0.75,1,1.5,3.1)
@@ -210,12 +208,12 @@ invisible(dev.off())
 plot_data <- as.data.frame(tmp2004_6_climate_anomaly, xy = TRUE)
 
 # organise breaks, colours and labels
-brks <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3.1)
-cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:6],
+brks <- c(-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3,5)
+cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:6],
           (brewer.pal(n = 8,name = "Purples"))[4:8],
-          (brewer.pal(n = 8,name = "Oranges"))[3:4])
-labs <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3")
+          (brewer.pal(n = 8,name = "Oranges"))[3:5])
+labs <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", "3 : 5")
 
 # assign values into bins
 plot_data$bins <- cut(plot_data$layer, 
@@ -271,11 +269,11 @@ p2 <- ggplot(data = ravg) +
 plot_data2 <- as.data.frame(tmp2004_6std_climate_anomaly, xy = TRUE)
 
 # organise breaks, colours and labels
-brks2 <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3, 5, 10.4)
-cols2 <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:6],
+brks2 <- c(-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3, 5, 10.4)
+cols2 <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:6],
           (brewer.pal(n = 8,name = "Purples"))[4:8],
           (brewer.pal(n = 8,name = "Oranges"))[3:6])
-labs2 <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+labs2 <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
           "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", "3 : 5", "> 5")
 
 # assign values into bins
@@ -402,12 +400,12 @@ all_plot <- rbind(plot_data_pres, plot_data_fut)
 all_plot <- all_plot[!is.na(all_plot$layer), ]
 
 # organise breaks, colours and labels
-brks <- c(-1,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,50)
-cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:8],
+brks <- c(-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,10,50)
+cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
           (brewer.pal(n = 8,name = "Purples"))[4:6],
-          (brewer.pal(n = 8,name = "Oranges"))[5:8])
-labs <- c("-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5")
+          (brewer.pal(n = 9,name = "Oranges"))[5:9])
+labs <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","5 : 10", "> 10")
 
 # assign values into bins
 all_plot$bins <- cut(all_plot$layer, 
