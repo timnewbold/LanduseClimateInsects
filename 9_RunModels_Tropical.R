@@ -1368,6 +1368,43 @@ summary(MaxRichTrop$model)
 R2GLMER(MaxRichTrop$model) # use these values
 
 
+# save model stats
+
+# save the stats info
+abtemp_stats <- as.data.frame(MaxAbundTemp$stats)
+abtrop_stats <- as.data.frame(MaxAbundTrop$stats)
+srtemp_stats <- as.data.frame(MaxRichTemp$stats)
+srtrop_stats <- as.data.frame(MaxRichTrop$stats)
+
+abtemp_stats$significant <- NA
+abtrop_stats$significant <- NA
+srtemp_stats$significant <- NA
+srtrop_stats$significant <- NA
+
+abtemp_stats$model <- "abtemp"
+abtrop_stats$model <- "abtrop"
+srtemp_stats$model <- "srtemp"
+srtrop_stats$model <- "srtrop"
+
+all_stats <- rbind(abtemp_stats, abtrop_stats, srtemp_stats, srtrop_stats)
+
+# function to check significance
+checksig <- function(x){
+  if(x <= 0.05){ 
+    res <- "Yes" 
+  } else { 
+    res <- "No" }
+  return(res)}
+
+
+# add values to table
+all_stats$significant <- sapply(X = all_stats$P, FUN = checksig)
+
+
+
+# save the stats tables
+write.csv(all_stats, file = paste0(outDir, "/TropTemp_Max_Stats.csv"), row.names = FALSE)
+
 
 
 
