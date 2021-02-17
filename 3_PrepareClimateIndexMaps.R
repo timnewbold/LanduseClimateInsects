@@ -288,7 +288,7 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$layer),]) +
   scale_fill_manual(values = cols2) + 
   xlab("") +
   ylab("") +
-  labs(fill = "Standardised Climate Anomaly") +
+  labs(fill = "Standardised Temperature Anomaly") +
   theme_bw() +
   theme(legend.position = 'bottom', 
         panel.border = element_blank(), 
@@ -338,15 +338,15 @@ p0 <- ggplot() +
 # organise the plots and legends into one object
 
 
-final_plot <- plot_grid(
-plot_grid(
-  plot_grid(
+final_plot <- cowplot::plot_grid(
+  cowplot::plot_grid(
+    cowplot::plot_grid(
     p1 + theme(legend.position = "none")
     , p2
     , nrow = 1
     , align = "hv"
     , rel_widths = c(3,1))
-  , plot_grid(
+  , cowplot::plot_grid(
     get_legend(p1)
     #, p0
     #, ncol = 2
@@ -355,14 +355,14 @@ plot_grid(
  , nrow = 2
  , rel_heights = c(3, 1)
 ),
-plot_grid(
-  plot_grid(
+cowplot::plot_grid(
+  cowplot::plot_grid(
     p3 + theme(legend.position = "none")
     , p4
     , nrow = 1
     , align = "hv"
     , rel_widths = c(3,1))
-  , plot_grid(
+  , cowplot::plot_grid(
     get_legend(p3)
   #  , NULL
   #  , ncol = 2
@@ -421,7 +421,7 @@ ggplot(all_plot) +
   facet_grid(~ year) +
   xlab("") +
   ylab("") +
-  labs(fill = "Standardised\nClimate\nAnomaly") +
+  labs(fill = "Standardised\nTemperature\nAnomaly") +
   theme_bw() +
   theme(legend.position = 'bottom', 
         #panel.border = element_blank(), 
