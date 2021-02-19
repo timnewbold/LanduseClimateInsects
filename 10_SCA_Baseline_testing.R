@@ -118,8 +118,10 @@ all_plot$bins <- cut(all_plot$layer,
                      include.lowest = TRUE)
 
 
-year_labs <- c("A. 1901-1930", "B. 1901-1905", "C. 1901-1910", "D. 1901-1920")
+year_labs <- c("D. 1901-1930", "A. 1901-1905", "B. 1901-1910", "C. 1901-1920")
 names(year_labs) <- unique(all_plot$year)
+
+all_plot$year <- as.factor(all_plot$year)
 
 # plot
 ggplot(all_plot) + 
@@ -129,7 +131,7 @@ ggplot(all_plot) +
   facet_wrap(~ year, nrow = 2, labeller = labeller(year = year_labs)) +
   xlab("") +
   ylab("") +
-  labs(fill = "Standardised\nClimate\nAnomaly") +
+  labs(fill = "Standardised\nTemperature\nAnomaly") +
   theme_bw() +
   theme(legend.position = 'bottom', 
         #panel.border = element_blank(), 
@@ -332,7 +334,7 @@ p1 <- ggplot(data = nd, aes(x = anomStd_0105RS, y = PredMedian)) +
   theme_bw() + 
   #labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -419,7 +421,7 @@ p2 <- ggplot(data = nd2, aes(x = anomStd_0110RS, y = PredMedian)) +
   theme_bw() + 
   #labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -507,7 +509,7 @@ p3 <- ggplot(data = nd3, aes(x = anomStd_0120RS, y = PredMedian)) +
   theme_bw() + 
   #labs(fill = "% NH", col = "% NH") + 
   ylab("Total Abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -517,9 +519,9 @@ p3 <- ggplot(data = nd3, aes(x = anomStd_0120RS, y = PredMedian)) +
 
 
 # organise plots
-plot_grid(p1, p2, p3)
+cowplot::plot_grid(p1, p2, p3)
 
-ggsave(filename = paste0(outDir, "Extended_Data_Baselines_plots.pdf"), width = 10, height = 10, units = "in")
+ggsave(filename = paste0(outDir, "Extended_Data_Baselines_plots_Abun.pdf"), width = 10, height = 10, units = "in")
 
 
 
@@ -661,7 +663,7 @@ p1 <- ggplot(data = nd, aes(x = anomStd_0105RS, y = PredMedian)) +
   theme_bw() + 
   #labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -748,7 +750,7 @@ p2 <- ggplot(data = nd2, aes(x = anomStd_0110RS, y = PredMedian)) +
   theme_bw() + 
   #labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -836,7 +838,7 @@ p3 <- ggplot(data = nd3, aes(x = anomStd_0120RS, y = PredMedian)) +
   theme_bw() + 
   #labs(fill = "% NH", col = "% NH") + 
   ylab("Species Richness (%)") +
-  xlab("Standardised Climate Anomaly") +
+  xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-75, 100)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
@@ -846,7 +848,7 @@ p3 <- ggplot(data = nd3, aes(x = anomStd_0120RS, y = PredMedian)) +
 
 
 # organise plots
-plot_grid(p1, p2, p3)
+cowplot::plot_grid(p1, p2, p3)
 
 ggsave(filename = paste0(outDir, "Extended_Data_Baselines_plots_Rich.pdf"), width = 10, height = 10, units = "in")
 
