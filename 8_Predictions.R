@@ -27,7 +27,7 @@ dir.create(outdir)
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 
-### Hyp 1: land use effect only ###
+#### Hyp 1: land use effect only ####
 
 # these values can be retrieved from the info in script 2_RunSimpleLUIModel.R
 # used the median values that were used for plotting of Figure 1.
@@ -35,7 +35,9 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 
 
-### Hyp 2: Land use and climate anomaly interaction ###
+#### Hyp 2: Land use and climate anomaly interaction ####
+
+# first one, looking at SCA of 1
 
 # load in models
 load(file = paste0(moddir, "/MeanAnomalyModelAbund.rdata"))
@@ -56,8 +58,8 @@ BackTransformCentreredPredictor(transformedX = -0.9, originalX = predictsSites$S
 
 # reference is primary with 0 climate change so have 0 for that row
 
-data_tab <- data.frame(UI2 = c("Primary vegetation", "Agriculture_Low", "Agriculture_High"), 
-                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68),
+data_tab <- data.frame(UI2 = c("Primary vegetation", "Agriculture_Low", "Agriculture_High", "Agriculture_Low", "Agriculture_High"), 
+                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68,-0.9,-0.9),
                        LogAbund = 0,
                        Species_richness = 0)
 
@@ -76,7 +78,9 @@ result.sr$UI2 <- data_tab$UI2
 # express as a percentage of primary
 result.sr$perc <- ((result.sr$y/result.sr$y[1]) * 100) - 100
 
-  
+# add in SCA vals
+result.sr$SCA <- c(0, 1, 1, 0,0)  
+
 # now for the abundance model  
 result.ab <- PredictGLMER(model = MeanAnomalyModelAbund$model, data = data_tab, se.fit = TRUE, seMultiplier = 1.96)
 
@@ -89,14 +93,18 @@ result.ab$UI2 <- data_tab$UI2
 # express as a percentage of primary
 result.ab$perc <- ((result.ab$y/result.ab$y[1]) * 100) - 100
 
+# add in SCA vals
+result.ab$SCA <- c(0, 1, 1, 0,0) 
 
 # combine results into a table for saving
 all_res <- rbind(result.ab, result.sr)
 
-all_res$measure <- c(rep("ab", 3), rep("sr", 3))
+all_res$measure <- c(rep("ab", 5), rep("sr", 5))
 
 # save table
 write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC.csv"))
+
+
 
 
 
@@ -118,9 +126,9 @@ load(file = "7_RunLUClimateNHModels/MeanAnomalyModelAbun_NH.rdata")
 
 
 
-data_tab <- data.frame(UI2 = c("Primary vegetation", rep("Agriculture_Low", 2)), 
-                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68),
-                       NH_5000.rs = c(2.073849, 1.045653, -1.015469 ), #100, 75, 25
+data_tab <- data.frame(UI2 = c("Primary vegetation", rep("Agriculture_Low", 2), rep("Agriculture_High", 2)), 
+                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68, 1.68,1.68),
+                       NH_5000.rs = c(2.073849, 1.045653, -1.015469, 1.045653, -1.015469 ), #100, 75, 25
                        LogAbund = 0,
                        Species_richness = 0)
 
@@ -137,8 +145,8 @@ result.ab <- exp(result.ab)-0.01
 # add in the LU info
 result.ab$UI2 <- data_tab$UI2
 
-result.ab$NH <- c(100, 75, 25)
-result.ab$CC <- c(0, 1, 1)
+result.ab$NH <- c(100, 75, 25, 75, 25)
+result.ab$CC <- c(0, 1, 1, 1, 1)
 
 # express as a percentage of primary
 result.ab$perc <- ((result.ab$y/result.ab$y[1]) * 100) - 100
