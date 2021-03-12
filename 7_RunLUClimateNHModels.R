@@ -670,7 +670,9 @@ nd2$LogAbund <- 0
 nd2$Species_richness <- 0
 
 # set the reference row
-refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & 
+refRow <- which((nd2$UI2=="Primary vegetation") & 
+                  nd2$StdTmeanAnomaly== min(nd2$StdTmeanAnomaly[nd2$StdTmeanAnomaly > 0]) &
+                  #(nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & 
                   (nd2$NH_5000==100))
 
 # quantiles for presenting results
@@ -691,7 +693,7 @@ QAH <- quantile(x = AbundMeanAnomalyModel1$data$StdTmeanAnomalyRS[
   probs = exclQuantiles)
 
 # predict results 
-a.preds.tmean <- PredictGLMERRandIter(model = AbundMeanAnomalyModel1$model,data = nd2)
+a.preds.tmean <- PredictGLMERRandIter(model = AbundMeanAnomalyModel1$model,data = nd2, nIters = 10000)
 
 # transform results
 a.preds.tmean <- exp(a.preds.tmean)-0.01
@@ -788,7 +790,8 @@ QAH <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
   AbundMaxAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
-a.preds.tmax <- PredictGLMERRandIter(model = AbundMaxAnomalyModel1$model,data = nd2)
+a.preds.tmax <- PredictGLMERRandIter(model = AbundMaxAnomalyModel1$model,data = nd2, nIters = 10000)
+
 a.preds.tmax <- exp(a.preds.tmax)-0.01
 
 a.preds.tmax <- sweep(x = a.preds.tmax,MARGIN = 2,STATS = a.preds.tmax[refRow,],FUN = '/')
@@ -984,7 +987,7 @@ QAH <- quantile(x = RichMaxAnomalyModel1$data$StdTmaxAnomalyRS[
   RichMaxAnomalyModel1$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
-s.preds.tmax <- PredictGLMERRandIter(model = RichMaxAnomalyModel1$model,data = nd3)
+s.preds.tmax <- PredictGLMERRandIter(model = RichMaxAnomalyModel1$model,data = nd3, nIters = 10000)
 s.preds.tmax <- exp(s.preds.tmax)
 
 s.preds.tmax <- sweep(x = s.preds.tmax,MARGIN = 2,STATS = s.preds.tmax[refRow,],FUN = '/')
