@@ -36,16 +36,26 @@ predicts <- CorrectSamplingEffort(diversity = predicts)
 
 table(predicts$Diversity_metric)
 
+
+# insects should not have diversity metric "percent cover", this is a mistake in the database
+# remove those sites that are the problem
+predicts <- predicts[!predicts$Diversity_metric == "percent cover", ]
+
+
 # Merge sites that have the same coordinates (e.g. multiple traps on a single transect)
 predicts <- MergeSites(diversity = predicts)
 
+
+# remove rows where land use or use intensity info is missing
 predicts.complete <- droplevels(predicts[(
   predicts$Predominant_land_use!="Cannot decide"),])
 predicts.complete <- droplevels(predicts.complete[(
   predicts.complete$Use_intensity!="Cannot decide"),])
 
-# 780,145 records
+nrow(predicts.complete)
+# 779,912 records
 
+# get counts of n species in major groups
 species <- unique(predicts.complete[,c('Order','Taxon_name_entered')])
 
 order.counts <- tapply(X = species$Taxon_name_entered,
@@ -136,6 +146,27 @@ saveRDS(object = sites,file = paste0(outDir,"PREDICTSSiteData.rds"))
 
 
 
+#### redo dataset summaries after removing other sites ####
+
+predicts2 <- predicts[predicts$SSBS %in% sites$SSBS, ]
+
+
+table(predicts2$Diversity_metric)
+
+
+nrow(predicts2)
+# 756,879 records
+
+# get counts of n species in major groups
+species <- unique(predicts2[,c('Order','Taxon_name_entered')])
+
+order.counts <- tapply(X = species$Taxon_name_entered,
+                       INDEX = species$Order,
+                       FUN = function(sp) length(unique(sp)))
+
+sum(order.counts)
+# 17889
+
 #### basic map of PREDICTS sites ####
 
 # plot the raster in ggplot
@@ -163,10 +194,10 @@ ggsave(filename = paste0(outDir, "/PREDICTS_points_map.pdf"), height = 4, width 
 ### Basic summaries ###
 
 # nstudies/ nsites - all
-length(unique(sites$SS)) # 265
-length(unique(sites$SSBS)) # 6328
+length(unique(sites$SS)) # 264
+length(unique(sites$SSBS)) # 6095
 
 # nstudies/nsites - abun
-length(unique(sites[!is.na(sites$LogAbund) , 'SS'])) # 245
-length(unique(sites[!is.na(sites$LogAbund) , 'SSBS'])) # 5992
+length(unique(sites[!is.na(sites$LogAbund) , 'SS'])) # 244
+length(unique(sites[!is.na(sites$LogAbund) , 'SSBS'])) # 5759
 
