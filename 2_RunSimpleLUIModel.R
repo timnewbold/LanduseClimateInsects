@@ -18,7 +18,7 @@ inDir <- "1_PreparePREDICTSData/"
 outDir <- "2_RunSimpleLUIModel/"
 
 # read in the formatted PREDICTS data
-sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6334 rows
+sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6095 rows
 
 
 ## SPECIES RICHNESS MODELS ##
@@ -27,8 +27,8 @@ sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6334 rows
 model_data_sr <- na.omit(sites[,c('Species_richness','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
 # summaries
-length(unique(model_data_sr$SS)) # 265
-length(unique(model_data_sr$SSBS)) # 6328
+length(unique(model_data_sr$SS)) # 264
+length(unique(model_data_sr$SSBS)) # 6095
 
 
 # look at the spread of land use/use intensity categories
@@ -60,8 +60,8 @@ print(AIC(sm0$model,sm1$model,sm2$model,sm3$model,sm4$model))
 model_data_ab <- na.omit(sites[,c('LogAbund','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
 # summaries
-length(unique(model_data_ab$SS)) # 245
-length(unique(model_data_ab$SSBS)) # 5992
+length(unique(model_data_ab$SS)) # 244
+length(unique(model_data_ab$SSBS)) # 5759
 
 # look at the spread of land use/use intensity categories
 print(table(model_data_ab$UI2))
