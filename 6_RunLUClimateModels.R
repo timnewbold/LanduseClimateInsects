@@ -28,7 +28,7 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSitesWithClimateAndNatH
 predictsSites <- predictsSites@data
 
 # remove the Urban sites
-predictsSites$UI2[(predictsSites$UI2=="Urban")] <- NA
+#predictsSites$UI2[(predictsSites$UI2=="Urban")] <- NA
 predictsSites$UI2 <- factor(predictsSites$UI2)
 predictsSites$UI2 <- relevel(predictsSites$UI2,ref="Primary vegetation")
 
@@ -37,7 +37,7 @@ predictsSites$TmeanAnomaly <- predictsSites$climate_anomaly
 predictsSites$StdTmeanAnomaly <- predictsSites$TmeanAnomaly / predictsSites$historic_sd
 predictsSites$StdTmeanAnomalyRS <- StdCenterPredictor(predictsSites$StdTmeanAnomaly)
 
-predictsSites$TmaxAnomaly <- predictsSites$tmax_anomaly
+predictsSites$TmaxAnomaly <- predictsSites$tmax_quarter_anomaly
 predictsSites$StdTmaxAnomaly <- predictsSites$TmaxAnomaly / predictsSites$historic_sd_tmax
 # rescale the variable
 predictsSites$StdTmaxAnomalyRS <- StdCenterPredictor(predictsSites$StdTmaxAnomaly)
