@@ -189,9 +189,9 @@ write.csv(MaxRichStats, file = paste0(outDir, "/MaxAnomRich_Stats.csv"), row.nam
 exclQuantiles <- c(0.025,0.975)
 
 
-pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
 #pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
-#pdf(file = paste0(outDir,"Extended_Data3_MaxAnom.pdf"),width = 17.5,height = 8)
+#pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
+pdf(file = paste0(outDir,"Extended_Data3_MaxAnom.pdf"),width = 17.5,height = 8)
 
 #par(mfrow=c(2,2))
 par(mfrow=c(1,2))
@@ -421,7 +421,7 @@ QAH <- quantile(x = MaxAnomalyModelAbund$data$StdTmaxAnomalyRS[
 
 if(!is.null(MaxAnomalyModelAbund$model)){
   
-  a.preds.tmax <- PredictGLMERRandIter(model = MaxAnomalyModelAbund$model,data = nd)
+  a.preds.tmax <- PredictGLMERRandIter(model = MaxAnomalyModelAbund$model,data = nd, nIters = 10000)
   a.preds.tmax <- exp(a.preds.tmax)-0.01
   
   a.preds.tmax <- sweep(x = a.preds.tmax,MARGIN = 2,STATS = a.preds.tmax[refRow,],FUN = '/')
@@ -473,7 +473,7 @@ if(!is.null(MaxAnomalyModelAbund$model)){
   abline(v=2,lty=1,col="#00000022")
   
   legend(
-    x = -0.2,y = 97,bty="n",
+    x = -0.5,y = 90 ,bty="n",
     legend = c("Primary","Secondary",
                "Agriculture_Low",
                "Agriculture_High"),
@@ -505,7 +505,7 @@ QAH <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
 
 if(!is.null(MaxAnomalyModelRich$model)){
   
-  s.preds.tmax <- PredictGLMERRandIter(model = MaxAnomalyModelRich$model,data = nd)
+  s.preds.tmax <- PredictGLMERRandIter(model = MaxAnomalyModelRich$model,data = nd, nIters = 10000)
   s.preds.tmax <- exp(s.preds.tmax)
   
   s.preds.tmax <- sweep(x = s.preds.tmax,MARGIN = 2,STATS = s.preds.tmax[refRow,],FUN = '/')
@@ -735,7 +735,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     probs = exclQuantiles)
   
   # predict the results
-  a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd)
+  a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd, nIters = 10000)
   
   # back transform the abundance values
   a.preds.tmean <- exp(a.preds.tmean)
