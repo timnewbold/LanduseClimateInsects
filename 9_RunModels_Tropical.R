@@ -40,12 +40,12 @@ predictsSites$Tropical <- as.factor(predictsSites$Tropical)
 table(predictsSites$Tropical)
 
 # Temperate  Tropical 
-#    4586      1742 
+# 4353      1742 
 
 table(predictsSites[!is.na(predictsSites$LogAbund), 'Tropical'])
 
 # Temperate  Tropical 
-#    4403      1589 
+# 4170      1589
 
 
 table(predictsSites$UI2, predictsSites$Tropical)
@@ -786,7 +786,7 @@ head(predictsSites)
 
 # sort dataset, remove NAs etc
 predictsSites <- predictsSites[!is.na(predictsSites$UI2), ]
-predictsSites <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ] # 6308
+predictsSites <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ] # 6076
 
 
 #levels(predictsSites$UI2)
@@ -803,25 +803,25 @@ predictsSites <- droplevels(predictsSites)
 
 # SR subsets
 predictsSites_sr_trop <- predictsSites[predictsSites$Tropical == "Tropical", ] # 1742
-predictsSites_sr_temp <- predictsSites[predictsSites$Tropical == "Temperate", ] # 4566
+predictsSites_sr_temp <- predictsSites[predictsSites$Tropical == "Temperate", ] # 4334
 
 #length(unique(predictsSites_sr_trop$SS)) # 102
-#length(unique(predictsSites_sr_temp$SS)) # 163
+#length(unique(predictsSites_sr_temp$SS)) # 162
 
 #table(predictsSites_sr_trop$UI2)
 #table(predictsSites_sr_temp$UI2)
 
 # subset for abundance data
-predictsSites_ab <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5974
+predictsSites_ab <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5742
 
 
 
 predictsSites_ab_trop <- predictsSites_ab[predictsSites_ab$Tropical == "Tropical", ] # 1589
-predictsSites_ab_temp <- predictsSites_ab[predictsSites_ab$Tropical == "Temperate", ] # 4385
+predictsSites_ab_temp <- predictsSites_ab[predictsSites_ab$Tropical == "Temperate", ] # 4153
   
 
 length(unique(predictsSites_ab_trop$SS)) # 91
-length(unique(predictsSites_ab_temp$SS)) # 154
+length(unique(predictsSites_ab_temp$SS)) # 153
 
 table(predictsSites_ab_trop$UI2)
 table(predictsSites_ab_temp$UI2)
@@ -951,7 +951,7 @@ exclQuantiles <- c(0.025,0.975)
 nd <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanAbundTemp$data$StdTmeanAnomalyRS),
                         to = max(MeanAbundTemp$data$StdTmeanAnomalyRS),
-                        length.out = 200),
+                        length.out = 100),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanAbundTemp$data$UI2)))
 
@@ -1115,7 +1115,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 nd3 <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanRichTemp$data$StdTmeanAnomalyRS),
                         to = max(MeanRichTemp$data$StdTmeanAnomalyRS),
-                        length.out = 200),
+                        length.out = 100),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanRichTemp$data$UI2)))
 
@@ -1339,7 +1339,7 @@ MaxRichTrop <- GLMERSelect(modelData = predictsSites_sr_trop,responseVar = "Spec
                             saveVars = c("Total_abundance", "SSBS"))
 
 summary(MaxRichTrop$model)
-# Species_richness ~ UI2 + poly(StdTmaxAnomalyRS, 1) + UI2:poly(StdTmaxAnomalyRS,      1) + (1 | SS) + (1 | SSB) + (1 | SSBS)
+# Species_richness ~ UI2 + (1 | SS) + (1 | SSB) + (1 | SSBS)
 
 
 save(MaxAbundTemp, file = paste0(outDir, "/MaxAbundTemp_output.rdata"))
@@ -1418,7 +1418,7 @@ exclQuantiles <- c(0.025,0.975)
 nd <- expand.grid(
   StdTmaxAnomalyRS=seq(from = min(MaxAbundTemp$data$StdTmaxAnomalyRS),
                         to = max(MaxAbundTemp$data$StdTmaxAnomalyRS),
-                        length.out = 100),
+                        length.out = 200),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MaxAbundTemp$data$UI2)))
 
@@ -1582,7 +1582,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 nd3 <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanRichTemp$data$StdTmeanAnomalyRS),
                         to = max(MeanRichTemp$data$StdTmeanAnomalyRS),
-                        length.out = 200),
+                        length.out = 100),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MeanRichTemp$data$UI2)))
 
