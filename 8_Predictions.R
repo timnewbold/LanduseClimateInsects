@@ -51,15 +51,15 @@ load(file = paste0(moddir, "/MeanAnomalyModelRich.rdata"))
 # abun and richness = 0
 
 # what is the rescaled value of SCA of 1
-BackTransformCentreredPredictor(transformedX = 1.68, originalX = predictsSites$StdTmeanAnomaly) # 1.68 gives about 1 
+BackTransformCentreredPredictor(transformedX = 1.66, originalX = predictsSites$StdTmeanAnomaly) # 1.66 gives about 1 
 
 # what is the rescaled value of SCA of 0
-BackTransformCentreredPredictor(transformedX = -0.9, originalX = predictsSites$StdTmeanAnomaly) # -0.9 gives about 0 
+BackTransformCentreredPredictor(transformedX = -0.95, originalX = predictsSites$StdTmeanAnomaly) # -0.95 gives about 0 
 
 # reference is primary with 0 climate change so have 0 for that row
 
 data_tab <- data.frame(UI2 = c("Primary vegetation", "Agriculture_Low", "Agriculture_High", "Agriculture_Low", "Agriculture_High"), 
-                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68,-0.9,-0.9),
+                       StdTmeanAnomalyRS = c(-0.95,1.66,1.66,-0.95,-0.95),
                        LogAbund = 0,
                        Species_richness = 0)
 
@@ -110,7 +110,7 @@ write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC.csv"))
 
 ### Hyp 3:  Land use, climate and natural habitat interactions ###
 
-# 25% NH cover = -1.015469 in rescaled values
+# 25% NH cover = -1.05 in rescaled values
 # 50% NH cover = 0.01493712 in rescaled values
 # 75% NH cover = 1.045653 in rescaled values
 # 100% NH cover = 2.073849 in rescaled values
@@ -127,8 +127,8 @@ load(file = "7_RunLUClimateNHModels/MeanAnomalyModelAbun_NH.rdata")
 
 
 data_tab <- data.frame(UI2 = c("Primary vegetation", rep("Agriculture_Low", 2), rep("Agriculture_High", 2)), 
-                       StdTmeanAnomalyRS = c(-0.9,1.68,1.68, 1.68,1.68),
-                       NH_5000.rs = c(2.073849, 1.045653, -1.015469, 1.045653, -1.015469 ), #100, 75, 25
+                       StdTmeanAnomalyRS = c(-0.95,1.66,1.66, 1.66,1.66),
+                       NH_5000.rs = c(2.073849, 1.045653, -1.05, 1.045653, -1.05 ), #100, 75, 25
                        LogAbund = 0,
                        Species_richness = 0)
 
