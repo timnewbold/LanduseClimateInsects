@@ -651,7 +651,7 @@ nd2 <- expand.grid(
                         length.out = 100),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(AbundMeanAnomalyModel1$data$UI2)),
-  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
+  NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
 # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
 
 # back transform the climate data range
@@ -760,7 +760,7 @@ nd2 <- expand.grid(
                        length.out = 100),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(AbundMaxAnomalyModel1$data$UI2)),
-  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
+  NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
 # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
 nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
   transformedX = nd2$StdTmaxAnomalyRS,
@@ -954,7 +954,7 @@ nd3 <- expand.grid(
                        length.out = 100),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(RichMaxAnomalyModel1$data$UI2)),
-  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
+  NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
 # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
 
 nd3$StdTmaxAnomaly <- BackTransformCentreredPredictor(
