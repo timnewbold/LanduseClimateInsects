@@ -10,6 +10,10 @@
 
 rm(list = ls())
 
+#library(devtools)
+#install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions")
+#install_github(repo = "timnewbold/StatisticalModels")
+
 # load required libraries
 library(predictsFunctions)
 library(ggplot2)
