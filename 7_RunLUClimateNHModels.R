@@ -757,7 +757,7 @@ ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
 nd2 <- expand.grid(
   StdTmaxAnomalyRS=seq(from = min(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
                        to = max(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
-                       length.out = 100),
+                       length.out = 200),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(AbundMaxAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
@@ -951,7 +951,7 @@ ggsave(filename = paste0(outDir, "Extended_Data6_MaxAnomAbun_NH.pdf"), height = 
 nd3 <- expand.grid(
   StdTmaxAnomalyRS=seq(from = min(RichMaxAnomalyModel1$data$StdTmaxAnomalyRS),
                        to = max(RichMaxAnomalyModel1$data$StdTmaxAnomalyRS),
-                       length.out = 100),
+                       length.out = 200),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(RichMaxAnomalyModel1$data$UI2)),
   NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))

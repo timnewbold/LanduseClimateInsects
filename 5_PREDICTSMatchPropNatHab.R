@@ -23,7 +23,7 @@ outDir <- "5_PREDICTSMatchPropNatHab/"
 wgs84 <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
 
 # read in the predicts data with climate info
-predicts_sp <- readRDS(paste0(predictsDir,"PREDICTSSitesWithClimateData.rds"))
+predicts_sp <- readRDS(paste0(predictsDir,"PREDICTSSitesWithClimateData_update.rds"))
 
 # load the NH raster layers
 PV <- raster(paste0(

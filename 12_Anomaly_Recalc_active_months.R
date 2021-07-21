@@ -95,7 +95,7 @@ st1 <- Sys.time()
 
 cl <- snow::makeCluster(nCores-1)
 
-# Time difference # I can no longer get this to work in parallel ?!
+# Time difference 
 snow::clusterExport(
   cl = cl,
   list = c('predicts_sp','names_sub','names_tmp', 'values', 'names', 'length', 'mean', 'sd',

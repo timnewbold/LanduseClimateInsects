@@ -95,7 +95,7 @@ p3 <- ggplot(data = sa_test_vals ) +
 
 if(grepl("Abun", x) == 1) {
   
-plot_grid(p1,p2,p3,
+cowplot::plot_grid(p1,p2,p3,
           labels = c("A.", "B.", "C."))
   ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 10, width = 10)
   
@@ -104,7 +104,7 @@ plot_grid(p1,p2,p3,
   
   
 }else{
-  plot_grid(p2,p3,
+  cowplot::plot_grid(p2,p3,
             labels = c("A.", "B."))#
 
 ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 5, width = 10) 

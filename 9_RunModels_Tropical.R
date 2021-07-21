@@ -311,10 +311,10 @@ p1 <- ggplot(data = plot_data, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Total Abundance (%)") +
+  ylab("Change in total abundance (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 300)) + 
+  ylim(c(-100, 750)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12)) +
   ggtitle("Temperate")
 
@@ -329,7 +329,7 @@ p2 <- ggplot(data = plot_data2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Total Abundance (%)") +
+  ylab("Change in total abundance (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 100)) + 
@@ -447,13 +447,14 @@ p4 <- ggplot(data = plotdata, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = plotdata$PredLower, ymax = plotdata$PredUpper, fill = UI2), alpha = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Species Richness (%)") +
+  ylab("Change in species richness (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 300)) + 
+  ylim(c(-100, 950)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12))+
   ggtitle("Temperate")
 
@@ -466,10 +467,11 @@ p5 <- ggplot(data = plotdata2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_ribbon(aes(ymin = plotdata2$PredLower, ymax = plotdata2$PredUpper, fill = UI2), alpha = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   #facet_wrap(~Tropical, ncol = 2) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Species Richness (%)") +
+  ylab("Change in species richness (%)") +
   xlab("Standardised Climate Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 100)) + 
@@ -477,7 +479,7 @@ p5 <- ggplot(data = plotdata2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ggtitle("Tropical")
 
 legend2 <- get_legend(p4)
-p6 <- plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 3)
+p6 <- cowplot::plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 3)
 
 
 
@@ -555,18 +557,18 @@ p6 <- plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 3)
 
 #nd3$UI2 <- factor(nd3$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
 
-#p3 <- ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+#p3 <- ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) +
 #  geom_line(aes(col = UI2), size = 1) +
 #  geom_ribbon(aes(ymin = nd3$PredLower, ymax = nd3$PredUpper, fill = UI2), alpha = 0.2) +
 #  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
 #  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-#  facet_wrap(~Tropical, ncol = 2) + 
-#  theme_bw() + 
-#  labs(fill = "% NH", col = "% NH") + 
+#  facet_wrap(~Tropical, ncol = 2) +
+#  theme_bw() +
+#  labs(fill = "% NH", col = "% NH") +
 #  ylab("Total Abundance (%)") +
 #  xlab("Standardised Climate Anomaly Maximum") +
 #  xlim(c(-0.5, 2)) +
-#  ylim(c(-100, 150)) + 
+#  ylim(c(-100, 150)) +
 #  theme(aspect.ratio = 1, text = element_text(size = 12))
 
 
@@ -768,7 +770,12 @@ res <- stepwise.vif(dataset = effdata[, c(2:3, 6)],
              verbose = T)
 
 
+library(performance)
 
+check_collinearity(MeanAnomalyModelAbund$model)
+check_collinearity(MeanAnomalyModelRich$model)
+check_collinearity(MaxAnomalyModelAbund$model)
+check_collinearity(MaxAnomalyModelRich$model)
 
 ##%######################################################%##
 #                                                          #
@@ -824,7 +831,14 @@ length(unique(predictsSites_ab_trop$SS)) # 91
 length(unique(predictsSites_ab_temp$SS)) # 153
 
 table(predictsSites_ab_trop$UI2)
+
+# Primary vegetation Secondary vegetation      Agriculture_Low     Agriculture_High 
+# 552                  384                  258                  395
+
 table(predictsSites_ab_temp$UI2)
+
+# Primary vegetation Secondary vegetation      Agriculture_Low     Agriculture_High 
+# 857                  941                 1031                 1317
 
 #### run models ####
 
@@ -898,9 +912,16 @@ R2GLMER(MeanAbundTrop$model)
 tab_model(MeanRichTemp$model, MeanRichTrop$model, transform = NULL, file = paste0(outDir, "/RichMeanAnomTempTrop_output_table.html"))
 summary(MeanRichTemp$model)
 R2GLMER(MeanRichTemp$model) # use these values
+# $conditional
+# [1] 0.6652306
+# $marginal
+# [1] 0.00808889
 summary(MeanRichTrop$model)
 R2GLMER(MeanRichTrop$model) # use these values
-
+# $conditional
+# [1] 0.5596599
+# $marginal
+# [1] 0.03645811
 
 # save model stats
 
@@ -1013,10 +1034,11 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
         geom_line(aes(col = UI2), size = 1) +
         geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+        geom_hline(yintercept = 0, linetype = "dashed") +
         scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
         scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
         theme_bw() + 
-        ylab("Total Abundance (%)") +
+        ylab("Change in Total Abundance (%)") +
         xlab("Standardised Temperature Anomaly") +
         xlim(c(-0.5, 2)) +
         ylim(c(-100, 150)) + 
@@ -1094,10 +1116,11 @@ nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Total Abundance (%)") +
+  ylab("Change in Total Abundance (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -1177,13 +1200,14 @@ nd3$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Species Richness (%)") +
+  ylab("Change in Species Richness (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 150)) + 
+  ylim(c(-100, 200)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
   ggtitle("c. Non-tropical Realm")
@@ -1258,10 +1282,11 @@ nd4$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Species Richness (%)") +
+  ylab("Change in Species Richness (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -1355,7 +1380,7 @@ save(MaxRichTrop, file = paste0(outDir, "/MaxRichTrop_output.rdata"))
 
 #### save model output tables using sjPlot package ####
 
-tab_model(MaxAbundTemp$model, MaxAbundTrop$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnomTempTrop_output_table.html"))
+sjPlot::tab_model(MaxAbundTemp$model, MaxAbundTrop$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnomTempTrop_output_table.html"))
 summary(MaxAbundTemp$model)
 R2GLMER(MaxAbundTemp$model)
 summary(MaxAbundTrop$model)
@@ -1364,9 +1389,16 @@ R2GLMER(MaxAbundTrop$model)
 tab_model(MaxRichTemp$model, MaxRichTrop$model, transform = NULL, file = paste0(outDir, "/RichMaxAnomTempTrop_output_table.html"))
 summary(MaxRichTemp$model)
 R2GLMER(MaxRichTemp$model) # use these values
+# $conditional
+#[1] 0.6597703
+#$marginal
+#[1] 0.004763959
 summary(MaxRichTrop$model)
 R2GLMER(MaxRichTrop$model) # use these values
-
+# $conditional
+# [1] 0.552677
+# $marginal
+# [1] 0.02567178
 
 # save model stats
 
@@ -1418,7 +1450,7 @@ exclQuantiles <- c(0.025,0.975)
 nd <- expand.grid(
   StdTmaxAnomalyRS=seq(from = min(MaxAbundTemp$data$StdTmaxAnomalyRS),
                         to = max(MaxAbundTemp$data$StdTmaxAnomalyRS),
-                        length.out = 200),
+                        length.out = 300),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
              levels = levels(MaxAbundTemp$data$UI2)))
 
@@ -1480,10 +1512,11 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Total Abundance (%)") +
+  ylab("Change in Total Abundance (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -1561,10 +1594,11 @@ nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Total Abundance (%)") +
+  ylab("Change in Total Abundance (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -1644,13 +1678,14 @@ nd3$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Species Richness (%)") +
+  ylab("Change in Species Richness (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 150)) + 
+  ylim(c(-100, 200)) + 
   theme(aspect.ratio = 1, text = element_text(size = 12),
         legend.title = element_blank()) + 
   ggtitle("c. Non-tropical Realm")
@@ -1725,10 +1760,11 @@ nd4$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = UI2), size = 1) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Species Richness (%)") +
+  ylab("Change in Species Richness (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
