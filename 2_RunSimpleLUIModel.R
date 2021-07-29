@@ -34,6 +34,9 @@ length(unique(model_data_sr$SSBS)) # 6095
 # look at the spread of land use/use intensity categories
 print(table(model_data_sr$UI2))
 
+# Agriculture_High      Agriculture_Low   Primary vegetation Secondary vegetation 
+# 1779                 1317                 1516                 1483
+
 # run set of simple models with different fixed effects structures
 sm0 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamily = "poisson",
              fixedStruct = "1",randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
@@ -66,6 +69,8 @@ length(unique(model_data_ab$SSBS)) # 5759
 # look at the spread of land use/use intensity categories
 print(table(model_data_ab$UI2))
 
+# Agriculture_High      Agriculture_Low   Primary vegetation Secondary vegetation 
+# 1717                 1294                 1410                 1338
 
 # run set of simple models with different fixed effects structures
 am0 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gaussian",
@@ -159,8 +164,8 @@ par(cex.axis=1)
 par(cex.main=1)
 par(ps=10)
 par(las=1)
-par(mgp=c(1.6,0.2,0))
-par(mar=c(2.5,2.5,1,0.5))
+par(mgp=c(2.5,1,0))
+par(mar=c(4,3.5,0.1,1.5))
 par(tck=-0.01)
 
 # set colours
@@ -170,47 +175,48 @@ errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00")
 
 
 errbar(x = 1:4,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
-       col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(s.preds.lower),max(s.preds.upper)),xaxt="n",
-       ylab="Species richness (%)",xlab="Land use",bty="l")
+       col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,0),xaxt="n",
+       ylab="Change in species richness (%)",xlab="",bty="l")
 
-axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
+axis(side = 1,at = 1:4, labels = c("Primary","Secondary","Agriculture\nLow","Agriculture\nHigh"), cex.axis = 1, las = 2)
+
 
 abline(h=0,col="#00000077",lty=2)
 
 #title(main = "b.", adj = 0, cex.main = 1, line = 1)
 
-p2 <- recordPlot()
+p3 <- recordPlot()
 
 # abundance plot
 
 errbar(x = 1:4,y = a.preds.median,yplus = a.preds.upper,yminus = a.preds.lower,
-       col=errbar.cols,errbar.col = errbar.cols,ylim=c(min(a.preds.lower),max(a.preds.upper)),xaxt="n",
-       ylab="Total abundance (%)",xlab="Land use",bty="l")
+       col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,0),xaxt="n",
+       ylab="Change in total abundance (%)",xlab="",bty="l")
 
-axis(side = 1,at = 1:4,labels = c("PV","SV","AG.Low","AG.Hi"))
+axis(side = 1,at = 1:4,labels = c("Primary","Secondary","Agriculture\nLow","Agriculture\nHigh"), cex.axis = 1, las = 2)
 
 abline(h=0,col="#00000077",lty=2)
 
 #title(main = "c.", adj = 0, cex.main = 1, line = 1)
 
-p3 <- recordPlot()
+p2 <- recordPlot()
 
 
 #invisible(dev.off())
 
 # Organise the plots
-
-p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85, labels = c("a", "b", "c"), label_x = 0.1)
-
-# save figure
-save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
-
+# 
+# p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85, labels = c("a", "b", "c"), label_x = 0.1)
+# 
+# # save figure
+# save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
+# 
 
 # alternative fig 1 format
 
 p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.78, labels = c("b", "c"), label_x = 0.2), ncol = 1, rel_heights = c(0.7, 1), labels = c("a"), label_x = 0.1)
 
-save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 8, base_width = 8)
+save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 9, base_width = 9)
 
 
 
