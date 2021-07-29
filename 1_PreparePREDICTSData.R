@@ -71,7 +71,7 @@ order.counts <- tapply(X = species$Taxon_name_entered,
 # Calculate site metrics of diversity
 sites <- SiteMetrics(diversity = predicts,
                      extra.cols = c("Predominant_land_use",
-                                    "SSB","SSBS"))
+                                    "SSB","SSBS", "Biome"))
 
 # First, we will rearrange the land-use classification a bit
 sites$LandUse <- paste(sites$Predominant_land_use)
@@ -150,7 +150,12 @@ saveRDS(object = sites,file = paste0(outDir,"PREDICTSSiteData.rds"))
 
 
 
-#### redo dataset summaries after removing other sites ####
+##%######################################################%##
+#                                                          #
+#### redo dataset summaries after removing other sites  ####
+#                                                          #
+##%######################################################%##
+
 
 predicts2 <- predicts[predicts$SSBS %in% sites$SSBS, ]
 
@@ -205,3 +210,39 @@ length(unique(sites$SSBS)) # 6095
 length(unique(sites[!is.na(sites$LogAbund) , 'SS'])) # 244
 length(unique(sites[!is.na(sites$LogAbund) , 'SSBS'])) # 5759
 
+# reviewer request, UI2 by Biome
+
+table(sites$Biome, sites$UI2)
+
+#                                                         Agriculture_High Agriculture_Low Primary vegetation Secondary vegetation
+# Boreal Forests/Taiga                                                    2               6                172                   13
+# Temperate Conifer Forests                                               4             103                 10                   88
+# Temperate Broadleaf & Mixed Forests                                  1308             671                315                  787
+# Montane Grasslands & Shrublands                                         2             200                247                   33
+# Temperate Grasslands, Savannas & Shrublands                            15              11                 15                   27
+# Mediterranean Forests, Woodlands & Scrub                               21              32                 96                   58
+# Deserts & Xeric Shrublands                                              0              30                 16                   16
+# Tropical & Subtropical Grasslands, Savannas & Shrublands               56              47                175                   78
+# Tropical & Subtropical Coniferous Forests                               2              26                 32                   43
+# Flooded Grasslands & Savannas                                           6               6                  0                    0
+# Tropical & Subtropical Dry Broadleaf Forests                           62              66                 13                   50
+# Tropical & Subtropical Moist Broadleaf Forests                        293             119                420                  283
+# Mangroves                                                               8               0                  5                    7
+
+table(sites[!is.na(sites$LogAbund), 'Biome'], sites[!is.na(sites$LogAbund), 'UI2'])
+
+
+#                                                          Agriculture_High Agriculture_Low Primary vegetation Secondary vegetation
+# Boreal Forests/Taiga                                                    2               6                172                   13
+# Temperate Conifer Forests                                               4             103                 10                   88
+# Temperate Broadleaf & Mixed Forests                                  1280             669                289                  729
+# Montane Grasslands & Shrublands                                         2             200                247                   33
+# Temperate Grasslands, Savannas & Shrublands                            15              11                 15                   27
+# Mediterranean Forests, Woodlands & Scrub                               21              26                 92                   58
+# Deserts & Xeric Shrublands                                              0              30                 16                   16
+# Tropical & Subtropical Grasslands, Savannas & Shrublands               56              47                165                   70
+# Tropical & Subtropical Coniferous Forests                               2              26                 32                   43
+# Flooded Grasslands & Savannas                                           0               0                  0                    0
+# Tropical & Subtropical Dry Broadleaf Forests                           62              66                 13                   50
+# Tropical & Subtropical Moist Broadleaf Forests                        265             110                354                  204
+# Mangroves                                                               8               0                  5                    7
