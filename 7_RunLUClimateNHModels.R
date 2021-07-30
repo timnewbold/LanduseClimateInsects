@@ -729,15 +729,16 @@ nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
 nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
-ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+p1 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
   geom_line(aes(col = NH_5000), size = 1) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_hline(yintercept = 0, lty = "dashed") +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Abundance (%)") +
+  ylab("Change in total abundance (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -745,14 +746,118 @@ ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 # save
-ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
+#ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
 
 
+### mean anomaly species richness 
+nd <- expand.grid(
+ StdTmeanAnomalyRS=seq(from = min(RichMeanAnomalyModel1$data$StdTmeanAnomalyRS),
+                       to = max(RichMeanAnomalyModel1$data$StdTmeanAnomalyRS),
+                       length.out = 100),
+ UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+            levels = levels(RichMeanAnomalyModel1$data$UI2)),
+ NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
+#NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
+
+# back transform the climate data range
+nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd$StdTmeanAnomalyRS,
+  originalX = predictsSites$StdTmeanAnomaly)
+
+# back transform NH data range
+nd$NH_5000 <- round(BackTransformCentreredPredictor(
+  transformedX = nd$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+
+nd$NH_5000[nd2$NH_5000 == 99] <- 100
+
+# set values for richness and Abundance
+nd$LogAbund <- 0
+nd$Species_richness <- 0
+
+# set the reference row
+refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) &
+                  (nd$NH_5000==100))
+
+# quantiles for presenting results
+exclQuantiles <- c(0.025,0.975)
 
 
+QPV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  RichMeanAnomalyModel1$data$UI2=="Primary vegetation"],
+  probs = exclQuantiles)
+QSV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  RichMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
+  probs = exclQuantiles)
+QAL <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  RichMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
+  probs = exclQuantiles)
+QAH <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
+  RichMeanAnomalyModel1$data$UI2=="Agriculture_High"],
+  probs = exclQuantiles)
 
-############ Extended data figure 6  ############ 
+# predict results
+s.preds.tmean <- PredictGLMERRandIter(model = RichMeanAnomalyModel1$model,data = nd)
 
+# transform results
+s.preds.tmean <- exp(s.preds.tmean)
+
+# convert to percentage of reference row
+s.preds.tmean <- sweep(x = s.preds.tmean,MARGIN = 2,STATS = s.preds.tmean[refRow,],FUN = '/')
+
+# set anything outside the desired quantiles to NA
+s.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+s.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+s.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+s.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+s.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+s.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+s.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+s.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+
+# get the median and upper/lower intervals for plots
+nd$PredMedian <- ((apply(X = s.preds.tmean,MARGIN = 1,
+                          FUN = median,na.rm=TRUE))*100)-100
+nd$PredUpper <- ((apply(X = s.preds.tmean,MARGIN = 1,
+                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+nd$PredLower <- ((apply(X = s.preds.tmean,MARGIN = 1,
+                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# Abundance response to mean anomaly only, all LUs
+
+# set factor levels
+nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+
+nd$NH_5000 <- factor(nd$NH_5000, levels = c("100", "75", "50", "25"))
+
+# just take agriculture values
+nd <- nd[nd$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
+
+# plot
+p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
+  geom_line(aes(col = NH_5000), size = 1) +
+  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_hline(yintercept = 0, lty = "dashed") +
+  scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_Low", 'Agriculture_High' = "d              Agriculture_High"))) +
+  theme_bw() +
+  labs(fill = "% NH", col = "% NH") +
+  ylab("Change in species richness (%)") +
+  xlab("Standardised Temperature Anomaly") +
+  xlim(c(-0.5, 2)) +
+  ylim(c(-100, 150)) +
+  theme(aspect.ratio = 1, text = element_text(size = 12),
+        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
+
+
+library(cowplot)
+
+cowplot::plot_grid(p1, p2, nrow = 2)
+
+# save
+ggsave(filename = paste0(outDir, "Figure_3_ab_sr.pdf"), height = 8, width = 8)
+
+
+#### extended data - max anom
 
 nd2 <- expand.grid(
   StdTmaxAnomalyRS=seq(from = min(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
@@ -822,15 +927,16 @@ nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
 nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
-ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+p1 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
   geom_line(aes(col = NH_5000), size = 1) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_hline(yintercept =  0, lty = "dashed") + 
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Total Abundance (%)") +
+  ylab("Change in total abundance (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -838,113 +944,10 @@ ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 
-ggsave(filename = paste0(outDir, "Extended_Data6_MaxAnomAbun_NH.pdf"), height = 4, width = 8)
+#ggsave(filename = paste0(outDir, "Extended_Data6_MaxAnomAbun_NH.pdf"), height = 4, width = 8)
 
-
-
-
-
-############ Extended data figure 7  ############ 
 
 # richness and max anomaly
-
-#nd2 <- expand.grid(
-#  StdTmeanAnomalyRS=seq(from = min(RichMeanAnomalyModel1$data$StdTmeanAnomalyRS),
-#                        to = max(RichMeanAnomalyModel1$data$StdTmeanAnomalyRS),
-#                        length.out = 100),
-#  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-#             levels = levels(RichMeanAnomalyModel1$data$UI2)),
-#  NH_5000.rs=c(-1.015469,0.01493712,1.045653,2.073849))
-# NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
-
-# back transform the climate data range
-# nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-#   transformedX = nd2$StdTmeanAnomalyRS,
-#   originalX = predictsSites$StdTmeanAnomaly)
-
-# # back transform NH data range
-# nd2$NH_5000 <- round(BackTransformCentreredPredictor(
-#   transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
-# 
-# nd2$NH_5000[nd2$NH_5000 == 99] <- 100
-# 
-# # set values for richness and Abundance
-# nd2$LogAbund <- 0
-# nd2$Species_richness <- 0
-# 
-# # set the reference row
-# refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & 
-#                   (nd2$NH_5000==100))
-# 
-# # quantiles for presenting results
-# exclQuantiles <- c(0.025,0.975)
-# 
-# 
-# QPV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-#   RichMeanAnomalyModel1$data$UI2=="Primary vegetation"],
-#   probs = exclQuantiles)
-# QSV <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-#   RichMeanAnomalyModel1$data$UI2=="Secondary vegetation"],
-#   probs = exclQuantiles)
-# QAL <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-#   RichMeanAnomalyModel1$data$UI2=="Agriculture_Low"],
-#   probs = exclQuantiles)
-# QAH <- quantile(x = RichMeanAnomalyModel1$data$StdTmeanAnomalyRS[
-#   RichMeanAnomalyModel1$data$UI2=="Agriculture_High"],
-#   probs = exclQuantiles)
-# 
-# # predict results 
-# s.preds.tmean <- PredictGLMERRandIter(model = RichMeanAnomalyModel1$model,data = nd2)
-# 
-# # transform results
-# s.preds.tmean <- exp(s.preds.tmean)
-# 
-# # convert to percentage of reference row
-# s.preds.tmean <- sweep(x = s.preds.tmean,MARGIN = 2,STATS = s.preds.tmean[refRow,],FUN = '/')
-# 
-# # set anything outside the desired quantiles to NA
-# s.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
-# s.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
-# 
-# # get the median and upper/lower intervals for plots
-# nd2$PredMedian <- ((apply(X = s.preds.tmean,MARGIN = 1,
-#                           FUN = median,na.rm=TRUE))*100)-100
-# nd2$PredUpper <- ((apply(X = s.preds.tmean,MARGIN = 1,
-#                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-# nd2$PredLower <- ((apply(X = s.preds.tmean,MARGIN = 1,
-#                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-# # Abundance response to mean anomaly only, all LUs
-# 
-# # set factor levels
-# nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
-# 
-# nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
-# 
-# # just take agriculture values
-# nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
-# 
-# # plot
-# p1 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-#   geom_line(aes(col = NH_5000), size = 1) +
-#   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
-#   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-#   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-#   facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
-#   theme_bw() + 
-#   labs(fill = "% NH", col = "% NH") + 
-#   ylab("Species Richness (%)") +
-#   xlab("Standardised Temperature Anomaly") +
-#   xlim(c(-0.5, 2)) +
-#   ylim(c(-100, 150)) + 
-#   theme(aspect.ratio = 1, text = element_text(size = 12),
-#         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
-# 
 
 # richness model
 
@@ -1020,12 +1023,13 @@ nd3 <- nd3[nd3$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
   geom_line(aes(col = NH_5000), size = 1) +
   geom_ribbon(aes(ymin = nd3$PredLower, ymax = nd3$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_hline(yintercept = 0, lty = "dashed") +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_Low", 'Agriculture_High' = "d              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
-  ylab("Species Richness (%)") +
+  ylab("Change in species richness (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
@@ -1035,7 +1039,7 @@ p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) +
 
 
 # organise plots together
-#cowplot::plot_grid(p1, p2, nrow = 2)
+cowplot::plot_grid(p1, p2, nrow = 2)
 
 # save
-ggsave(filename = paste0(outDir, "Extended_Data7_SR_NH.pdf"), height = 4, width = 8)
+ggsave(filename = paste0(outDir, "Extended_Data7_ab_sr_MAX.pdf"), height = 8, width = 8)
