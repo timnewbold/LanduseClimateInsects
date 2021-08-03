@@ -12,8 +12,6 @@ rm(list = ls())
 # load libraries
 library(StatisticalModels)
 library(predictsFunctions)
-
-
 source('Functions.R')
 
 
@@ -51,15 +49,15 @@ load(file = paste0(moddir, "/MeanAnomalyModelRich.rdata"))
 # abun and richness = 0
 
 # what is the rescaled value of SCA of 1
-BackTransformCentreredPredictor(transformedX = 1.66, originalX = predictsSites$StdTmeanAnomaly) # 1.66 gives about 1 
+BackTransformCentreredPredictor(transformedX = 0.98, originalX = predictsSites$StdTmeanAnomaly) # 0.98 gives about 1 
 
 # what is the rescaled value of SCA of 0
-BackTransformCentreredPredictor(transformedX = -0.95, originalX = predictsSites$StdTmeanAnomaly) # -0.95 gives about 0 
+BackTransformCentreredPredictor(transformedX = -1.39, originalX = predictsSites$StdTmeanAnomaly) # -1.39 gives about 0 
 
 # reference is primary with 0 climate change so have 0 for that row
 
 data_tab <- data.frame(UI2 = c("Primary vegetation", "Agriculture_Low", "Agriculture_High", "Agriculture_Low", "Agriculture_High"), 
-                       StdTmeanAnomalyRS = c(-0.95,1.66,1.66,-0.95,-0.95),
+                       StdTmeanAnomalyRS = c(-1.39,0.98,0.98,-1.39,-1.39),
                        LogAbund = 0,
                        Species_richness = 0)
 
@@ -123,6 +121,7 @@ write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC.csv"))
 
 
 load(file = "7_RunLUClimateNHModels/MeanAnomalyModelAbun_NH.rdata")
+load(file = "7_RunLUClimateNHModels/RichMeanAnomalyModel_NH.rdata")
 
 
 
@@ -153,8 +152,27 @@ result.ab$perc <- ((result.ab$y/result.ab$y[1]) * 100) - 100
 
 result.ab$metric <- "ab"
 
-# save table
-write.csv(result.ab, file = paste0(outdir, "/percentage_change_LU_CC_NH.csv"))
 
+result.sr <- PredictGLMER(model = RichMeanAnomalyModel1$model, data = data_tab, se.fit = TRUE, seMultiplier = 1.96)
+
+# backtransform
+result.sr <- exp(result.sr)
+
+# add in the LU info
+result.sr$UI2 <- data_tab$UI2
+
+result.sr$NH <- c(100, 75, 25, 75, 25)
+result.sr$CC <- c(0, 1, 1, 1, 1)
+
+# express as a percentage of primary
+result.sr$perc <- ((result.sr$y/result.sr$y[1]) * 100) - 100
+
+result.sr$metric <- "sr"
+
+# combine results into a table for saving
+all_res <- rbind(result.ab, result.sr)
+
+# save table
+write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC_NH.csv"))
 
 
