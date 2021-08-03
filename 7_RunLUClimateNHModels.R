@@ -832,9 +832,9 @@ nd$NH_5000 <- factor(nd$NH_5000, levels = c("100", "75", "50", "25"))
 nd <- nd[nd$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
-p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
+p2 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_line(aes(col = NH_5000), size = 1) +
-  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+  geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = NH_5000), alpha = 0.2) +
   geom_hline(yintercept = 0, lty = "dashed") +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
