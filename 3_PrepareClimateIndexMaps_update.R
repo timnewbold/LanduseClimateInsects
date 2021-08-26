@@ -23,13 +23,21 @@ library(snow)
 
 # directories
 dataDir <- "0_data/"
-outDir <- "3_PrepareClimateIndexMaps/"
+#outDir <- "3_PrepareClimateIndexMaps/"
+outDir <- "10_SCA_Baseline_testing/"
+
 
 # load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
 # take names of values for 1901 to 1930
 tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
+
+# for testing baseline lengths:
+tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
+tmp1901_1910 <- tmp[[names(tmp)[1:120]]]
+tmp1901_1920 <- tmp[[names(tmp)[1:240]]]
+
 
 # take the current predicts time data
 tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
@@ -38,14 +46,14 @@ tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 tmp2016_18<- tmp[[names(tmp)[1381:1416]]]
 
 # what is the active months threshold
-thresh <- 10
+thresh <- 10 # 6, 8, 10
 
 # create a function that can be run in parallel to produce maps
 
 
 # which raster to use as present
-# pre_ras <- tmp2004_6 
- pre_ras <- tmp2016_18
+pre_ras <- tmp2004_6 
+#pre_ras <- tmp2016_18
 
 # get vector of positions in values of raster that are not NA
 ras <- pre_ras[[1]]
@@ -72,7 +80,7 @@ snow::clusterExport(
   cl = cl,
   list = c('pre_ras', 'values', 'names', 'length', 'mean', 'sd',
            'tmp', 'SP','rasterize','crop','trim', 'grep', 'sapply', 'strsplit',
-           'cellStats', 'thresh', 'tmp1901_1930'),envir = environment())
+           'cellStats', 'thresh', 'tmp1901_1930', 'tmp1901_1905', 'tmp1901_1910', 'tmp1901_1920'),envir = environment())
 
 temperatureVars <- data.frame(t(parSapply(
   cl = cl,X = (1:length(SP)),FUN = function(i){
@@ -146,6 +154,9 @@ temperatureVars <- data.frame(t(parSapply(
         
         # get the values for that grid cell across all years
         baseline <- crop(tmp1901_1930, mask)
+        #baseline <- crop(tmp1901_1905, mask)
+        #baseline <- crop(tmp1901_1910, mask)
+        #baseline <- crop(tmp1901_1920, mask)
         
         # subset the baseline to just the required months
         baseline <-  baseline[[names(baseline)[sapply(strsplit(names(baseline), "[.]"), "[[", 2) %in% months]]]
@@ -192,10 +203,14 @@ snow::stopCluster(cl)
 
 st2 <- Sys.time()
 
-print(st2 - st1) # Time difference of 
+print(st2 - st1) # Time difference of 1.013413 hours
 
 # save 
-save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2016_18.rdata"))
+save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, ".rdata"))
+#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2016_18_thresh_", thresh, ".rdata"))
+#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline5.rdata"))
+#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline10.rdata"))
+#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline20.rdata"))
 
 
 #### take a look at correlations between the different metrics ####
@@ -547,7 +562,7 @@ world_map <- map_data("world")
 
 # plot the raster
 p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) + 
-  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "none", size = 0.1) +
+  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white",  size = 0.1) +
   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
   scale_fill_manual(values = cols) + 
   xlab("") +
@@ -612,7 +627,7 @@ plot_data2 <- plot_data2[!is.na(plot_data2$bins), ]
 
 # plot the raster
 p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 
-  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "none", size = 0.1) +
+  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
   scale_fill_manual(values = cols2) + 
   xlab("") +
@@ -709,10 +724,10 @@ final_plot <- cowplot::plot_grid(
 )
 
 # save as a pdf
-ggsave(filename = paste0(outDir, "/Extended_Data1_maps.pdf"), plot = last_plot(), width = 9, height = 10)
+ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".pdf"), plot = last_plot(), width = 9, height = 10)
 
 # save final_plot as an rdata file to be used in later scripts
-save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
+#save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
 
 
 #### Figure - map of number of active months ####
@@ -720,7 +735,7 @@ save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
 map_data <- SP_df[, c(1,2,4)]
 
 ggplot(map_data[!is.na(map_data$n_months),]) + 
-  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "none", size = 0.1) +
+  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
   geom_raster(aes(x = x, y = y, fill = n_months), na.rm = TRUE) +
   scale_fill_gradient(low = c("#79CDCD"), high = c("#00688B"), na.value = NA, limits = c(1, 12)) +
   xlab("") +
@@ -737,7 +752,11 @@ ggplot(map_data[!is.na(map_data$n_months),]) +
   guides(colour = guide_colourbar(show.limits = TRUE)) 
 
 
-ggsave(filename = paste0(outDir, "Nmonths_plot.pdf"), width = 4, height = 3)
+ggsave(filename = paste0(outDir, "Nmonths_plot_thresh_", thresh, ".pdf"), width = 4, height = 3)
+
+
+
+
 
 ##### Manuscript, Figure 4, present and future anomaly #####
 
