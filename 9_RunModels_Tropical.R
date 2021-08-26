@@ -15,6 +15,7 @@ source("Functions.R")
 library(ggplot2)
 library(cowplot)
 library(sjPlot)
+library(performance)
 
 # directories
 predictsDataDir <- "6_RunLUClimateModels/"
@@ -99,12 +100,19 @@ MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Lo
 
 summary(MeanAnomalyModelAbund$model)
 
+# model is rank deficient
 
 # selected model:
 # LogAbund ~ UI2 + poly(StdTmeanAnomalyRS, 1) + Tropical +
 # UI2:Tropical +
 # Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
 # (1 | SS) + (1 | SSB)
+
+
+check_collinearity(MeanAnomalyModelAbund$model)
+
+# the 3 way interaction between land use, climate and realm has a high VIF
+
 
 
 # save the model output
@@ -131,6 +139,11 @@ summary(MeanAnomalyModelRich$model)
 # (1 | SS) +  (1 | SSB) + (1 | SSBS)
 
 # Model failed to converge: degenerate  Hessian with 2 negative eigenvalues
+
+check_collinearity(MeanAnomalyModelAbund$model)
+
+
+# the 3 way interaction between land use, climate and realm has a high VIF
 
 
 # save model output
