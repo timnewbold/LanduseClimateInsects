@@ -47,7 +47,7 @@ predicts <- predicts[!predicts$Diversity_metric == "percent cover", ]
 
 
 # Merge sites that have the same coordinates (e.g. multiple traps on a single transect)
-predicts <- MergeSites(diversity = predicts)
+predicts <- predictsFunctions::MergeSites(diversity = predicts)
 
 
 # remove rows where land use or use intensity info is missing
@@ -193,6 +193,9 @@ sites2$StdTmaxAnomalyRS <- StdCenterPredictor(sites2$StdTmaxAnomaly)
 # charlie added this line as later bits were throwing errors
 sites2 <- droplevels(sites2)
 
+
+save(sites2, file = paste0(outDir, "PREDICTS_sites_ChaoR.rdata"))
+
 #### run the model with ChaoR as the response ####
 
 # 1. Chao Richness, mean anomaly
@@ -226,6 +229,10 @@ summary(MaxAnomalyModelChaoR$model)
 
 
 #### plot the results ####
+
+#load(paste0(outDir, "MeanAnomalyModelChaoR.rdata"))
+#load(paste0(outDir, "MaxAnomalyModelChaoR.rdata"))
+
 
 #### 1. mean anom ChaoR ####
 
@@ -307,7 +314,8 @@ p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   xlim(c(-0.25, 2)) +
   theme(aspect.ratio = 1, text = element_text(size = 12),
         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), 
-        legend.position = "none")
+        legend.position = "none") +
+  ggtitle("a.")
 
 
 #### maximum anomaly ####
@@ -387,7 +395,8 @@ p2 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   xlim(c(-0.25, 2)) +
   theme(aspect.ratio = 1, text = element_text(size = 12),
         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), 
-        legend.position = c(0.3, 0.8), legend.title = element_blank())
+        legend.position = c(0.3, 0.8), legend.title = element_blank()) +
+  ggtitle("b.")
 
 
 

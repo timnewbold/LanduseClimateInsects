@@ -211,7 +211,7 @@ for(i in vals){
     ylim(c(-100, 150)) + 
     theme(aspect.ratio = 1, text = element_text(size = 12),
           strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), legend.title = element_blank()) +
-    ggtitle(paste0("Sites with ", i, " or more stns"))
+    ggtitle(paste0("Sites with more than ", i, " stns"))
   
   # save
   ggsave(filename = paste0(outdir, "/Plot_removing_", i, ".pdf"), height = 5, width = 6)

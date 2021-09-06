@@ -117,3 +117,116 @@ rm(perc_auto)
 }
 
 
+
+##%######################################################%##
+#                                                          #
+####      Additional checks - performance package       ####
+#                                                          #
+##%######################################################%##
+
+library(performance)
+
+# first the LU:CC models
+check_model(MeanAnomalyModelAbund$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
+check_model(MeanAnomalyModelRich$model, check = c("vif",  "ncv", "homogeneity", "reqq")) # 'check_normality()' does not support models of class 'glmerMod'.
+check_model(MaxAnomalyModelAbund$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
+check_model(MaxAnomalyModelRich$model, check = c("vif",  "ncv", "homogeneity", "reqq"))
+
+
+# problem with homogeneity of variance in the abundance models (try adding in block?)
+
+modelData <- MeanAnomalyModelAbund$data
+check_outliers(MeanAnomalyModelAbund$model)
+# Warning: 3 outliers detected (cases 229, 1815, 4874).
+
+modelData <- MeanAnomalyModelRich$data
+check_outliers(MeanAnomalyModelRich$model)
+# Warning: 1 outliers detected (cases 229).
+# Warning message:  In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
+
+modelData <- MaxAnomalyModelAbund$data
+check_outliers(MaxAnomalyModelAbund$model)
+# Warning: 3 outliers detected (cases 229, 1815, 4874).
+
+modelData <- MaxAnomalyModelRich$data
+check_outliers(MaxAnomalyModelRich$model)
+# Warning: 1 outliers detected (cases 229).
+# Warning message: In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
+
+# check autocorrelation of the residuals
+check_autocorrelation(MeanAnomalyModelAbund$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+check_autocorrelation(MeanAnomalyModelRich$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+check_autocorrelation(MaxAnomalyModelAbund$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+check_autocorrelation(MaxAnomalyModelRich$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+
+### then the LU:CC:NH models ###
+
+check_model(AbundMeanAnomalyModel1$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
+check_model(RichMeanAnomalyModel1$model, check = c("vif",  "ncv", "homogeneity", "reqq")) # 'check_normality()' does not support models of class 'glmerMod'.
+check_model(AbundMaxAnomalyModel1$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
+check_model(RichMaxAnomalyModel1$model, check = c("vif",  "ncv", "homogeneity", "reqq"))
+
+
+# problem with homogeneity of variance in the abundance models (try adding in block?)
+
+modelData <- AbundMeanAnomalyModel1$data
+check_outliers(AbundMeanAnomalyModel1$model)
+# OK: No outliers detected.
+
+modelData <- RichMeanAnomalyModel1$data
+check_outliers(RichMeanAnomalyModel1$model)
+# OK: No outliers detected.
+# Warning message: In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
+
+modelData <- AbundMaxAnomalyModel1$data
+check_outliers(AbundMaxAnomalyModel1$model)
+# OK: No outliers detected.
+
+modelData <- RichMaxAnomalyModel1$data
+check_outliers(RichMaxAnomalyModel1$model)
+# OK: No outliers detected.
+# Warning message: In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
+
+
+# check autocorrelation of the residuals
+check_autocorrelation(AbundMeanAnomalyModel1$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+check_autocorrelation(RichMeanAnomalyModel1$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+check_autocorrelation(AbundMaxAnomalyModel1$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+check_autocorrelation(RichMaxAnomalyModel1$model)
+# Warning: Autocorrelated residuals detected (p < .001).
+
+
+##%######################################################%##
+#                                                          #
+####         Additional checks - DHARMa package         ####
+#                                                          #
+##%######################################################%##
+
+library(DHARMa)
+
+# working through using vignette https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html
+
+simulationOutput <- simulateResiduals(fittedModel = MeanAnomalyModelAbund$model, plot = T)
+
+plot(simulationOutput)
+
+plotResiduals(simulationOutput, form = MeanAnomalyModelAbund$data$UI2)
+plotResiduals(simulationOutput, form = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS)
+
+
+simulationOutput2 <- simulateResiduals(fittedModel = MeanAnomalyModelRich$model, plot = F)
+
+plot(simulationOutput2)
+
+
+plotResiduals(simulationOutput2, form = MeanAnomalyModelRich$data$UI2)
+plotResiduals(simulationOutput2, form = MeanAnomalyModelRich$data$StdTmeanAnomalyRS)
+
+
