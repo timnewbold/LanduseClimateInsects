@@ -184,4 +184,29 @@ vif.mer <- function (fit) {
 }
 
 
+# edited version of StatisticalModels function for use with glmmTMB model
+
+PredictGLMERRandIter_TMB <- function(model,data,nIters=1000){
+  
+  # stopifnot((class(model)[1] == "lmerMod") | (class(model)[1] == "glmerMod"))
+  
+  preds <- sapply(X = 1:nIters,FUN = function(i){
+    
+    mm<-model.matrix(terms(model),data)
+    
+    if(ncol(mm)>length(lme4::fixef(model)[1]$cond)){
+      mm <- mm[,-which(!(names(mm[1,]) %in% names(
+        lme4::fixef(model))))]
+    }
+    
+    fe.draw <- mvrnorm(n = 1,mu = fixef(model)[1]$cond,Sigma = vcov(model)[1]$cond)
+    
+    y <- mm %*% fe.draw
+    
+  })
+  
+  return(preds)
+}
+
+
 
