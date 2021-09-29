@@ -23,8 +23,9 @@ library(snow)
 
 # directories
 dataDir <- "0_data/"
-#outDir <- "3_PrepareClimateIndexMaps/"
-outDir <- "10_SCA_Baseline_testing/"
+outDir <- "3_PrepareClimateIndexMaps/"
+#outDir <- "10_SCA_Baseline_testing/"
+#outDir <- "14_Additional_Tests/"
 
 
 # load in the mean temperature data from CRU
@@ -225,7 +226,7 @@ temperatureVars <- as.data.frame(temperatureVars) # 67420 rows
 # remove the NAs
 temp_data <- temperatureVars[!is.na(temperatureVars$avg_temp), ] # 58319 rows
 
-cor(temp_data$avg_temp, temp_data$Anom) # -0.21
+cor(temp_data$avg_temp, temp_data$Anom) # -0.21, 2004-6 version
 
 ggplot(data = temp_data, aes(x = avg_temp, y = Anom)) + 
   geom_point( size = 0.5) + 
@@ -237,11 +238,11 @@ ggplot(data = temp_data, aes(x = avg_temp, y = Anom)) +
 
 ggsave(filename = paste0(outDir, "Correlation_global_avgtemp_Anom.pdf"))
 
-# remove the few outliers
+# remove the few outliers, some Infs
 nrow(temp_data[temp_data$StdAnom >12, ]) # 6 rows
 temp_data <- temp_data[temp_data$StdAnom < 12, ] # 58313 rows
 
-cor(temp_data$avg_temp, temp_data$StdAnom) # -0.15
+cor(temp_data$avg_temp, temp_data$StdAnom) # -0.15, 2004-06
 
 ggplot(data = temp_data, aes(x = avg_temp, y = StdAnom)) + 
   geom_point( size = 0.5) + 
@@ -265,6 +266,7 @@ ggplot(data = temp_data[temp_data$StdAnom <=3, ], aes(x = avg_temp, y = StdAnom)
 ggsave(filename = paste0(outDir, "Correlation_global_avgtemp_StdAnom_outliersrem.pdf"))
 
 
+cor(temp_data$Anom, temp_data$StdAnom) # 0.34, 2004-06
 
 # now take a look at the realms
 # add in the lat/lons
@@ -310,7 +312,9 @@ SP_df[is.na(SP_df$Tropical), 'Tropical'] <- "Temperate"
 SP_df <- SP_df[SP_df$StdAnom < 12, ] # 58313 rows
 
 cor_temp <- round(cor(SP_df[SP_df$Tropical == "Temperate", "avg_temp"], SP_df[SP_df$Tropical == "Temperate", "StdAnom"]), digits = 2) # -0.55
-cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "avg_temp"], SP_df[SP_df$Tropical == "Tropical", "StdAnom"]), digits = 2) # 0.08
+
+
+ <- round(cor(SP_df[SP_df$Tropical == "Tropical", "avg_temp"], SP_df[SP_df$Tropical == "Tropical", "StdAnom"]), digits = 2) # 0.08
 
 SP_df$Tropical2 <- sub("Temperate", paste0("Temperate, cor = ", cor_temp), SP_df$Tropical)
 SP_df$Tropical2 <- sub("Tropical", paste0("Tropical, cor = ", cor_trop), SP_df$Tropical)
@@ -334,6 +338,10 @@ cor(SP_df[SP_df$Tropical == "Temperate", "avg_temp"], SP_df[SP_df$Tropical == "T
 test <- SP_df[SP_df$StdAnom <= 4, ]
 cor(test[test$Tropical == "Temperate", "avg_temp"], test[test$Tropical == "Temperate", "StdAnom"])
 plot(test[test$Tropical == "Temperate", "avg_temp"], test[test$Tropical == "Temperate", "StdAnom"])
+
+
+cor_temp <- round(cor(SP_df[SP_df$Tropical == "Temperate", "Anom"], SP_df[SP_df$Tropical == "Temperate", "StdAnom"]), digits = 2) # 0.37, 2004-6
+cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "Anom"], SP_df[SP_df$Tropical == "Tropical", "StdAnom"]), digits = 2) # 0.46, 2004-6
 
 
 # prev version code
@@ -514,7 +522,7 @@ plot(test[test$Tropical == "Temperate", "avg_temp"], test[test$Tropical == "Temp
 ##%######################################################%##
 
 
-# load(file = paste0(outDir, "Map_data_tempvars_2004_06.rdata"))
+# load(file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_8.rdata"))
 
 # convert to dataframe
 temperatureVars2 <- as.data.frame(temperatureVars)
@@ -543,11 +551,11 @@ plot(n_months)
 plot_data <- SP_df[, c(1,2,5)]
 
 # organise breaks, colours and labels
-brks <- c(-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3,5)
-cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:6],
-          (brewer.pal(n = 8,name = "Purples"))[4:8],
-          (brewer.pal(n = 8,name = "Oranges"))[3:5])
-labs <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
+brks <- c(-0.6,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3,5)
+cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
+          (brewer.pal(n = 8,name = "Purples"))[4:6],
+          (brewer.pal(n = 8,name = "Oranges"))[3:4])
+labs <- c("-0.6 : -0.2","-0.2 : -0.1","-0.1 : 0",
           "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", "3 : 5")
 
 # assign values into bins
@@ -589,7 +597,7 @@ ravg <- as.data.frame(ravg)
 
 # plot the marginal plot
 p2 <- ggplot(data = ravg) +
-  geom_line( aes(x = zone, y = mean), col = c("#473C8B")) +
+  geom_line( aes(x = zone, y = mean), col = c("#8379BD")) +
   geom_ribbon(aes(ymin = min(ravg$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B"), alpha = 0.7) +
   theme_bw() + 
   scale_x_reverse(limits = c(300, 1), expand = c(0,0)) +
@@ -610,9 +618,9 @@ p2 <- ggplot(data = ravg) +
 plot_data2 <- SP_df[, c(1,2,6)]
 
 # organise breaks, colours and labels
-brks2 <- c(-0.6,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3, 5)
-cols2 <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:6],
-           (brewer.pal(n = 8,name = "Purples"))[4:8],
+brks2 <- c(-0.65,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3, 5)
+cols2 <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
+           (brewer.pal(n = 8,name = "Purples"))[4:6],
            (brewer.pal(n = 8,name = "Oranges"))[3:5])
 labs2 <- c("-0.6 : -0.2","-0.2 : -0.1","-0.1 : 0",
            "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", "> 3")
@@ -657,7 +665,7 @@ ravg2 <- ravg2[!ravg2$mean == Inf, ]
 
 # plot the marginal plot
 p4 <- ggplot(data = ravg2) +
-  geom_line( aes(x = zone, y = mean), col = c("#473C8B")) +
+  geom_line( aes(x = zone, y = mean), col = c("#8379BD")) +
   geom_ribbon(aes(ymin = min(ravg2$mean, na.rm = T), ymax = mean, x = zone), fill = c("#473C8B"), alpha = 0.7) +
   theme_bw() + 
   scale_x_reverse(limits = c(300, 1), expand = c(0,0)) +
