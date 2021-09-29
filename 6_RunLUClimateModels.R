@@ -69,13 +69,15 @@ predictsSites <- predictsSites[!is.na(predictsSites$avg_temp), ]
 plot(predictsSites$avg_temp, predictsSites$TmeanAnomaly,
      xlab = "Average temperature", 
      ylab = "Anomaly (difference between present and baseline)")
-cor(predictsSites$avg_temp, predictsSites$TmeanAnomaly)
+cor(predictsSites$avg_temp, predictsSites$TmeanAnomaly) # -0.42
 
 
 plot(predictsSites$avg_temp, predictsSites$StdTmeanAnomaly,
      xlab = "Average temperature", 
      ylab = "Standardised climate anomaly")
-cor(predictsSites$avg_temp, predictsSites$StdTmeanAnomaly)
+cor(predictsSites$avg_temp, predictsSites$StdTmeanAnomaly) # 0.15
+
+cor(predictsSites$TmeanAnomaly, predictsSites$StdTmeanAnomaly) # 0.21
 
 
 # save the dataset
@@ -86,8 +88,15 @@ saveRDS(object = predictsSites,file = paste0(outDir,"PREDICTSSiteData.rds"))
 
 # running the model selection process
 
+
+
 # 1. Abundance, mean anomaly
-MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
+
+model_data <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5759
+model_data <- model_data[!is.na(model_data$StdTmeanAnomalyRS), ] # 5735
+
+
+MeanAnomalyModelAbund <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
                                 fitFamily = "gaussian",fixedFactors = "UI2",
                                 fixedTerms = list(StdTmeanAnomalyRS=1),
                                 randomStruct = "(1|SS)+(1|SSB)",
@@ -98,18 +107,28 @@ MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Lo
 save(MeanAnomalyModelAbund, file = paste0(outDir, "/MeanAnomalyModelAbund.rdata"))
 
 # 2. Richness, mean anomaly
-MeanAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
+
+
+model_data <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ] # 6069
+
+
+MeanAnomalyModelRich <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
                                      fitFamily = "poisson",fixedFactors = "UI2",
                                      fixedTerms = list(StdTmeanAnomalyRS=1),
                                      randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
                                      fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-                                     saveVars = c("Total_abundance", "SSBS", "NH_3000"))
+                                     saveVars = c("SSBS"))
 
 # save model output
 save(MeanAnomalyModelRich, file = paste0(outDir, "/MeanAnomalyModelRich.rdata"))
 
 # 3. Abundance, max anomaly
-MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
+
+model_data <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5759
+model_data <- model_data[!is.na(model_data$StdTmeanAnomalyRS), ] # 5735
+
+
+MaxAnomalyModelAbund <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
                                      fitFamily = "gaussian",fixedFactors = "UI2",
                                      fixedTerms = list(StdTmaxAnomalyRS=1),
                                      randomStruct = "(1|SS)+(1|SSB)",
@@ -120,12 +139,15 @@ MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "Log
 save(MaxAnomalyModelAbund, file = paste0(outDir, "/MaxAnomalyModelAbund.rdata"))
 
 # 4. Richness, max anomaly
-MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
+
+model_data <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ] # 6069
+
+MaxAnomalyModelRich <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
                                     fitFamily = "poisson",fixedFactors = "UI2",
                                     fixedTerms = list(StdTmaxAnomalyRS=1),
                                     randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
                                     fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)"),
-                                    saveVars = c("Total_abundance", "SSBS", "NH_3000"))
+                                    saveVars = c("SSBS"))
 
 # save model output
 save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich.rdata"))
@@ -142,6 +164,12 @@ tab_model(MeanAnomalyModelRich$model, transform = NULL, file = paste0(outDir, "/
 summary(MeanAnomalyModelRich$model) # check the table against the outputs
 R2GLMER(MeanAnomalyModelRich$model) # check the R2 values (function has issues with the richness models, so use output from Tim's formula)
 
+#$conditional
+#[1] 0.6385927
+
+#$marginal
+#[1] 0.01041383
+
 tab_model(MaxAnomalyModelAbund$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnom_output_table.html"))
 summary(MaxAnomalyModelAbund$model) # check the table against the outputs
 R2GLMER(MaxAnomalyModelAbund$model) # check the R2 values 
@@ -149,7 +177,11 @@ R2GLMER(MaxAnomalyModelAbund$model) # check the R2 values
 tab_model(MaxAnomalyModelRich$model, transform = NULL, file = paste0(outDir, "/RichMaxAnom_output_table.html"))
 summary(MaxAnomalyModelRich$model) # check the table against the outputs
 R2GLMER(MaxAnomalyModelRich$model) # check the R2 values (function has issues with the richness models, so use output from Tim's formula)
+#$conditional
+#[1] 0.636048
 
+#$marginal
+#[1] 0.009140814
 
 ##%######################################################%##
 #                                                          #
@@ -453,7 +485,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
   #pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
   #pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
-  pdf(file = paste0(outDir,"Extended_Data3_MaxAnom.pdf"),width = 8,height = 4)
+  pdf(file = paste0(outDir,"Extended_Data2_MaxAnom.pdf"),width = 8,height = 4)
   
   par(mfrow=c(1,2))
   par(las=1)
