@@ -27,7 +27,7 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 # remove any NAs
 modelData <- na.omit(predictsSites[,c(
-  'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5974 rows
+  'LogAbund','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5735 rows
 
 # run models with and without NH interaction, Abundance models
 AbundMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
@@ -46,7 +46,7 @@ save(AbundMeanAnomalyModel1, file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rda
 
 # run models with and without NH interaction, species richness models
 modelData <- na.omit(predictsSites[,c(
-  'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6308 rows
+  'Species_richness','UI2','StdTmeanAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6069 rows
 
 RichMeanAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmeanAnomalyRS",
@@ -64,7 +64,7 @@ save(RichMeanAnomalyModel1, file = paste0(outDir, "/RichMeanAnomalyModel_NH.rdat
 
 # run models with and without NH interaction, Abundance models, max anomaly
 modelData <- na.omit(predictsSites[,c(
-  'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5974 rows
+  'LogAbund','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 5735 rows
 
 AbundMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
                                 fixedStruct = "UI2 * StdTmaxAnomalyRS",
@@ -83,7 +83,7 @@ save(AbundMaxAnomalyModel1, file = paste0(outDir, "/AbundMaxAnomalyModel_NH.rdat
 
 # run models with and without NH interaction, species richness models, max anomaly
 modelData <- na.omit(predictsSites[,c(
-  'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6308 rows
+  'Species_richness','UI2','StdTmaxAnomalyRS','SS','SSB','SSBS','NH_5000.rs')]) # 6069 rows
 
 RichMaxAnomalyModel0 <- GLMER(modelData = modelData,responseVar = "Species_richness",fitFamily = "poisson",
                                fixedStruct = "UI2 * StdTmaxAnomalyRS",
