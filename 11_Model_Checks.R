@@ -43,6 +43,8 @@ mod_list <- c("MeanAnomalyModelAbund", "MeanAnomalyModelRich", "MaxAnomalyModelA
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 
+predictsSites <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ]
+
 #x <- mod_list[1]
 
 for(x in mod_list){
@@ -92,24 +94,51 @@ p3 <- ggplot(data = sa_test_vals ) +
         aspect.ratio = 1)
 
 
-
+  
 if(grepl("Abun", x) == 1) {
   
-cowplot::plot_grid(p1,p2,p3,
-          labels = c("A.", "B.", "C."))
+  
+ predData <- predictsSites[!is.na(predictsSites$LogAbund), ]
+ 
+ # 4. plot of observed vs fitted values
+ 
+ pdf(NULL)
+ dev.control(displaylist="enable")
+ plot(predData$LogAbund,fitted(get(x)$model), 
+      xlab = "Observed values", ylab = "Fitted values") 
+ abline(a = 0, b = 1, col = "red", lwd = 2)
+ p4 <- recordPlot()
+ invisible(dev.off())
+  
+
+ cowplot::plot_grid(p1,p2,p3, p4,
+          labels = c("A.", "B.", "C.", "D."))
+
   ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 10, width = 10)
   
-  rm(p1, p2, p3)
+  rm(p1, p2, p3, p4)
   rm(perc_auto)
   
   
 }else{
-  cowplot::plot_grid(p2,p3,
-            labels = c("A.", "B."))#
+  
+  
+  # 4. plot of observed vs fitted values
+  
+  pdf(NULL)
+  dev.control(displaylist="enable")
+  plot(predictsSites$Species_richness,fitted(get(x)$model), 
+       xlab = "Observed values", ylab = "Fitted values") 
+  abline(a = 0, b = 1, col = "red", lwd = 2)
+  p4 <- recordPlot()
+  invisible(dev.off())
+  
+  cowplot::plot_grid(p2,p3,p4,
+            labels = c("A.", "B.", "C."))#
 
-ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 5, width = 10) 
+ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 10, width = 10) 
 
-rm(p2, p3)
+rm(p2, p3, p4)
 rm(perc_auto)
 
 }
