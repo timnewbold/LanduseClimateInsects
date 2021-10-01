@@ -1,0 +1,213 @@
+---
+title: "Comparing richness random effect specs"
+author: "Charlie Outhwaite"
+date: "17 September 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(roquefort)
+```
+
+## Comparing richness models with and without SSBS as a random effect
+
+Models using mcmcglmm showed some odd trace plots for the SSBS random effect in the species richness models. So, here we will take a look at those models but will also compare lme4 versions of the models with and without the SSBS random effect to see which models are best. 
+
+
+# First, look at the MCMCglmm models
+
+```{r mcmc models, echo = F}
+
+# loading the models that have been run already
+
+load("14_Additional_Tests/MeanAnomalyModelRich_mcmc_noSSBS.rdata")
+load("14_Additional_Tests/MaxAnomalyModelRich_mcmc_noSSBS.rdata")
+
+# rename these ones
+Rich_mean_nossbs <- rich_mean_model
+Rich_max_nossbs <- rich_max_model
+
+load("14_Additional_Tests/MeanAnomalyModelRich_mcmc.rdata")
+load("14_Additional_Tests/MaxAnomalyModelRich_mcmc.rdata")
+
+```
+
+
+## Take a look at the traceplots for the model including SSBS
+
+
+```{r traceplots, fig.height=7, fig.width=7, echo = F}
+
+# loading the models that have been run already
+
+plot(rich_mean_model)
+plot(rich_max_model)
+
+
+```
+
+## Take a look at the traceplots for the model NOT including SSBS
+
+
+For the models that do not include SSBS, the traceplots look much better, especially for the units plot which I think are the residuals. 
+
+
+```{r traceplots2, fig.height=7, fig.width=7, echo = F}
+
+
+plot(Rich_mean_nossbs)
+plot(Rich_max_nossbs)
+
+```
+
+
+### Comparing the model outputs
+
+
+```{r model outputs, echo = F}
+
+
+summary(rich_mean_model)
+summary(Rich_mean_nossbs)
+
+print(paste0("DIC of model including SSBS is ", round(rich_mean_model$DIC, digits = 2)))
+print(paste0("DIC of model NOT including SSBS is ", round(Rich_mean_nossbs$DIC, digits = 2)))
+
+
+summary(rich_max_model)
+summary(Rich_max_nossbs)
+
+print(paste0("DIC of model including SSBS is ", round(rich_max_model$DIC, digits = 2)))
+print(paste0("DIC of model NOT including SSBS is ", round(Rich_max_nossbs$DIC, digits = 2)))
+```
+
+# Now the ML version of the model with and without SSBS random effect
+
+
+```{r ML models, echo = F}
+
+
+load("14_Additional_Tests/MeanAnomalyModelRich_noSSBS.rdata")
+load("14_Additional_Tests/MaxAnomalyModelRich_noSSBS.rdata")
+
+# rename these ones
+MeanAnomalyModelRich_noSSBS <- MeanAnomalyModelRich
+MaxAnomalyModelRich_noSSBS <- MaxAnomalyModelRich
+
+load("6_RunLUClimateModels/MeanAnomalyModelRich.rdata")
+load("6_RunLUClimateModels/MaxAnomalyModelRich.rdata")
+
+
+```
+
+
+## Take a look at the model check plots
+
+
+
+```{r model checks, echo = F, cache = T , message = F, results='hide'}
+
+predictsSites <- readRDS("6_RunLUClimateModels/PREDICTSSiteData.rds")
+
+mod_list <- c("MeanAnomalyModelRich", "MaxAnomalyModelRich", "MeanAnomalyModelRich_noSSBS", "MaxAnomalyModelRich_noSSBS")
+
+
+
+for(x in mod_list){
+
+# only do this one if not SR model
+if(grepl("Abun", x) ==1) {
+
+
+## 1. Checking the fitted vs residuals relationship
+p1 <- plot(get(x)$model)
+}
+  
+## 2. Normality of Residuals
+pdf(NULL)
+dev.control(displaylist="enable")
+qqnorm(resid(get(x)$model), main = "")
+qqline(resid(get(x)$model))
+p2 <- recordPlot()
+invisible(dev.off())
+
+
+
+## 3. Check for spatial autocorrelation
+
+sa_test<-roquefort::SpatialAutocorrelationTest(model=get(x), all.data=predictsSites)
+
+#summary(sa_test)
+
+# percentage of studies that show spatial autocorrelation?
+perc_auto <- (length(which(sa_test$P<0.05))/length(sa_test$P))*100
+
+
+sa_test_vals <- as.data.frame(sa_test$P)
+sa_test_vals$`sa_test$P` <- round(sa_test_vals$`sa_test$P`, digits = 4)
+
+label1 <- paste0("P < 0.05 \nin ", round(perc_auto, 1), "% \nof studies")
+
+p3 <- ggplot(data = sa_test_vals ) +
+  geom_histogram(aes(x = sa_test_vals$`sa_test$P`)) +
+  geom_vline(xintercept = 0.05, col = "red") +
+  geom_text(aes(x = 0.9, y = 90, label = label1), size = 4, check_overlap = T) +
+  theme_bw() +
+  ylim(c(0, 100)) +
+  xlab("P-value") +
+  ylab("Frequency") +
+  theme(panel.grid = element_blank(), 
+        aspect.ratio = 1)
+
+
+
+if(grepl("Abun", x) == 1) {
+  
+cowplot::plot_grid(p1,p2,p3,
+          labels = c("A.", "B.", "C."))
+  #ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 10, width = 10)
+  
+  rm(p1, p2, p3)
+  rm(perc_auto)
+  
+  
+}else{
+  print(cowplot::plot_grid(p2,p3,
+            labels = c(paste0("A. ", x), "B.")))
+
+#ggsave(file = paste0(outdir, x, "_model_checks.pdf"), height = 5, width = 10) 
+
+rm(p2, p3)
+rm(perc_auto)
+
+}
+
+}
+
+```
+
+
+### Comparing the model outputs
+
+
+```{r compare ML mods, echo = F}
+
+summary(MeanAnomalyModelRich$model)
+summary(MeanAnomalyModelRich_noSSBS$model)
+
+print(paste0("AIC of model including SSBS is ", round(AIC(MeanAnomalyModelRich$model), digits = 2)))
+print(paste0("AIC of model NOT including SSBS is ", round(AIC(MeanAnomalyModelRich_noSSBS$model), digits = 2)))
+
+
+summary(MaxAnomalyModelRich$model)
+summary(MaxAnomalyModelRich_noSSBS$model)
+
+print(paste0("AIC of model including SSBS is ", round(AIC(MaxAnomalyModelRich$model), digits = 2)))
+print(paste0("AIC of model NOT including SSBS is ", round(AIC(MaxAnomalyModelRich_noSSBS$model), digits = 2)))
+
+
+
+```
