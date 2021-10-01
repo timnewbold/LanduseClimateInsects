@@ -93,13 +93,17 @@ all_data <- melt(all_data, id.vars = c("x", "y"))
 
 all_plot <- all_data[!is.na(all_data$value), ]
 
+
+
 # organise breaks, colours and labels
-brks <- c(-2,-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,50)
-cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[4:8],
+brks <- c(-2.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3,5,55)
+cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
           (brewer.pal(n = 8,name = "Purples"))[4:6],
-          (brewer.pal(n = 8,name = "Oranges"))[5:8])
-labs <- c("-2 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5")
+          (brewer.pal(n = 9,name = "Oranges"))[3:6])
+labs <- c("-0.8 : -0.2","-0.2 : -0.1","-0.1 : 0",
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3","3 : 5",">5")
+
+
 
 # assign values into bins
 all_plot$bins <- cut(all_plot$value, 
