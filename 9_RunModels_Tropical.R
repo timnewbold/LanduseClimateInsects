@@ -38,15 +38,18 @@ predictsSites[is.na(predictsSites$Tropical), 'Tropical'] <- "Temperate"
 predictsSites$Tropical <- as.factor(predictsSites$Tropical)
 # levels: Temperate Tropical
 
+
+predictsSites <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ] #6069
+
 table(predictsSites$Tropical)
 
 # Temperate  Tropical 
-# 4353      1742 
+# 4327      1742 
 
 table(predictsSites[!is.na(predictsSites$LogAbund), 'Tropical'])
 
 # Temperate  Tropical 
-# 4170      1589
+# 4146      1589
 
 
 table(predictsSites$UI2, predictsSites$Tropical)
@@ -823,21 +826,21 @@ predictsSites <- droplevels(predictsSites)
 
 # SR subsets
 predictsSites_sr_trop <- predictsSites[predictsSites$Tropical == "Tropical", ] # 1742
-predictsSites_sr_temp <- predictsSites[predictsSites$Tropical == "Temperate", ] # 4334
+predictsSites_sr_temp <- predictsSites[predictsSites$Tropical == "Temperate", ] # 4327
 
 #length(unique(predictsSites_sr_trop$SS)) # 102
-#length(unique(predictsSites_sr_temp$SS)) # 162
+#length(unique(predictsSites_sr_temp$SS)) # 161
 
 #table(predictsSites_sr_trop$UI2)
 #table(predictsSites_sr_temp$UI2)
 
 # subset for abundance data
-predictsSites_ab <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5742
+predictsSites_ab <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5735
 
 
 
 predictsSites_ab_trop <- predictsSites_ab[predictsSites_ab$Tropical == "Tropical", ] # 1589
-predictsSites_ab_temp <- predictsSites_ab[predictsSites_ab$Tropical == "Temperate", ] # 4153
+predictsSites_ab_temp <- predictsSites_ab[predictsSites_ab$Tropical == "Temperate", ] # 4146
   
 
 length(unique(predictsSites_ab_trop$SS)) # 91

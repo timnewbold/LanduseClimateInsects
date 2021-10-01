@@ -42,6 +42,7 @@ print(anova(AbundMeanAnomalyModel0$model,AbundMeanAnomalyModel1$model))
 
 # save for use in predictions script
 save(AbundMeanAnomalyModel1, file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rdata"))
+#load( file = paste0(outDir, "/MeanAnomalyModelAbun_NH.rdata"))
 
 
 # run models with and without NH interaction, species richness models
@@ -60,6 +61,7 @@ print(anova(RichMeanAnomalyModel0$model,RichMeanAnomalyModel1$model))
 
 
 save(RichMeanAnomalyModel1, file = paste0(outDir, "/RichMeanAnomalyModel_NH.rdata"))
+#load(file = paste0(outDir, "/RichMeanAnomalyModel_NH.rdata"))
 
 
 # run models with and without NH interaction, Abundance models, max anomaly
@@ -78,6 +80,7 @@ print(anova(AbundMaxAnomalyModel0$model,AbundMaxAnomalyModel1$model))
 
 
 save(AbundMaxAnomalyModel1, file = paste0(outDir, "/AbundMaxAnomalyModel_NH.rdata"))
+#load(file = paste0(outDir, "/AbundMaxAnomalyModel_NH.rdata"))
 
 
 
@@ -96,6 +99,7 @@ RichMaxAnomalyModel1 <- GLMER(modelData = modelData,responseVar = "Species_richn
 print(anova(RichMaxAnomalyModel0$model,RichMaxAnomalyModel1$model))
 
 save(RichMaxAnomalyModel1, file = paste0(outDir, "/RichMaxAnomalyModel_NH.rdata"))
+#load(file = paste0(outDir, "/RichMaxAnomalyModel_NH.rdata"))
 
 
 ##%######################################################%##
@@ -215,6 +219,12 @@ tab_model(RichMeanAnomalyModel1$model, transform = NULL, file = paste0(outDir, "
 summary(RichMeanAnomalyModel1$model)
 R2GLMER(RichMeanAnomalyModel1$model) # use these values in the table
 
+#$conditional
+#[1] 0.638607
+
+#$marginal
+#[1] 0.01279844
+
 tab_model(AbundMaxAnomalyModel1$model, transform = NULL, file = paste0(outDir, "/AbunMaxAnomNH_output_table.html"))
 summary(AbundMaxAnomalyModel1$model)
 R2GLMER(AbundMaxAnomalyModel1$model)
@@ -223,7 +233,11 @@ tab_model(RichMaxAnomalyModel1$model, transform = NULL, file = paste0(outDir, "/
 summary(RichMaxAnomalyModel1$model)
 R2GLMER(RichMaxAnomalyModel1$model) # use these values in the table
 
+#$conditional
+#[1] 0.6361979
 
+#$marginal
+#[1] 0.01214215
 
 # For insects
 
@@ -858,93 +872,93 @@ ggsave(filename = paste0(outDir, "Figure_3_ab_sr.pdf"), height = 8, width = 8)
 
 
 #### extended data - max anom
-
-nd2 <- expand.grid(
-  StdTmaxAnomalyRS=seq(from = min(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
-                       to = max(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
-                       length.out = 200),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(AbundMaxAnomalyModel1$data$UI2)),
-  NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
-# NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
-nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd2$StdTmaxAnomalyRS,
-  originalX = predictsSites$StdTmaxAnomaly)
-nd2$NH_5000 <- round(BackTransformCentreredPredictor(
-  transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
-
-nd2$NH_5000[nd2$NH_5000  == 99] <- 100
-nd2$LogAbund <- 0
-nd2$Species_richness <- 0
-
-refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))) & 
-                  (nd2$NH_5000==100))
-
-exclQuantiles <- c(0.025,0.975)
-
-QPV <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Primary vegetation"],
-  probs = exclQuantiles)
-QSV <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Secondary vegetation"],
-  probs = exclQuantiles)
-QAL <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Agriculture_Low"],
-  probs = exclQuantiles)
-QAH <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
-  AbundMaxAnomalyModel1$data$UI2=="Agriculture_High"],
-  probs = exclQuantiles)
-
-a.preds.tmax <- PredictGLMERRandIter(model = AbundMaxAnomalyModel1$model,data = nd2, nIters = 10000)
-
-a.preds.tmax <- exp(a.preds.tmax)-0.01
-
-a.preds.tmax <- sweep(x = a.preds.tmax,MARGIN = 2,STATS = a.preds.tmax[refRow,],FUN = '/')
-
-a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
-a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
-
-nd2$PredMedian <- ((apply(X = a.preds.tmax,MARGIN = 1,
-                          FUN = median,na.rm=TRUE))*100)-100
-nd2$PredUpper <- ((apply(X = a.preds.tmax,MARGIN = 1,
-                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd2$PredLower <- ((apply(X = a.preds.tmax,MARGIN = 1,
-                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-
-# set factor levels
-nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
-
-nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
-
-# just take agriculture values
-nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
-
-# plot
-p1 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = NH_5000), size = 1) +
-  geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
-  geom_hline(yintercept =  0, lty = "dashed") + 
-  scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Change in total abundance (%)") +
-  xlab("Maximum Temperature Anomaly") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
-
-
-#ggsave(filename = paste0(outDir, "Extended_Data6_MaxAnomAbun_NH.pdf"), height = 4, width = 8)
+# 
+# nd2 <- expand.grid(
+#   StdTmaxAnomalyRS=seq(from = min(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
+#                        to = max(AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS),
+#                        length.out = 200),
+#   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+#              levels = levels(AbundMaxAnomalyModel1$data$UI2)),
+#   NH_5000.rs=c(-1.05,0.01493712,1.045653,2.073849))
+# # NH_5000.rs=c(-1.122627,-0.1351849,0.8498366,1.834235))
+# nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+#   transformedX = nd2$StdTmaxAnomalyRS,
+#   originalX = predictsSites$StdTmaxAnomaly)
+# nd2$NH_5000 <- round(BackTransformCentreredPredictor(
+#   transformedX = nd2$NH_5000.rs,originalX = predictsSites$NH_5000)*100,0)
+# 
+# nd2$NH_5000[nd2$NH_5000  == 99] <- 100
+# nd2$LogAbund <- 0
+# nd2$Species_richness <- 0
+# 
+# refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))) & 
+#                   (nd2$NH_5000==100))
+# 
+# exclQuantiles <- c(0.025,0.975)
+# 
+# QPV <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+#   AbundMaxAnomalyModel1$data$UI2=="Primary vegetation"],
+#   probs = exclQuantiles)
+# QSV <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+#   AbundMaxAnomalyModel1$data$UI2=="Secondary vegetation"],
+#   probs = exclQuantiles)
+# QAL <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+#   AbundMaxAnomalyModel1$data$UI2=="Agriculture_Low"],
+#   probs = exclQuantiles)
+# QAH <- quantile(x = AbundMaxAnomalyModel1$data$StdTmaxAnomalyRS[
+#   AbundMaxAnomalyModel1$data$UI2=="Agriculture_High"],
+#   probs = exclQuantiles)
+# 
+# a.preds.tmax <- PredictGLMERRandIter(model = AbundMaxAnomalyModel1$model,data = nd2, nIters = 10000)
+# 
+# a.preds.tmax <- exp(a.preds.tmax)-0.01
+# 
+# a.preds.tmax <- sweep(x = a.preds.tmax,MARGIN = 2,STATS = a.preds.tmax[refRow,],FUN = '/')
+# 
+# a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+# a.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
+# 
+# nd2$PredMedian <- ((apply(X = a.preds.tmax,MARGIN = 1,
+#                           FUN = median,na.rm=TRUE))*100)-100
+# nd2$PredUpper <- ((apply(X = a.preds.tmax,MARGIN = 1,
+#                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd2$PredLower <- ((apply(X = a.preds.tmax,MARGIN = 1,
+#                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# 
+# # set factor levels
+# nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+# 
+# nd2$NH_5000 <- factor(nd2$NH_5000, levels = c("100", "75", "50", "25"))
+# 
+# # just take agriculture values
+# nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
+# 
+# # plot
+# p1 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = NH_5000), size = 1) +
+#   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
+#   geom_hline(yintercept =  0, lty = "dashed") + 
+#   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+#   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
+#   facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Change in total abundance (%)") +
+#   xlab("Maximum Temperature Anomaly") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 150)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12),
+#         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
+# 
+# 
+# #ggsave(filename = paste0(outDir, "Extended_Data6_MaxAnomAbun_NH.pdf"), height = 4, width = 8)
 
 
 # richness and max anomaly
@@ -1026,7 +1040,7 @@ p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   geom_hline(yintercept = 0, lty = "dashed") +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_Low", 'Agriculture_High' = "d              Agriculture_High"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Change in species richness (%)") +
@@ -1037,9 +1051,9 @@ p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) +
         strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
 
 
-
+# abundance plot non-significant so not including in figure. 
 # organise plots together
-cowplot::plot_grid(p1, p2, nrow = 2)
+#cowplot::plot_grid(p1, p2, nrow = 2)
 
 # save
-ggsave(filename = paste0(outDir, "Extended_Data7_ab_sr_MAX.pdf"), height = 8, width = 8)
+ggsave(filename = paste0(outDir, "Extended_Data7_sr_MAX.pdf"), height = 4, width = 8)
