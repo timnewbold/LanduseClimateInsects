@@ -1,6 +1,6 @@
 ##%######################################################%##
 #                                                          #
-####          Data and R package requirements           ####
+####               R package requirements               ####
 #                                                          #
 ##%######################################################%##
 
@@ -24,20 +24,4 @@ install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions")
 # The StatisticalModels package includes various functions for analysing the
 # PREDICTS database
 install_github(repo = "timnewbold/StatisticalModels")
-
-
-# other useful functions, including those in the following scripts named
-# 'Predictsfunction.r' are found in the following repository.
-install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions", force = T)
-
-
-# I think yarg and roquefort are used in places
-# roquefort - spatial autocorrelation test - could add this to Functions.R
-# yarg is used to do the Chao richness test
-
-
-
-
-
-
 
