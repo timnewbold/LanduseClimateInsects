@@ -296,13 +296,20 @@ plot_data <- rbind(SP_df, SP_df_2018)
 # convert raster to dataframe
 plot_data2 <- plot_data[, c(1,2,6,7)]
 
+# remove the infs and NAs
+plot_data2 <- plot_data2[!is.na(plot_data2$StdAnom), ]
+plot_data2 <- plot_data2[!plot_data2$StdAnom ==  Inf, ]
+
+
 # organise breaks, colours and labels
-brks <- c(-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,10,50)
+brks <- c(-2.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3,5,10,450)
 cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
           (brewer.pal(n = 8,name = "Purples"))[4:6],
-          (brewer.pal(n = 9,name = "Oranges"))[5:9])
+          (brewer.pal(n = 9,name = "Oranges"))[3:7])
 labs <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","5 : 10", "> 10")
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3","3 : 5","5 : 10", "> 10")
+
+
 
 # assign values into bins
 plot_data2$bins <- cut(plot_data2$StdAnom, 
@@ -312,6 +319,9 @@ plot_data2$bins <- cut(plot_data2$StdAnom,
 
 
 plot_data2 <- plot_data2[!is.na(plot_data2$bins), ]
+
+# get worldmap for outline
+world_map <- map_data("world")
 
 # plot the raster
 p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 

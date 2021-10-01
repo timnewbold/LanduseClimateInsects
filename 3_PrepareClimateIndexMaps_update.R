@@ -35,19 +35,20 @@ tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
 
 # for testing baseline lengths:
-tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
-tmp1901_1910 <- tmp[[names(tmp)[1:120]]]
-tmp1901_1920 <- tmp[[names(tmp)[1:240]]]
+#tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
+#tmp1901_1910 <- tmp[[names(tmp)[1:120]]]
+#tmp1901_1920 <- tmp[[names(tmp)[1:240]]]
 
 
 # take the current predicts time data
 tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 
 # more recent data
-tmp2016_18<- tmp[[names(tmp)[1381:1416]]]
+#tmp2016_18<- tmp[[names(tmp)[1381:1416]]]
 
 # what is the active months threshold
-thresh <- 10 # 6, 8, 10
+thresh <- 10 # 6, 8, 10 degrees C
+thresh <- - 100 # want all months so setting crazy low threshold
 
 # create a function that can be run in parallel to produce maps
 
@@ -206,8 +207,9 @@ st2 <- Sys.time()
 
 print(st2 - st1) # Time difference of 1.013413 hours
 
-# save 
-save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, ".rdata"))
+# save
+save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_ALLMonths.rdata"))
+#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, ".rdata"))
 #save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2016_18_thresh_", thresh, ".rdata"))
 #save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline5.rdata"))
 #save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline10.rdata"))
@@ -521,7 +523,7 @@ cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "Anom"], SP_df[SP_df$T
 #                                                          #
 ##%######################################################%##
 
-
+# load the data for threshold and year range required
 # load(file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_8.rdata"))
 
 # convert to dataframe
@@ -554,9 +556,9 @@ plot_data <- SP_df[, c(1,2,5)]
 brks <- c(-0.6,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,3,5)
 cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
           (brewer.pal(n = 8,name = "Purples"))[4:6],
-          (brewer.pal(n = 8,name = "Oranges"))[3:4])
+          (brewer.pal(n = 8,name = "Oranges"))[3:5])
 labs <- c("-0.6 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", "3 : 5")
+          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3", ">3")
 
 # assign values into bins
 plot_data$bins <- cut(plot_data$Anom, 
@@ -732,7 +734,8 @@ final_plot <- cowplot::plot_grid(
 )
 
 # save as a pdf
-ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".pdf"), plot = last_plot(), width = 9, height = 10)
+#ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".pdf"), plot = last_plot(), width = 9, height = 10)
+ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_ALLMonths.pdf"), plot = last_plot(), width = 9, height = 10)
 
 # save final_plot as an rdata file to be used in later scripts
 #save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
@@ -762,67 +765,6 @@ ggplot(map_data[!is.na(map_data$n_months),]) +
 
 ggsave(filename = paste0(outDir, "Nmonths_plot_thresh_", thresh, ".pdf"), width = 4, height = 3)
 
-
-
-
-
-##### Manuscript, Figure 4, present and future anomaly #####
-
-# load(file = paste0(outDir, "Map_data_tempvars_2016_18.rdata"))
-
-
-plot_data_pres <- SP_df
-plot_data_fut <- as.data.frame(tmp2069_71std_climate_anomaly, xy = TRUE)
-
-# add years to data table
-plot_data_pres$year <- 2018
-plot_data_fut$year <- 2070
-
-# combine the two together
-all_plot <- rbind(plot_data_pres, plot_data_fut)
-
-all_plot <- all_plot[!is.na(all_plot$layer), ]
-
-# organise breaks, colours and labels
-brks <- c(-0.5,-0.2,-0.1,0,0.1,0.5,0.75,1,1.5,2,5,10,50)
-cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
-          (brewer.pal(n = 8,name = "Purples"))[4:6],
-          (brewer.pal(n = 9,name = "Oranges"))[5:9])
-labs <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","5 : 10", "> 10")
-
-# assign values into bins
-all_plot$bins <- cut(all_plot$layer, 
-                     breaks = brks, 
-                     labels = labs,
-                     include.lowest = TRUE)
-
-# plot
-ggplot(all_plot) + 
-  geom_raster(aes(x = x, y = y, fill = bins), alpha = 0.9) +
-  #scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
-  scale_fill_manual(values = cols) +
-  facet_grid(~ year) +
-  xlab("") +
-  ylab("") +
-  labs(fill = "Standardised\nTemperature\nAnomaly") +
-  theme_bw() +
-  theme(legend.position = 'bottom', 
-        #panel.border = element_blank(), 
-        panel.grid = element_blank(),
-        axis.text = element_blank(),
-        #legend.key.width = unit(3, "cm"),
-        axis.ticks = element_blank(), 
-        legend.text = element_text(size = 10), 
-        legend.title = element_text(size = 10), 
-        #legend.key.size = unit(0.2,"cm",
-        panel.border = element_rect(size = 0.2),
-        strip.background = element_rect(size = 0.2, fill = "transparent"),
-        strip.text = element_text(size = 10))
-
-
-# save plot as pdf
-ggsave(filename = paste0(outDir, "/Figure4_Current_Future_panel_plot.pdf"), width = 8, height = 4)
 
 
 
