@@ -147,115 +147,90 @@ rm(perc_auto)
 
 
 
-##%######################################################%##
-#                                                          #
-####      Additional checks - performance package       ####
-#                                                          #
-##%######################################################%##
-
-library(performance)
-
-# first the LU:CC models
-check_model(MeanAnomalyModelAbund$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
-check_model(MeanAnomalyModelRich$model, check = c("vif",  "ncv", "homogeneity", "reqq")) # 'check_normality()' does not support models of class 'glmerMod'.
-check_model(MaxAnomalyModelAbund$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
-check_model(MaxAnomalyModelRich$model, check = c("vif",  "ncv", "homogeneity", "reqq"))
-
-
-# problem with homogeneity of variance in the abundance models (try adding in block?)
-
-modelData <- MeanAnomalyModelAbund$data
-check_outliers(MeanAnomalyModelAbund$model)
-# Warning: 3 outliers detected (cases 229, 1815, 4874).
-
-modelData <- MeanAnomalyModelRich$data
-check_outliers(MeanAnomalyModelRich$model)
-# Warning: 1 outliers detected (cases 229).
-# Warning message:  In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
-
-modelData <- MaxAnomalyModelAbund$data
-check_outliers(MaxAnomalyModelAbund$model)
-# Warning: 3 outliers detected (cases 229, 1815, 4874).
-
-modelData <- MaxAnomalyModelRich$data
-check_outliers(MaxAnomalyModelRich$model)
-# Warning: 1 outliers detected (cases 229).
-# Warning message: In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
-
-# check autocorrelation of the residuals
-check_autocorrelation(MeanAnomalyModelAbund$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-check_autocorrelation(MeanAnomalyModelRich$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-check_autocorrelation(MaxAnomalyModelAbund$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-check_autocorrelation(MaxAnomalyModelRich$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-
-### then the LU:CC:NH models ###
-
-check_model(AbundMeanAnomalyModel1$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
-check_model(RichMeanAnomalyModel1$model, check = c("vif",  "ncv", "homogeneity", "reqq")) # 'check_normality()' does not support models of class 'glmerMod'.
-check_model(AbundMaxAnomalyModel1$model, check = c("vif", "normality", "ncv", "homogeneity", "reqq"))
-check_model(RichMaxAnomalyModel1$model, check = c("vif",  "ncv", "homogeneity", "reqq"))
-
-
-# problem with homogeneity of variance in the abundance models (try adding in block?)
-
-modelData <- AbundMeanAnomalyModel1$data
-check_outliers(AbundMeanAnomalyModel1$model)
-# OK: No outliers detected.
-
-modelData <- RichMeanAnomalyModel1$data
-check_outliers(RichMeanAnomalyModel1$model)
-# OK: No outliers detected.
-# Warning message: In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
-
-modelData <- AbundMaxAnomalyModel1$data
-check_outliers(AbundMaxAnomalyModel1$model)
-# OK: No outliers detected.
-
-modelData <- RichMaxAnomalyModel1$data
-check_outliers(RichMaxAnomalyModel1$model)
-# OK: No outliers detected.
-# Warning message: In hatvalues.merMod(model) : the hat matrix may not make sense for GLMMs
-
-
-# check autocorrelation of the residuals
-check_autocorrelation(AbundMeanAnomalyModel1$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-check_autocorrelation(RichMeanAnomalyModel1$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-check_autocorrelation(AbundMaxAnomalyModel1$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-check_autocorrelation(RichMaxAnomalyModel1$model)
-# Warning: Autocorrelated residuals detected (p < .001).
-
 
 ##%######################################################%##
 #                                                          #
-####         Additional checks - DHARMa package         ####
+####    Additional plots: residuals with anomaly/LU     ####
 #                                                          #
 ##%######################################################%##
 
-library(DHARMa)
+# additional plots for the abundance models to investigate residuals
 
-# working through using vignette https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html
-
-simulationOutput <- simulateResiduals(fittedModel = MeanAnomalyModelAbund$model, plot = T)
-
-plot(simulationOutput)
-
-plotResiduals(simulationOutput, form = MeanAnomalyModelAbund$data$UI2)
-plotResiduals(simulationOutput, form = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS)
+library(ggplot2)
+library(cowplot)
 
 
-simulationOutput2 <- simulateResiduals(fittedModel = MeanAnomalyModelRich$model, plot = F)
-
-plot(simulationOutput2)
-
-
-plotResiduals(simulationOutput2, form = MeanAnomalyModelRich$data$UI2)
-plotResiduals(simulationOutput2, form = MeanAnomalyModelRich$data$StdTmeanAnomalyRS)
+mod_list <- c("MeanAnomalyModelAbund", "MaxAnomalyModelAbund", 
+              "AbundMeanAnomalyModel1",  "AbundMaxAnomalyModel1")
 
 
+
+
+mod_res <- resid(MeanAnomalyModelAbund$model)
+
+plot_data1 <- cbind(mod_res, MeanAnomalyModelAbund$data[, c("UI2", "StdTmeanAnomalyRS")])
+
+p1 <- ggplot(data = plot_data1) +
+  geom_point(aes(x = StdTmeanAnomalyRS, y = mod_res, col = UI2), size = 0.5)+
+  scale_colour_manual(values = c("#009E73","#D55E00", "#E69F00", "#0072B2")) +
+  theme_bw() + 
+  ggtitle("Model of total abundance as a function of the STA \nand Land use") + 
+  ylab("Residuals")+
+  theme(legend.position = "bottom", legend.title = element_blank(), text = element_text(size = 8))
+
+
+
+mod_res2 <- resid(MaxAnomalyModelAbund$model)
+
+plot_data2 <- cbind(mod_res2, MaxAnomalyModelAbund$data[, c("UI2", "StdTmaxAnomalyRS")])
+
+p2 <- ggplot(data = plot_data2) +
+  geom_point(aes(x = StdTmaxAnomalyRS, y = mod_res, col = UI2), size = 0.5)+
+  scale_colour_manual(values = c("#009E73","#D55E00", "#E69F00", "#0072B2")) +
+  theme_bw() + 
+  ggtitle("Model of total abundance as a function of the STMA \nand Land use") + 
+  ylab("Residuals") +
+  theme(legend.position = "none", text = element_text(size = 8))
+
+
+mod_res3 <- resid(AbundMeanAnomalyModel1$model)
+
+plot_data3 <- cbind(mod_res3, AbundMeanAnomalyModel1$data[, c("UI2", "StdTmeanAnomalyRS")])
+
+p3 <- ggplot(data = plot_data3) +
+  geom_point(aes(x = StdTmeanAnomalyRS, y = mod_res, col = UI2), size = 0.5)+
+  scale_colour_manual(values = c("#009E73","#D55E00", "#E69F00", "#0072B2")) +
+  theme_bw() + 
+  ggtitle("Model of total abundance as a function of the STA, \nLand use and natural habitat availability") + 
+  ylab("Residuals") +
+  theme(legend.position = "none", text = element_text(size = 8))
+
+
+mod_res4 <- resid(AbundMaxAnomalyModel1$model)
+
+plot_data4 <- cbind(mod_res4, AbundMaxAnomalyModel1$data[, c("UI2", "StdTmaxAnomalyRS")])
+
+p4 <- ggplot(data = plot_data4) +
+  geom_point(aes(x = StdTmaxAnomalyRS, y = mod_res, col = UI2), size = 0.5)+
+  scale_colour_manual(values = c("#009E73","#D55E00", "#E69F00", "#0072B2")) +
+  theme_bw() + 
+  ggtitle("Model of total abundance as a function of the STMA, \nLand use and natural habitat availability") + 
+  ylab("Residuals") +
+  theme(legend.position = "none", text = element_text(size = 8))
+
+legend <- get_legend(
+  # create some space to the left of the legend
+  p1 + theme(legend.box.margin = margin(0, 0, 0, 12), text = element_text(size = 12))
+)
+
+
+
+plots <- cowplot::plot_grid(p1 + theme(legend.position = "none"), p2, p3, p4, 
+                   nrow = 2)
+
+
+cowplot::plot_grid(plots, legend, 
+                   nrow = 2, 
+                   rel_heights = c(6, 1))
+
+ggsave(filename = paste0(outdir, "Residual_plots_by_anom_All.pdf"), height = 7, width = 8)
