@@ -15,15 +15,35 @@ library(ggplot2)
 library(cowplot)
 library(sjPlot)
 
-
 # directories
 predictsDataDir <- "6_RunLUClimateModels/"
 outDir <- "7_RunLUClimateNHModels/"
 
 
-###Create Models for all insects in predicts for Standardised climate anomaly and Land interactions
-
+# read in data
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
+
+### explore the data 
+
+# look at spread of natural habitat availability across land used
+predictsSites$UI2 <- factor(predictsSites$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+
+ggplot(data = predictsSites) + 
+  geom_boxplot(aes(x = UI2, y = NH_5000)) + 
+  theme_bw()
+
+ggsave(filename = paste0(outDir, "Boxplot_NH_LU.pdf"))
+
+# look at spread of NH across anomlay values coloured by LU
+ggplot(data = predictsSites)+
+  geom_point(aes(x = StdTmeanAnomaly, y = NH_5000, col = UI2)) +
+  scale_colour_manual(values = c("#009E73", "#0072B2" , "#E69F00", "#D55E00")) + 
+  theme_bw()
+
+ggsave(filename = paste0(outDir, "Scatter_NH_LU_Anom.pdf"))
+
+
+#### Run the models ####
 
 # remove any NAs
 modelData <- na.omit(predictsSites[,c(
