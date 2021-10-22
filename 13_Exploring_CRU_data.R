@@ -138,26 +138,31 @@ for(i in vals){
   
   model_data <- droplevels(model_data)
   
-  model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
-                              fitFamily = "gaussian",fixedFactors = "UI2",
-                              fixedTerms = list(StdTmeanAnomalyRS=1),
-                              randomStruct = "(1|SS)+(1|SSB)",
-                              fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-                              saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+  # model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
+  #                             fitFamily = "gaussian",fixedFactors = "UI2",
+  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
+  #                             randomStruct = "(1|SS)+(1|SSB)",
+  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
+  #                             saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
   
   #summary(model_output$model)
   
+  model_output <- GLMER(modelData = model_data,responseVar = "LogAbund", 
+                        fitFamily = "gaussian",
+                        fixedStruct = "UI2 * StdTmeanAnomalyRS",
+                        randomStruct = "(1|SS)+(1|SSB)")
+  
   
   # save model output
-  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, ".rdata"))
+  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, "_Abun.rdata"))
   
   # save model stats
-  write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, ".csv"))
+  write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, "_Abun.csv"))
   
   
   # plot the results
   # the 0 one doesn't get a refrow with lnegth.out set to 300
-  if(i == 0){
+  if(i == 0 | i == 2 | i == 3 | i == 4 | i == 5){
     nd <- expand.grid(
       StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
                             to = max(model_output$data$StdTmeanAnomalyRS),
@@ -178,7 +183,7 @@ for(i in vals){
   # back transform the predictors
   nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
     transformedX = nd$StdTmeanAnomalyRS,
-    originalX = model_data$StdTmeanAnomaly)
+    originalX = predicts_sites2$StdTmeanAnomaly)
   
   # set richness and abundance to 0 - to be predicted
   nd$LogAbund <- 0
@@ -204,7 +209,7 @@ for(i in vals){
     probs = exclQuantiles)
   
   # predict the results
-  a.preds.tmean <- PredictGLMERRandIter(model = model_output$model,data = nd)
+  a.preds.tmean <- PredictGLMERRandIter(model = model_output$model,data = nd, nIters = 2000)
   
   # back transform the abundance values
   a.preds.tmean <- exp(a.preds.tmean)-0.01
@@ -249,7 +254,7 @@ for(i in vals){
     ggtitle(paste0("Sites with more than ", i, " stns"))
   
   # save
-  ggsave(filename = paste0(outdir, "/Plot_removing_", i, ".pdf"), height = 5, width = 6)
+  ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Abun.pdf"), height = 5, width = 6)
   
 
   
@@ -269,14 +274,18 @@ for(i in vals){
   
   model_data <- droplevels(model_data)
   
-  model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
-                              fitFamily = "poisson",fixedFactors = "UI2",
-                              fixedTerms = list(StdTmeanAnomalyRS=1),
-                              randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-                              fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-                              saveVars = c("SSBS"))
+  # model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
+  #                             fitFamily = "poisson",fixedFactors = "UI2",
+  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
+  #                             randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
+  #                             saveVars = c("SSBS"))
   
   #summary(model_output$model)
+  
+  model_output <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+                                 fixedStruct = "UI2 * StdTmeanAnomalyRS",
+                                 randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
   
   
   # save model output
@@ -288,7 +297,7 @@ for(i in vals){
   
   # plot the results
   # the 0 one doesn't get a refrow with lnegth.out set to 300
-  if(i == 0 | i == 2){
+  if(i == 0 | i == 2 | i == 3 | i == 4| i == 5){
     nd <- expand.grid(
       StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
                             to = max(model_output$data$StdTmeanAnomalyRS),
@@ -309,7 +318,7 @@ for(i in vals){
   # back transform the predictors
   nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
     transformedX = nd$StdTmeanAnomalyRS,
-    originalX = model_data$StdTmeanAnomaly)
+    originalX = predicts_sites2$StdTmeanAnomaly)
   
   # set richness and abundance to 0 - to be predicted
   nd$LogAbund <- 0
@@ -393,38 +402,52 @@ for(i in vals){
 
 #### Tropical sites, Abundance ####
 
+vals <- c(0,1,2,3,4,5,6)
+
+
+trop_data <- predicts_sites2[predicts_sites2$Latitude > -23.44 & predicts_sites2$Latitude < 23.44, ] # 1742 rows
+
+table(trop_data[!is.na(trop_data$LogAbund), "nstn"])
+# 0   1   2   3   4   5   7   8 
+# 127 174 367 586  39  65  17 214 
+
 
 # i <- 0
 for(i in vals){
   
   model_data <- trop_data[trop_data$nstn > i, ]
   
+  model_data <- model_data[!is.na(model_data$LogAbund), ]
+  
   model_data <- droplevels(model_data)
   
-  model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
-                              fitFamily = "gaussian",fixedFactors = "UI2",
-                              fixedTerms = list(StdTmeanAnomalyRS=1),
-                              randomStruct = "(1|SS)+(1|SSB)",
-                              fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-                              saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+  # model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
+  #                             fitFamily = "gaussian",fixedFactors = "UI2",
+  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
+  #                             randomStruct = "(1|SS)+(1|SSB)",
+  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
+  #                             saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
   
   #summary(model_output$model)
   
-  
+  model_output <- GLMER(modelData = model_data,responseVar = "LogAbund", 
+                        fitFamily = "gaussian",
+                        fixedStruct = "UI2 * StdTmeanAnomalyRS",
+                        randomStruct = "(1|SS)+(1|SSB)")
   # save model output
-  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, "_Tropical.rdata"))
+  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, "_Abun_Tropical.rdata"))
   
   # save model stats
-  write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, "_Tropical.csv"))
+  write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, "_Abun_Tropical.csv"))
   
   
   # plot the results
   # the 0 one doesn't get a refrow with lnegth.out set to 300
-  if(i == 0){
+  if(i == 0 | i == 5){
     nd <- expand.grid(
       StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
                             to = max(model_output$data$StdTmeanAnomalyRS),
-                            length.out = 100),
+                            length.out = 200),
       UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
                  levels = levels(model_output$data$UI2)))
   }else{
@@ -441,7 +464,7 @@ for(i in vals){
   # back transform the predictors
   nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
     transformedX = nd$StdTmeanAnomalyRS,
-    originalX = model_data$StdTmeanAnomaly)
+    originalX = predicts_sites2$StdTmeanAnomaly)
   
   # set richness and abundance to 0 - to be predicted
   nd$LogAbund <- 0
@@ -512,7 +535,7 @@ for(i in vals){
     ggtitle(paste0("Sites with more than ", i, " stns"))
   
   # save
-  ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Tropical.pdf"), height = 5, width = 6)
+  ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Abun_Tropical.pdf"), height = 5, width = 6)
   
   
   
@@ -521,3 +544,516 @@ for(i in vals){
 }
 
 
+
+
+#### Tropical sites, Richness ####
+
+table(trop_data$nstn)
+#   0   1   2   3   4   5   6   7   8 
+# 148 178 459 604  39  65   6  29 214
+
+
+# i <- 0
+for(i in vals){
+  
+  print(i)
+  
+  model_data <- trop_data[trop_data$nstn > i, ]
+  
+  model_data <- droplevels(model_data)
+  
+  # model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
+  #                             fitFamily = "poisson",fixedFactors = "UI2",
+  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
+  #                             randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"), 
+  #                             saveVars = c("SSBS"))
+  # 
+  #summary(model_output$model)
+  
+  
+  model_output <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+                        fixedStruct = "UI2 * StdTmeanAnomalyRS",
+                        randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+  
+  
+  # save model output
+  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, "_Tropical_Rich.rdata"))
+  
+  # save model stats
+  write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, "_Tropical_Rich.csv"))
+  
+  
+  # plot the results
+  # the 0 one doesn't get a refrow with lnegth.out set to 300
+  if(i == 0){
+    nd <- expand.grid(
+      StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
+                            to = max(model_output$data$StdTmeanAnomalyRS),
+                            length.out = 175),
+      UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+                 levels = levels(model_output$data$UI2)))
+  }else{
+    
+    nd <- expand.grid(
+      StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
+                            to = max(model_output$data$StdTmeanAnomalyRS),
+                            length.out = 300),
+      UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+                 levels = levels(model_output$data$UI2)))
+    
+  }
+  
+  # back transform the predictors
+  nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+    transformedX = nd$StdTmeanAnomalyRS,
+    originalX = predicts_sites2$StdTmeanAnomaly)
+  
+  # set richness and abundance to 0 - to be predicted
+  nd$LogAbund <- 0
+  nd$Species_richness <- 0
+  
+  # reference for % difference = primary vegetation and positive anomaly closest to 0
+  refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))))
+  
+  # adjust plot 1: mean anomaly and abundance
+  exclQuantiles <- c(0.025,0.975)
+  
+  QPV <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Primary vegetation"],
+    probs = exclQuantiles)
+  QSV <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Secondary vegetation"],
+    probs = exclQuantiles)
+  QAL <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Agriculture_Low"],
+    probs = exclQuantiles)
+  QAH <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Agriculture_High"],
+    probs = exclQuantiles)
+  
+  # predict the results
+  a.preds.tmean <- PredictGLMERRandIter(model = model_output$model,data = nd)
+  
+  # back transform the abundance values
+  a.preds.tmean <- exp(a.preds.tmean)
+  
+  # convert to relative to reference
+  a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
+  
+  # remove anything above and below the quantiles
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+  
+  # Get the median, upper and lower quants for the plot
+  nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                           FUN = median,na.rm=TRUE))*100)-100
+  nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+  nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+  
+  nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+  
+  
+  if(i %in% c(3,4,5,6)){
+    
+    # plot
+    ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+      geom_line(aes(col = UI2), size = 1) +
+      geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+      geom_hline(yintercept = 0, linetype = "dashed") +
+      scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+      scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+      theme_bw() + 
+      ylab("Change in Species Richness (%)") +
+      xlab("Standardised Temperature Anomaly") +
+      xlim(c(-0.5, 2)) +
+      ylim(c(-100, 450)) + 
+      theme(aspect.ratio = 1, text = element_text(size = 12),
+            strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), legend.title = element_blank()) +
+      ggtitle(paste0("Sites with more than ", i, " stns"))
+    
+    # save
+    ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Tropical_Rich.pdf"), height = 5, width = 6)
+    
+    
+    
+    
+  }else{
+  
+  # plot
+  ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+    geom_line(aes(col = UI2), size = 1) +
+    geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+    scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+    theme_bw() + 
+    ylab("Change in Species Richness (%)") +
+    xlab("Standardised Temperature Anomaly") +
+    xlim(c(-0.5, 2)) +
+    ylim(c(-100, 150)) + 
+    theme(aspect.ratio = 1, text = element_text(size = 12),
+          strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), legend.title = element_blank()) +
+    ggtitle(paste0("Sites with more than ", i, " stns"))
+  
+  # save
+  ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Tropical_Rich.pdf"), height = 5, width = 6)
+  
+  
+  }
+  
+  
+  rm(nd, model_data, model_output)
+  
+}
+
+
+
+#### Temperate sites, Abundance ####
+
+vals <- c(0,1,2,3,4,5,6)
+
+
+temp_data <- predicts_sites2[!predicts_sites2$SS %in% trop_data$SS, ] # 4327 rows
+
+table(temp_data[!is.na(temp_data$LogAbund), "nstn"])
+#  2    3    4    5    6    7    8 
+# 46  146   49    1   15   37 3852 
+
+
+# i <- 0
+for(i in vals){
+  
+  model_data <- temp_data[temp_data$nstn > i, ]
+  
+  model_data <- model_data[!is.na(model_data$LogAbund), ]
+  
+  model_data <- droplevels(model_data)
+  
+  # model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
+  #                             fitFamily = "gaussian",fixedFactors = "UI2",
+  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
+  #                             randomStruct = "(1|SS)+(1|SSB)",
+  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
+  #                             saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+  
+  #summary(model_output$model)
+  
+  model_output <- GLMER(modelData = model_data,responseVar = "LogAbund", 
+                        fitFamily = "gaussian",
+                        fixedStruct = "UI2 * StdTmeanAnomalyRS",
+                        randomStruct = "(1|SS)+(1|SSB)")
+  # save model output
+  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, "_Abun_Temperate.rdata"))
+  
+  # save model stats
+  write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, "_Abun_Temperate.csv"))
+  
+  
+  # plot the results
+  # the 0 one doesn't get a refrow with lnegth.out set to 300
+  #if(i == 0 | i == 5){
+    nd <- expand.grid(
+      StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
+                            to = max(model_output$data$StdTmeanAnomalyRS),
+                            length.out = 200),
+      UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+                 levels = levels(model_output$data$UI2)))
+  # }else{
+  #   
+  #   nd <- expand.grid(
+  #     StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
+  #                           to = max(model_output$data$StdTmeanAnomalyRS),
+  #                           length.out = 300),
+  #     UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+  #                levels = levels(model_output$data$UI2)))
+  #   
+  # }
+  
+  # back transform the predictors
+  nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+    transformedX = nd$StdTmeanAnomalyRS,
+    originalX = predicts_sites2$StdTmeanAnomaly)
+  
+  # set richness and abundance to 0 - to be predicted
+  nd$LogAbund <- 0
+  nd$Species_richness <- 0
+  
+  # reference for % difference = primary vegetation and positive anomaly closest to 0
+  refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))))
+  
+  # adjust plot 1: mean anomaly and abundance
+  exclQuantiles <- c(0.025,0.975)
+  
+  QPV <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Primary vegetation"],
+    probs = exclQuantiles)
+  QSV <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Secondary vegetation"],
+    probs = exclQuantiles)
+  QAL <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Agriculture_Low"],
+    probs = exclQuantiles)
+  QAH <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Agriculture_High"],
+    probs = exclQuantiles)
+  
+  # predict the results
+  a.preds.tmean <- PredictGLMERRandIter(model = model_output$model,data = nd, nIters = 2000)
+  
+  # back transform the abundance values
+  a.preds.tmean <- exp(a.preds.tmean)-0.01
+  
+  # convert to relative to reference
+  a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
+  
+  # remove anything above and below the quantiles
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+  
+  # Get the median, upper and lower quants for the plot
+  nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                           FUN = median,na.rm=TRUE))*100)-100
+  nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+  nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+  
+  nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+  
+  # plot
+  ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+    geom_line(aes(col = UI2), size = 1) +
+    geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+    scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+    theme_bw() + 
+    ylab("Change in Total Abundance (%)") +
+    xlab("Standardised Temperature Anomaly") +
+    xlim(c(-0.5, 2)) +
+    ylim(c(-100, 150)) + 
+    theme(aspect.ratio = 1, text = element_text(size = 12),
+          strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), legend.title = element_blank()) +
+    ggtitle(paste0("Sites with more than ", i, " stns"))
+  
+  # save
+  ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Abun_Temperate.pdf"), height = 5, width = 6)
+  
+  
+  
+  rm(nd, model_data, model_output)
+  
+}
+
+
+
+
+#### Temperate sites, Richness ####
+
+table(temp_data$nstn)
+#  2    3    4    5    6    7    8 
+# 46  146  108    1   15   37 3974 
+
+
+# i <- 0
+for(i in vals){
+  
+  print(i)
+  
+  model_data <- temp_data[temp_data$nstn > i, ]
+  
+  model_data <- droplevels(model_data)
+  
+  # model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
+  #                             fitFamily = "poisson",fixedFactors = "UI2",
+  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
+  #                             randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"), 
+  #                             saveVars = c("SSBS"))
+  # 
+  #summary(model_output$model)
+  
+  
+  model_output <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
+                        fixedStruct = "UI2 * StdTmeanAnomalyRS",
+                        randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+  
+  
+  # save model output
+  save(model_output, file = paste0(outdir, "/Model_output_removing_", i, "_Temperate_Rich.rdata"))
+  
+  # save model stats
+  #write.csv(model_output$stats, file = paste0(outdir, "/Model_stats_removing_", i, "_Temperate_Rich.csv"))
+  
+  
+  # plot the results
+  # the 0 one doesn't get a refrow with lnegth.out set to 300
+  #if(i == 0){
+    nd <- expand.grid(
+      StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
+                            to = max(model_output$data$StdTmeanAnomalyRS),
+                            length.out = 275),
+      UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+                 levels = levels(model_output$data$UI2)))
+  # }else{
+  #   
+  #   nd <- expand.grid(
+  #     StdTmeanAnomalyRS=seq(from = min(model_output$data$StdTmeanAnomalyRS),
+  #                           to = max(model_output$data$StdTmeanAnomalyRS),
+  #                           length.out = 300),
+  #     UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+  #                levels = levels(model_output$data$UI2)))
+  #   
+  # }
+  # 
+  # back transform the predictors
+  nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+    transformedX = nd$StdTmeanAnomalyRS,
+    originalX = predicts_sites2$StdTmeanAnomaly)
+  
+  # set richness and abundance to 0 - to be predicted
+  nd$LogAbund <- 0
+  nd$Species_richness <- 0
+  
+  # reference for % difference = primary vegetation and positive anomaly closest to 0
+  refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))))
+  
+
+  # adjust plot 1: mean anomaly and abundance
+  exclQuantiles <- c(0.025,0.975)
+  
+  QPV <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Primary vegetation"],
+    probs = exclQuantiles)
+  QSV <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Secondary vegetation"],
+    probs = exclQuantiles)
+  QAL <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Agriculture_Low"],
+    probs = exclQuantiles)
+  QAH <- quantile(x = model_output$data$StdTmeanAnomalyRS[
+    model_output$data$UI2=="Agriculture_High"],
+    probs = exclQuantiles)
+  
+  # predict the results
+  a.preds.tmean <- PredictGLMERRandIter(model = model_output$model,data = nd)
+  
+  # back transform the abundance values
+  a.preds.tmean <- exp(a.preds.tmean)
+  
+  # convert to relative to reference
+  a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
+  
+  # remove anything above and below the quantiles
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
+  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+  
+  # Get the median, upper and lower quants for the plot
+  nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                           FUN = median,na.rm=TRUE))*100)-100
+  nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+  nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+  
+  nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High" ))
+  
+  # plot
+  ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+    geom_line(aes(col = UI2), size = 1) +
+    geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+    scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
+    theme_bw() + 
+    ylab("Change in Species Richness (%)") +
+    xlab("Standardised Temperature Anomaly") +
+    xlim(c(-0.5, 2)) +
+    ylim(c(-100, 200)) + 
+    theme(aspect.ratio = 1, text = element_text(size = 12),
+          strip.text.x = element_text(hjust = 0, size = 12, face = "bold"), legend.title = element_blank()) +
+    ggtitle(paste0("Sites with more than ", i, " stns"))
+  
+  # save
+  ggsave(filename = paste0(outdir, "/Plot_removing_", i, "_Temperate_Rich.pdf"), height = 5, width = 6)
+  
+  
+  
+  rm(nd, model_data, model_output)
+  
+}
+
+
+
+
+
+
+
+#### maps of stns ####
+
+pdf(file = paste0(outdir, "/Maps_removing_sites.pdf"), width = 10, height = 8)
+par(mfrow = c(2,2))
+
+plot(stn_0130_mean, main = "All sites")
+plot(predicts_sp, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
+
+predicts_sp_1 <- predicts_sp[predicts_sp$stn > 0, ]
+
+plot(stn_0130_mean, main = "Sites supported by 1 or more stations")
+plot(predicts_sp_1, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
+
+predicts_sp_2 <- predicts_sp[predicts_sp$stn > 1, ]
+
+plot(stn_0130_mean, main = "Sites supported by 2 or more stations")
+plot(predicts_sp_2, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
+
+predicts_sp_3 <- predicts_sp[predicts_sp$stn > 2, ]
+
+plot(stn_0130_mean, main = "Sites supported by 3 or more stations")
+plot(predicts_sp_3, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
+
+
+dev.off()
+
+
+
+pdf(file = paste0(outdir, "/Histograms_anomaly_removing_sites.pdf"), width = 10, height = 8)
+par(mfrow = c(2,2))
+
+
+hist(predicts_sp$StdTmeanAnomaly, main = "All sites", xlab = "Standardised Temperature Anomaly")
+hist(predicts_sp_1$StdTmeanAnomaly, main = "Sites supported by 1 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(predicts_sp_2$StdTmeanAnomaly, main = "Sites supported by 2 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(predicts_sp_3$StdTmeanAnomaly, main = "Sites supported by 3 or more stations", xlab = "Standardised Temperature Anomaly")
+
+
+dev.off()
