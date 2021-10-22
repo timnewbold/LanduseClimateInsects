@@ -85,10 +85,10 @@ check_outliers(MaxAnomalyModelRich$model, method = "cook")
 
 # 1. abundance mean anomaly
 
-result1 <- cooks.distance(MeanAnomalyModelAbund$model)
-range(result1)
-summary(result1 < 1)# all true
-result1[result1 > 0.4]
+# result1 <- cooks.distance(MeanAnomalyModelAbund$model, sort = T)
+# range(result1)
+# summary(result1 < 1)# all true
+# result1[result1 > 0.4]
 
 modelData <- MeanAnomalyModelAbund$data
 
@@ -98,16 +98,17 @@ maxIters=10000
 optimizer="bobyqa"
 alt.est.a <- influence(MeanAnomalyModelAbund$model, "SS")
 plot(alt.est.a, which = "cook", sort = T)
+result1 <- cooks.distance(alt.est.a, sort = T)
 # looks like there are some with larger distances
 # 2 with higher values (previewed the plot and made it large to see the names)
 # SC1_2011__Meijer 1, CC1_2007__Ewers 1
 
 # 2. Richness mean anomaly
 
-result2 <- cooks.distance(MeanAnomalyModelRich$model)
-range(result2)
-summary(result2 < 1)# all true
-result2[result2 > 0.4]
+# result2 <- cooks.distance(MeanAnomalyModelRich$model)
+# range(result2)
+# summary(result2 < 1)# all true
+# result2[result2 > 0.4]
 
 modelData <- MeanAnomalyModelRich$data
 
@@ -127,10 +128,10 @@ plot(alt.est.a, which = "cook", sort = T)
 # 3. Abundance Max Anomaly
 
   
-result3 <- cooks.distance(MaxAnomalyModelAbund$model)
-range(result3)
-summary(result3 < 1)# all true
-result3[result3 > 0.4]
+# result3 <- cooks.distance(MaxAnomalyModelAbund$model)
+# range(result3)
+# summary(result3 < 1)# all true
+# result3[result3 > 0.4]
 
 modelData <- MaxAnomalyModelAbund$data
 
@@ -148,10 +149,11 @@ plot(alt.est.a, which = "cook", sort = T)
 
 
 # 4. Richness Max Anomaly
-result4 <- cooks.distance(MaxAnomalyModelRich$model)
-range(result4)
-summary(result4 < 1)# all true
-result4[result4 > 0.4]
+
+# result4 <- cooks.distance(MaxAnomalyModelRich$model)
+# range(result4)
+# summary(result4 < 1)# all true
+# result4[result4 > 0.4]
 
 modelData <- MaxAnomalyModelRich$data
 
