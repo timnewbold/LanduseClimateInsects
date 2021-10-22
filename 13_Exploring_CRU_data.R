@@ -1012,13 +1012,8 @@ for(i in vals){
 
 #### maps of stns ####
 
-pdf(file = paste0(outdir, "/Maps_removing_sites.pdf"), width = 10, height = 8)
-par(mfrow = c(2,2))
-
-plot(stn_0130_mean, main = "All sites")
-plot(predicts_sp, add = T)
-abline(h = -23.44, lty = "dashed")
-abline(h = 23.44, lty = "dashed")
+pdf(file = paste0(outdir, "/Maps_removing_sites.pdf"), width = 10, height = 6)
+par(mfrow = c(2,3))
 
 predicts_sp_1 <- predicts_sp[predicts_sp$stn > 0, ]
 
@@ -1041,10 +1036,31 @@ plot(predicts_sp_3, add = T)
 abline(h = -23.44, lty = "dashed")
 abline(h = 23.44, lty = "dashed")
 
+predicts_sp_4 <- predicts_sp[predicts_sp$stn > 3, ]
+
+plot(stn_0130_mean, main = "Sites supported by 4 or more stations")
+plot(predicts_sp_4, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
+
+predicts_sp_5 <- predicts_sp[predicts_sp$stn > 4, ]
+
+plot(stn_0130_mean, main = "Sites supported by 5 or more stations")
+plot(predicts_sp_5, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
+
+predicts_sp_6 <- predicts_sp[predicts_sp$stn > 5, ]
+
+plot(stn_0130_mean, main = "Sites supported by 6 or more stations")
+plot(predicts_sp_6, add = T)
+abline(h = -23.44, lty = "dashed")
+abline(h = 23.44, lty = "dashed")
 
 dev.off()
 
 
+#### histograms of data ####
 
 pdf(file = paste0(outdir, "/Histograms_anomaly_removing_sites.pdf"), width = 10, height = 8)
 par(mfrow = c(2,2))
@@ -1054,6 +1070,21 @@ hist(predicts_sp$StdTmeanAnomaly, main = "All sites", xlab = "Standardised Tempe
 hist(predicts_sp_1$StdTmeanAnomaly, main = "Sites supported by 1 or more stations", xlab = "Standardised Temperature Anomaly")
 hist(predicts_sp_2$StdTmeanAnomaly, main = "Sites supported by 2 or more stations", xlab = "Standardised Temperature Anomaly")
 hist(predicts_sp_3$StdTmeanAnomaly, main = "Sites supported by 3 or more stations", xlab = "Standardised Temperature Anomaly")
+
+
+dev.off()
+
+
+pdf(file = paste0(outdir, "/Histograms_anomaly_removing_sites_tropical.pdf"), width = 10, height = 8)
+par(mfrow = c(2,3))
+
+#hist(trop_data$StdTmeanAnomaly, main = "All sites", xlab = "Standardised Temperature Anomaly")
+hist(trop_data[trop_data$nstn > 0, "StdTmeanAnomaly"], main = "Sites supported by 1 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(trop_data[trop_data$nstn > 1, "StdTmeanAnomaly"], main = "Sites supported by 2 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(trop_data[trop_data$nstn > 2, "StdTmeanAnomaly"], main = "Sites supported by 3 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(trop_data[trop_data$nstn > 3, "StdTmeanAnomaly"], main = "Sites supported by 4 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(trop_data[trop_data$nstn > 4, "StdTmeanAnomaly"], main = "Sites supported by 5 or more stations", xlab = "Standardised Temperature Anomaly")
+hist(trop_data[trop_data$nstn >5, "StdTmeanAnomaly"], main = "Sites supported by 6 or more stations", xlab = "Standardised Temperature Anomaly")
 
 
 dev.off()
