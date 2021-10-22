@@ -28,7 +28,7 @@ predictsSites <- readRDS(file = paste0(datadir,"PREDICTSSiteData.rds"))
 #### 1. abundance model, mean anomaly ####
 
 model_data <- predictsSites[!is.na(predictsSites$LogAbund), ]
-model_data <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ]
+model_data <- model_data[!is.na(model_data$StdTmeanAnomalyRS), ]
 
 
 abund_mean_mod <- MCMCglmm(LogAbund ~ UI2 + poly(StdTmeanAnomalyRS,1) + UI2:poly(StdTmeanAnomalyRS,1), 
@@ -340,3 +340,11 @@ library(stargazer)
 stargazer(mcmcOutputs, type = "text", summary = FALSE, 
           out = paste0(outdir, "MCMC_output_tables.htm"))
 
+
+
+#### observed vs fitted plots ####
+
+vals <- predict(abund_mean_mod)
+
+plot(model_data$LogAbund,vals, 
+     xlab = "Observed values", ylab = "Fitted values") 
