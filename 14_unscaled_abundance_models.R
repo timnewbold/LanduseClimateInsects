@@ -31,6 +31,8 @@ predictsSites <- readRDS(file = paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 model_data <- predictsSites[!is.na(predictsSites$Total_abundance), ] # 5759 rows
 
+model_data <- model_data[!is.na(model_data$StdTmeanAnomalyRS), ] # 5735 rows
+
 model_data$LogAbund_new <- log(model_data$Total_abundance + 0.01)
 
 # 1. Abundance, mean anomaly
@@ -44,6 +46,7 @@ MeanAnomalyModelAbund_test <- GLMERSelect(modelData = model_data,responseVar = "
 # save the model output
 save(MeanAnomalyModelAbund_test, file = paste0(outDir, "MeanAnomalyModelAbund_notRSAbun.rdata"))
 
+load(file = paste0(outDir, "MeanAnomalyModelAbund_notRSAbun.rdata"))
 
 
 ## compare summaries with original model
@@ -294,14 +297,14 @@ legend(
 
 dev.off()
 
+
+
+
+
+
 ##### model checks for both models ####
 
-
-
-
-mod_list <- c("MeanAnomalyModelAbund", "MeanAnomalyModelAbund_test")
-
-#x <- mod_list[1]
+mod_list <- c("MeanAnomalyModelAbund_test")
 
 for(x in mod_list){
   
@@ -353,21 +356,48 @@ for(x in mod_list){
   
   if(grepl("Abun", x) == 1) {
     
-    cowplot::plot_grid(p1,p2,p3,
-                       labels = c(paste0("A.", x), "B.", "C."))
-    ggsave(file = paste0(outDir, x, "_model_checks.pdf"), height = 10, width = 10)
     
-    rm(p1, p2, p3)
+    #predData <- predictsSites[!is.na(predictsSites$LogAbund), ]
+    
+    # 4. plot of observed vs fitted values
+    
+    pdf(NULL)
+    dev.control(displaylist="enable")
+    plot(model_data$LogAbund_new,fitted(get(x)$model), 
+         xlab = "Observed values", ylab = "Fitted values") 
+    abline(a = 0, b = 1, col = "red", lwd = 2)
+    p4 <- recordPlot()
+    invisible(dev.off())
+    
+    
+    cowplot::plot_grid(p1,p2,p3, p4,
+                       labels = c("A.", "B.", "C.", "D."))
+    
+    ggsave(file = paste0(outDir, x, "_model_checks_UNSCALED.pdf"), height = 10, width = 10)
+    
+    rm(p1, p2, p3, p4)
     rm(perc_auto)
     
     
   }else{
-    cowplot::plot_grid(p2,p3,
-                       labels = c("A.", "B."))#
     
-    ggsave(file = paste0(outDir, x, "_model_checks.pdf"), height = 5, width = 10) 
     
-    rm(p2, p3)
+    # 4. plot of observed vs fitted values
+    
+    pdf(NULL)
+    dev.control(displaylist="enable")
+    plot(predictsSites$Species_richness,fitted(get(x)$model), 
+         xlab = "Observed values", ylab = "Fitted values") 
+    abline(a = 0, b = 1, col = "red", lwd = 2)
+    p4 <- recordPlot()
+    invisible(dev.off())
+    
+    cowplot::plot_grid(p2,p3,p4,
+                       labels = c("A.", "B.", "C."))#
+    
+    ggsave(file = paste0(outDir, x, "_model_checks.pdf"), height = 10, width = 10) 
+    
+    rm(p2, p3, p4)
     rm(perc_auto)
     
   }
@@ -376,4 +406,54 @@ for(x in mod_list){
 
 
 
+#### alternative plots. ####
 
+modelData = model_data
+# Plotting residuals as a function of fixed effects. 
+plot(MeanAnomalyModelAbund_test$model, resid(., type = "pearson") ~ fitted(.) | UI2)
+plot(MeanAnomalyModelAbund$model, resid(., type = "pearson") ~ fitted(.) | UI2)
+
+
+plot(MeanAnomalyModelAbund_test$model,UI2~resid(.,type="pearson"))
+plot(MeanAnomalyModelAbund$model,UI2~resid(.,type="pearson"))
+
+
+
+mod_res <- resid(MeanAnomalyModelAbund_test$model)
+
+plot_data <- cbind(mod_res, modelData[, c("UI2", "StdTmeanAnomalyRS")])
+
+
+library(ggplot2)
+
+p1 <- ggplot(data = plot_data) +
+  geom_point(aes(x = StdTmeanAnomalyRS, y = mod_res, col = UI2))+
+  scale_colour_manual(values = c("#009E73","#D55E00", "#E69F00", "#0072B2")) +
+  theme_bw() + 
+  ggtitle("Unscaled abundance") + 
+  ylab("Residuals") +
+  theme(legend.position = "none")
+
+
+plot_data2 <- cbind(resid(MeanAnomalyModelAbund$model), MeanAnomalyModelAbund$data[, c("UI2", "StdTmeanAnomalyRS")])
+colnames(plot_data2)[1] <- "mod_res"
+
+p2 <- ggplot(data = plot_data2) +
+  geom_point(aes(x = StdTmeanAnomalyRS, y = mod_res, col = UI2))+
+  scale_colour_manual(values = c("#009E73","#D55E00", "#E69F00", "#0072B2")) +
+  theme_bw() + 
+  ggtitle("Scaled abundance") + 
+  ylab("Residuals")
+
+legend <- get_legend(
+  # create some space to the left of the legend
+  p2 + theme(legend.box.margin = margin(0, 0, 0, 12))
+)
+
+library(cowplot)
+
+cowplot::plot_grid(p1, p2 + theme(legend.position = "none"), legend, 
+                   nrow = 1, 
+                  rel_widths = c(2,2,1))
+
+ggsave(filename = paste0(outDir, "Residual_plots_by_anom_UNSCALED.pdf"), height = 5, width = 9)
