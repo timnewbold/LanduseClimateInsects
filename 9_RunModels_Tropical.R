@@ -89,6 +89,23 @@ ggplot(data = plot_data) +
 #"#D55E00" - red
 
 
+### look at correlations between climate metrics for realm subsets ###
+
+trop <- predictsSites[predictsSites$Tropical == "Tropical", ]
+
+temp <- predictsSites[predictsSites$Tropical == "Temperate", ]
+
+# trop
+cor(trop$avg_temp, trop$TmeanAnomaly) # -0.11
+cor(trop$avg_temp, trop$StdTmeanAnomaly) # 0.005
+cor(trop$TmeanAnomaly, trop$StdTmeanAnomaly) # 0.33
+
+#temp
+cor(temp$avg_temp, temp$TmeanAnomaly) # -0.14
+cor(temp$avg_temp, temp$StdTmeanAnomaly) # -0.66
+cor(temp$TmeanAnomaly, temp$StdTmeanAnomaly) # 0.62
+
+
 # 1. Abundance, mean anomaly
 MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
                                      fitFamily = "gaussian",
