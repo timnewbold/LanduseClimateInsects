@@ -25,3 +25,26 @@ install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions")
 # PREDICTS database
 install_github(repo = "timnewbold/StatisticalModels")
 
+
+
+############ 2. Data to be downloaded ############
+
+# Datasets used in this analysis can be downloaded from the following webpages.
+
+# PREDICTs data - Biodiversity samples
+# https://data.nhm.ac.uk/dataset/the-2016-release-of-the-predicts-database
+
+
+
+# CRU data - TMP and TMX data for mean and max monthly temperatures
+# https://crudata.uea.ac.uk/cru/data/hrg/
+
+
+
+# Hoskins data - primary and secondary vegetation layers, which are then combined
+# into a "natural habitat" layer.
+# http://doi.org/10.4225/08/ 56DCD9249B224
+
+
+
+
