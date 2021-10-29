@@ -125,6 +125,7 @@ testCategorical(MeanAnomalyModelAbund_simres, catPred = predictsSites$UI2)
 
 
 
+
 #### Plot results of glmmTMB model ####
 
 
@@ -336,6 +337,8 @@ tab_model(SR_Zinf_mod, MeanAnomalyModelRich$model,
           show.obs =  F, 
           file = paste0(outDir, "Richness_Zinf_results_tab.html"))
 
+
+
 ##%######################################################%##
 #                                                          #
 ####          abundance model, zero inflated            ####
@@ -344,6 +347,7 @@ tab_model(SR_Zinf_mod, MeanAnomalyModelRich$model,
 
 
 model_data <- predictsSites[!is.na(predictsSites$LogAbund), ]
+model_data <- droplevels(model_data)
 
 Ab_Zinf_mod <- glmmTMB::glmmTMB(LogAbund ~ UI2 + poly(StdTmeanAnomalyRS,1) + UI2:poly(StdTmeanAnomalyRS,1) + (1|SS) + (1|SSB), data = model_data, ziformula = ~1, family=gaussian)
 
@@ -354,10 +358,10 @@ save(Ab_Zinf_mod, file = paste0(outDir, "AbundanceMeanAnom_zeroinf.rdata"))
 
 fixed.effects(Ab_Zinf_mod)
 
-### cant extract residuals for this model for some reason, so cannot generate plots. 
+### cant extract residuals for this model for some reason, so cannot generate plots. Doesn't work using Dharma package either. 
 
 #plot(abun_NB_mod)
-qqnorm(residuals(Ab_Zinf_mod), main = "")
+qqnorm(residuals(Ab_Zinf_mod, type = "response"), main = "")
 qqline(resid(Ab_Zinf_mod))
 
 
@@ -392,10 +396,10 @@ plot(Ab_Zinf_mod_simres)
 load("6_RunLUClimateModels/MeanAnomalyModelAbund.rdata")
 
 
-qqnorm(resid(MeanAnomalyModelRich$model), main = "")
-qqline(resid(MeanAnomalyModelRich$model))
+qqnorm(resid(MeanAnomalyModelAbund$model), main = "")
+qqline(resid(MeanAnomalyModelAbund$model))
 
-plot(fitted(MeanAnomalyModelRich$model), residuals(MeanAnomalyModelRich$model))
+plot(fitted(MeanAnomalyModelAbund$model), residuals(MeanAnomalyModelAbund$model))
 
 
 # compare coeffs
