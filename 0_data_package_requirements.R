@@ -46,5 +46,8 @@ install_github(repo = "timnewbold/StatisticalModels")
 # http://doi.org/10.4225/08/ 56DCD9249B224
 
 
-
-
+# To see a list of all R packages used in this work, please run the following code from a 
+# working directory containing all scripts:
+library(renv) 
+pckgs <- unique(dependencies(getwd()))
+unique(pckgs$Package)
