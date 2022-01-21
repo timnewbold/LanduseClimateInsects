@@ -48,7 +48,7 @@ tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 
 # what is the active months threshold
 thresh <- 10 # 6, 8, 10 degrees C
-thresh <- - 100 # want all months so setting crazy low threshold
+# thresh <- - 100 # want all months so setting crazy low threshold
 
 # create a function that can be run in parallel to produce maps
 
@@ -524,7 +524,7 @@ cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "Anom"], SP_df[SP_df$T
 ##%######################################################%##
 
 # load the data for threshold and year range required
-# load(file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_8.rdata"))
+# load(file = paste0(outDir, "Map_data_tempvars_2004_06.rdata"))
 
 # convert to dataframe
 temperatureVars2 <- as.data.frame(temperatureVars)
@@ -571,30 +571,58 @@ plot_data$bins <- cut(plot_data$Anom,
 world_map <- map_data("world")
 
 # plot the raster
+# p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) + 
+#   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white",  size = 0.1) +
+#   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
+#   scale_fill_manual(values = cols) + 
+#   xlab("") +
+#   ylab("") +
+#   labs(fill = "Absolute Temperature Change") +
+#   theme_bw() +
+#   theme(legend.position = 'bottom', 
+#         panel.border = element_blank(), 
+#         panel.grid = element_blank(),
+#         axis.text = element_blank(),
+#         #legend.key.width = unit(3, "cm"),
+#         axis.ticks = element_blank(), 
+#         legend.text = element_text(size = 14), 
+#         legend.title = element_text(size = 16), 
+#         legend.key.size = unit(0.2,"cm"),
+#         title = element_text(size = 14)) +
+#   #guides(fill = guide_colorbar(title.position = "top")) + 
+#   ggtitle("a.")
+
+# trying alternative legend
 p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) + 
   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white",  size = 0.1) +
-  geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
+  geom_tile(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
   scale_fill_manual(values = cols) + 
   xlab("") +
   ylab("") +
-  labs(fill = "Absolute Temperature Change") +
+  labs(fill = "Absolute\nTemperature\nChange") +
   theme_bw() +
-  theme(legend.position = 'bottom', 
+  theme(legend.position = c(0.15, 0.3), 
         panel.border = element_blank(), 
         panel.grid = element_blank(),
         axis.text = element_blank(),
         #legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
-        legend.text = element_text(size = 14), 
-        legend.title = element_text(size = 16), 
-        legend.key.size = unit(0.2,"cm"),
-        title = element_text(size = 14)) +
-  #guides(fill = guide_colorbar(title.position = "top")) + 
+        legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 7), 
+        legend.key.size = unit(0.2,"cm"), legend.direction = "vertical",
+        title = element_text(size = 8, face = "bold")) +
+  guides(fill = guide_legend(title.position = "top") ) + 
   ggtitle("a.")
+
+
+
+
+
 
 # get the mean climate value for each row of the dataset
 rows <- init(Anom_ras, v='row')
 ravg <- zonal(Anom_ras, rows, fun = 'mean', na.rm = T)
+ravg[is.nan(ravg)] <- NA
 ravg <- as.data.frame(ravg)
 
 # plot the marginal plot
@@ -635,31 +663,53 @@ plot_data2$bins <- cut(plot_data2$StdAnom,
 
 plot_data2 <- plot_data2[!is.na(plot_data2$bins), ]
 
-# plot the raster
+# # plot the raster
+# p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 
+#   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
+#   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
+#   scale_fill_manual(values = cols2) + 
+#   xlab("") +
+#   ylab("") +
+#   labs(fill = "Standardised Temperature Anomaly") +
+#   theme_bw() +
+#   theme(legend.position = 'bottom', 
+#         panel.border = element_blank(), 
+#         panel.grid = element_blank(),
+#         axis.text = element_blank(),
+#         #legend.key.width = unit(3, "cm"),
+#         axis.ticks = element_blank(), 
+#         legend.text = element_text(size = 14), 
+#         legend.title = element_text(size = 16), 
+#         legend.key.size = unit(0.2,"cm"),
+#         title = element_text(size = 14)) +
+#   #guides(fill = guide_colorbar(title.position = "top")) +
+#   ggtitle("b.")
+
 p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 
   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
   scale_fill_manual(values = cols2) + 
   xlab("") +
   ylab("") +
-  labs(fill = "Standardised Temperature Anomaly") +
+  labs(fill = "Standardised\nTemperature\nAnomaly") +
   theme_bw() +
-  theme(legend.position = 'bottom', 
+  theme(legend.position = c(0.15, 0.3), 
         panel.border = element_blank(), 
         panel.grid = element_blank(),
         axis.text = element_blank(),
         #legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
-        legend.text = element_text(size = 14), 
-        legend.title = element_text(size = 16), 
-        legend.key.size = unit(0.2,"cm"),
-        title = element_text(size = 14)) +
-  #guides(fill = guide_colorbar(title.position = "top")) +
+        legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 7), 
+        legend.key.size = unit(0.2,"cm"), legend.direction = "vertical",
+        title = element_text(size = 8, face = "bold")) +
+  guides(fill = guide_legend(title.position = "top") ) + 
   ggtitle("b.")
 
 # get the mean climate value for each row of the dataset
 rows2 <- init(StdAnom_ras, v='row')
 ravg2 <- zonal(StdAnom_ras, rows2, fun = 'mean', na.rm = T)
+ravg2[is.nan(ravg2)] <- NA
 ravg2 <- as.data.frame(ravg2)
 
 # remove the 3 infinite values
@@ -697,45 +747,47 @@ p0 <- ggplot() +
 
 
 final_plot <- cowplot::plot_grid(
-  cowplot::plot_grid(
+  #cowplot::plot_grid(
     cowplot::plot_grid(
-      p1 + theme(legend.position = "none")
+      p1 
       , p2
       , nrow = 1
       , align = "hv"
-      , rel_widths = c(3,1))
-    , cowplot::plot_grid(
-      get_legend(p1)
-      #, p0
-      #, ncol = 2
-      , rel_widths = c(2,1))
+      , rel_widths = c(3,1)),
+    # , cowplot::plot_grid(
+    #   get_legend(p1)
+    #   #, p0
+    #   #, ncol = 2
+    #   , rel_widths = c(2,1))
     
-    , nrow = 2
-    , rel_heights = c(3, 1)
-  ),
+   # , nrow = 2
+   # , rel_heights = c(3, 1)
+  #),
   cowplot::plot_grid(
-    cowplot::plot_grid(
-      p3 + theme(legend.position = "none")
+   # cowplot::plot_grid(
+      p3 
       , p4
       , nrow = 1
       , align = "hv"
-      , rel_widths = c(3,1))
-    , cowplot::plot_grid(
-      get_legend(p3)
-      #  , NULL
-      #  , ncol = 2
-      , rel_widths = c(1,1))
+      , rel_widths = c(3,1)),
+    # , cowplot::plot_grid(
+    #   get_legend(p3)
+    #   #  , NULL
+    #   #  , ncol = 2
+    #   , rel_widths = c(1,1))
     
-    , nrow = 2
-    , rel_heights = c(3, 1)
+    #, nrow = 2
+    #, rel_heights = c(3, 1)
     
-  ),
+ # ),
   nrow = 2
 )
 
 # save as a pdf
-#ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".pdf"), plot = last_plot(), width = 9, height = 10)
-ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_ALLMonths.pdf"), plot = last_plot(), width = 9, height = 10)
+ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".pdf"), plot = last_plot(), width = 183, height = 200, units = "mm", dpi = 300)
+ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".jpeg"), plot = last_plot(), width = 183, height = 200, units = "mm", dpi = 300)
+
+#ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_ALLMonths.pdf"), plot = last_plot(), width = 183, height = 247, units = "mm")
 
 # save final_plot as an rdata file to be used in later scripts
 #save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
