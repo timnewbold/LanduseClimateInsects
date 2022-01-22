@@ -612,7 +612,7 @@ p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) +
         legend.key.size = unit(0.2,"cm"), legend.direction = "vertical",
         title = element_text(size = 8, face = "bold")) +
   guides(fill = guide_legend(title.position = "top") ) + 
-  ggtitle("a.")
+  ggtitle("a")
 
 
 
@@ -704,7 +704,7 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) +
         legend.key.size = unit(0.2,"cm"), legend.direction = "vertical",
         title = element_text(size = 8, face = "bold")) +
   guides(fill = guide_legend(title.position = "top") ) + 
-  ggtitle("b.")
+  ggtitle("b")
 
 # get the mean climate value for each row of the dataset
 rows2 <- init(StdAnom_ras, v='row')
@@ -731,16 +731,16 @@ p4 <- ggplot(data = ravg2) +
   coord_flip()
 
 
-
-# setting up a black plot to fill the gap
-p0 <- ggplot() +
-  theme_bw() +
-  theme(panel.border = element_blank(), 
-        panel.grid = element_blank(),
-        axis.text = element_blank(),
-        axis.title = element_blank(),
-        axis.ticks = element_blank()) 
-
+# 
+# # setting up a black plot to fill the gap
+# p0 <- ggplot() +
+#   theme_bw() +
+#   theme(panel.border = element_blank(), 
+#         panel.grid = element_blank(),
+#         axis.text = element_blank(),
+#         axis.title = element_blank(),
+#         axis.ticks = element_blank()) 
+# 
 
 
 # organise the plots and legends into one object
