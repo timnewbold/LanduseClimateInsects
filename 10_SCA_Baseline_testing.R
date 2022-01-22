@@ -101,7 +101,7 @@ cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
           (brewer.pal(n = 8,name = "Purples"))[4:6],
           (brewer.pal(n = 9,name = "Oranges"))[3:6])
 labs <- c("-0.8 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3","3 : 5",">5")
+          "0:0.1","0.1:0.5","0.5:0.75","0.75:1","1:1.5","1.5:3","3:5","> 5")
 
 
 
@@ -114,7 +114,7 @@ all_plot$bins <- cut(all_plot$value,
 
 names(all_plot)[3] <- "year"
 
-year_labs <- c("A. 1901-1905", "B. 1901-1910", "C. 1901-1920", "D. 1901-1930")
+year_labs <- c("a 1901-1905", "b 1901-1910", "c 1901-1920", "d 1901-1930")
 names(year_labs) <- unique(all_plot$year)
 
 all_plot$year <- as.factor(all_plot$year)
@@ -126,13 +126,13 @@ all_plot <- all_plot[!is.na(all_plot$bins), ]
 
 # plot
 ggplot(all_plot) + 
-  geom_raster(aes(x = x, y = y, fill = bins), alpha = 0.9) +
+  geom_tile(aes(x = x, y = y, fill = bins), alpha = 0.9) +
   #scale_fill_viridis_c(option = "magma", values = c(0, 0.2, 1)) + 
   scale_fill_manual(values = cols) +
   facet_wrap(~ year, nrow = 2, labeller = labeller(year = year_labs)) +
   xlab("") +
   ylab("") +
-  labs(fill = "Standardised\nTemperature\nAnomaly") +
+  labs(fill = "Standardised Temperature Anomaly") +
   theme_bw() +
   theme(legend.position = 'bottom', 
         #panel.border = element_blank(), 
@@ -140,16 +140,19 @@ ggplot(all_plot) +
         axis.text = element_blank(),
         #legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
-        legend.text = element_text(size = 10), 
-        legend.title = element_text(size = 10), 
-        #legend.key.size = unit(0.2,"cm",
+        legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 7),
+        legend.direction = "horizontal",
         panel.border = element_rect(size = 0.2),
         strip.background = element_rect(size = 0.2, fill = "transparent"),
-        strip.text = element_text(size = 10))
+        strip.text = element_text(size = 8, face = "bold"),
+        legend.key.width = unit(0.8,"cm")) +
+  guides(fill = guide_legend(title.position = "top", nrow = 1, label.position = "bottom"))
 
 
 # save plot as pdf
-ggsave(filename = paste0(outDir, "/Supplementary_baseline_test_anomaly_maps.pdf"), width = 12, height = 8)
+ggsave(filename = paste0(outDir, "/Supplementary_baseline_test_anomaly_maps.pdf"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
+ggsave(filename = paste0(outDir, "/Supplementary_baseline_test_anomaly_maps.jpeg"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
 
 
 
