@@ -307,7 +307,7 @@ cols <- c(rev(brewer.pal(n = 8,name = "Greens"))[5:8],
           (brewer.pal(n = 8,name = "Purples"))[4:6],
           (brewer.pal(n = 9,name = "Oranges"))[3:7])
 labs <- c("-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-          "0 : 0.1","0.1 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 3","3 : 5","5 : 10", "> 10")
+          "0:0.1","0.1:0.5","0.5:0.75","0.75:1","1:1.5","1.5:3","3:5","5:10", "> 10")
 
 
 
@@ -326,12 +326,12 @@ world_map <- map_data("world")
 # plot the raster
 p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 
   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
-  geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
+  geom_tile(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
   scale_fill_manual(values = cols) + 
   facet_grid(~ year) +
   xlab("") +
   ylab("") +
-  labs(fill = "Standardised\nTemperature\nAnomaly") +
+  labs(fill = "Standardised Temperature Anomaly") +
   theme_bw() +
   theme(legend.position = 'bottom', 
         #panel.border = element_blank(), 
@@ -339,15 +339,20 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) +
         axis.text = element_blank(),
         #legend.key.width = unit(3, "cm"),
         axis.ticks = element_blank(), 
-        legend.text = element_text(size = 10), 
-        legend.title = element_text(size = 10), 
-        #legend.key.size = unit(0.2,"cm",
+        legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 7), 
+        legend.direction = "horizontal",
+        #legend.key.size = unit(0.2,"cm"),
         panel.border = element_rect(size = 0.2),
         strip.background = element_rect(size = 0.2, fill = "transparent"),
-        strip.text = element_text(size = 10))
+        strip.text = element_text(size = 7),
+        legend.key.width = unit(0.8,"cm")) +
+  guides(fill = guide_legend(title.position = "top", nrow = 1, label.position = "bottom"))
+  
 
 
 
-# save as a pdf
-ggsave(filename = paste0(outDir, "/Figure4_Current_Future_panel_plot.pdf"), width = 8, height = 4)
+# save as a pdf and jpeg
 
+ggsave(filename = paste0(outDir, "/ExtendedData_7_Current_Future_panel_plot.pdf"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
+ggsave(filename = paste0(outDir, "/ExtendedData_7_Current_Future_panel_plot.jpeg"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
