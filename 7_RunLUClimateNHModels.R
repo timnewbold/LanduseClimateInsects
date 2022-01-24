@@ -1055,20 +1055,26 @@ nd3 <- nd3[nd3$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
 p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = NH_5000), size = 1) +
+  geom_line(aes(col = NH_5000), size = 0.75) +
   geom_ribbon(aes(ymin = nd3$PredLower, ymax = nd3$PredUpper, fill = NH_5000), alpha = 0.2) +
   geom_hline(yintercept = 0, lty = "dashed") +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a                                Agriculture_Low", 'Agriculture_High' = "b                                Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Change in species richness (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
+  theme(aspect.ratio = 1, 
+        #title = element_text(size = 8, face = "bold"),
+        strip.text.x = element_text(hjust = 0, size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        text = element_text(size = 7),
+        legend.position = "right",
+        legend.text = element_text(size = 7), 
+        legend.title = element_text(size = 7))
 
 
 # abundance plot non-significant so not including in figure. 
@@ -1076,4 +1082,5 @@ p2 <-ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) +
 #cowplot::plot_grid(p1, p2, nrow = 2)
 
 # save
-ggsave(filename = paste0(outDir, "Extended_Data7_sr_MAX.pdf"), height = 4, width = 8)
+ggsave(filename = paste0(outDir, "Extended_Data6_sr_MAX.pdf"), height = 4, width = 8)
+ggsave(filename = paste0(outDir, "Extended_Data6_sr_MAX.jpeg"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)

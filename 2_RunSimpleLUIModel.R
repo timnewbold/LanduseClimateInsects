@@ -134,7 +134,7 @@ a.preds.lower <- ((apply(X = a.preds,MARGIN = 1,FUN = quantile,probs = 0.025))*1
 
 
 
-### plot species richness and abundance predictions ###
+#### plot species richness and abundance predictions ####
 
 # Figure 1, includes map of sites:
 

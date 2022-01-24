@@ -995,7 +995,12 @@ write.csv(all_stats, file = paste0(outDir, "/TropTemp_Stats.csv"), row.names = F
 
 
 
-#### Plots ####
+##%######################################################%##
+#                                                          #
+####                       Plots                        ####
+#                                                          #
+##%######################################################%##
+
 exclQuantiles <- c(0.025,0.975)
 
 
@@ -1077,7 +1082,7 @@ p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         ylim(c(-100, 150)) + 
         theme(aspect.ratio = 1, text = element_text(size = 12),
               legend.title = element_blank()) + 
-        ggtitle("a. Non-tropical Realm")
+        ggtitle("a Non-tropical Realm")
 
 
 
@@ -1473,7 +1478,12 @@ write.csv(all_stats, file = paste0(outDir, "/TropTemp_Max_Stats.csv"), row.names
 
 
 
-#### Plots ####
+##%######################################################%##
+#                                                          #
+####                  Max anom Plots                    ####
+#                                                          #
+##%######################################################%##
+
 exclQuantiles <- c(0.025,0.975)
 
 
@@ -1543,7 +1553,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 
 p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
@@ -1552,10 +1562,14 @@ p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   ylab("Change in Total Abundance (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
         legend.title = element_blank()) + 
-  ggtitle("a. Non-tropical Realm")
+  ggtitle("a Non-tropical Realm")
 
 
 
@@ -1563,41 +1577,41 @@ p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) +
 
 
 nd2 <- expand.grid(
-  StdTmeaxAnomalyRS=seq(from = min(MaxAbundTrop$data$StdTmeanAnomalyRS),
-                        to = max(MaxAbundTrop$data$StdTmeanAnomalyRS),
-                        length.out = 100),
+  StdTmaxAnomalyRS=seq(from = min(MaxAbundTrop$data$StdTmaxAnomalyRS),
+                        to = max(MaxAbundTrop$data$StdTmaxAnomalyRS),
+                        length.out = 300),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MeanAbundTrop$data$UI2)))
+             levels = levels(MaxAbundTrop$data$UI2)))
 
 # back transform the predictors
-nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd2$StdTmeanAnomalyRS,
-  originalX = predictsSites$StdTmeanAnomaly)
+nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd2$StdTmaxAnomalyRS,
+  originalX = predictsSites$StdTmaxAnomaly)
 
 # set richness and abundance to 0 - to be predicted
 nd2$LogAbund <- 0
 nd2$Species_richness <- 0
 
 # reference for % difference = primary vegetation and positive anomaly closest to 0
-refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))))
+refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))))
 
 # adjust plot 1: mean anomaly and abundance
 
-QPV <- quantile(x = MeanAbundTrop$data$StdTmeanAnomalyRS[
-  MeanAbundTrop$data$UI2=="Primary vegetation"],
+QPV <- quantile(x = MaxAbundTrop$data$StdTmaxAnomalyRS[
+  MaxAbundTrop$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
-QSV <- quantile(x = MeanAbundTrop$data$StdTmeanAnomalyRS[
-  MeanAbundTrop$data$UI2=="Secondary vegetation"],
+QSV <- quantile(x = MaxAbundTrop$data$StdTmaxAnomalyRS[
+  MaxAbundTrop$data$UI2=="Secondary vegetation"],
   probs = exclQuantiles)
-QAL <- quantile(x = MeanAbundTrop$data$StdTmeanAnomalyRS[
-  MeanAbundTrop$data$UI2=="Agriculture_Low"],
+QAL <- quantile(x = MaxAbundTrop$data$StdTmaxAnomalyRS[
+  MaxAbundTrop$data$UI2=="Agriculture_Low"],
   probs = exclQuantiles)
-QAH <- quantile(x = MeanAbundTrop$data$StdTmeanAnomalyRS[
-  MeanAbundTrop$data$UI2=="Agriculture_High"],
+QAH <- quantile(x = MaxAbundTrop$data$StdTmaxAnomalyRS[
+  MaxAbundTrop$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
 # predict the results
-a.preds.tmean <- PredictGLMERRandIter(model = MeanAbundTrop$model,data = nd2)
+a.preds.tmean <- PredictGLMERRandIter(model = MaxAbundTrop$model,data = nd2)
 
 # back transform the abundance values
 a.preds.tmean <- exp(a.preds.tmean)-0.01
@@ -1606,14 +1620,14 @@ a.preds.tmean <- exp(a.preds.tmean)-0.01
 a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
 
 # remove anything above and below the quantiles
-a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
-a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
 
 # Get the median, upper and lower quants for the plot
 nd2$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
@@ -1624,8 +1638,8 @@ nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 
-p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+p2 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
@@ -1634,54 +1648,58 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylab("Change in Total Abundance (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
         legend.title = element_blank()) + 
-  ggtitle("b. Tropical Realm")
+  ggtitle("b Tropical Realm")
 
 
 
 
 
-### 3. MeanRichTemp ###
+### 3. MaxRichTemp ###
 
 
 nd3 <- expand.grid(
-  StdTmeanAnomalyRS=seq(from = min(MeanRichTemp$data$StdTmeanAnomalyRS),
-                        to = max(MeanRichTemp$data$StdTmeanAnomalyRS),
-                        length.out = 100),
+  StdTmaxAnomalyRS=seq(from = min(MaxRichTemp$data$StdTmaxAnomalyRS),
+                        to = max(MaxRichTemp$data$StdTmaxAnomalyRS),
+                        length.out = 300),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MeanRichTemp$data$UI2)))
+             levels = levels(MaxRichTemp$data$UI2)))
 
 # back transform the predictors
-nd3$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd3$StdTmeanAnomalyRS,
-  originalX = predictsSites$StdTmeanAnomaly)
+nd3$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd3$StdTmaxAnomalyRS,
+  originalX = predictsSites$StdTmaxAnomaly)
 
 # set richness and abundance to 0 - to be predicted
 nd3$LogAbund <- 0
 nd3$Species_richness <- 0
 
 # reference for % difference = primary vegetation and positive anomaly closest to 0
-refRow <- which((nd3$UI2=="Primary vegetation") & (nd3$StdTmeanAnomaly==min(abs(nd3$StdTmeanAnomaly))))
+refRow <- which((nd3$UI2=="Primary vegetation") & (nd3$StdTmaxAnomaly==min(abs(nd3$StdTmaxAnomaly))))
 
 # adjust plot 1: mean anomaly and abundance
 
-QPV <- quantile(x = MeanRichTemp$data$StdTmeanAnomalyRS[
-  MeanRichTemp$data$UI2=="Primary vegetation"],
+QPV <- quantile(x = MaxRichTemp$data$StdTmaxAnomalyRS[
+  MaxRichTemp$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
-QSV <- quantile(x = MeanRichTemp$data$StdTmeanAnomalyRS[
-  MeanRichTemp$data$UI2=="Secondary vegetation"],
+QSV <- quantile(x = MaxRichTemp$data$StdTmaxAnomalyRS[
+  MaxRichTemp$data$UI2=="Secondary vegetation"],
   probs = exclQuantiles)
-QAL <- quantile(x = MeanRichTemp$data$StdTmeanAnomalyRS[
-  MeanRichTemp$data$UI2=="Agriculture_Low"],
+QAL <- quantile(x = MaxRichTemp$data$StdTmaxAnomalyRS[
+  MaxRichTemp$data$UI2=="Agriculture_Low"],
   probs = exclQuantiles)
-QAH <- quantile(x = MeanRichTemp$data$StdTmeanAnomalyRS[
-  MeanRichTemp$data$UI2=="Agriculture_High"],
+QAH <- quantile(x = MaxRichTemp$data$StdTmaxAnomalyRS[
+  MaxRichTemp$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
 # predict the results
-a.preds.tmean <- PredictGLMERRandIter(model = MeanRichTemp$model,data = nd3)
+a.preds.tmean <- PredictGLMERRandIter(model = MaxRichTemp$model,data = nd3)
 
 # back transform the abundance values
 a.preds.tmean <- exp(a.preds.tmean)
@@ -1690,14 +1708,14 @@ a.preds.tmean <- exp(a.preds.tmean)
 a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
 
 # remove anything above and below the quantiles
-a.preds.tmean[which((nd3$UI2=="Primary vegetation") & (nd3$StdTmeanAnomalyRS < QPV[1])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Primary vegetation") & (nd3$StdTmeanAnomalyRS > QPV[2])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Secondary vegetation") & (nd3$StdTmeanAnomalyRS < QSV[1])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Secondary vegetation") & (nd3$StdTmeanAnomalyRS > QSV[2])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Agriculture_Low") & (nd3$StdTmeanAnomalyRS < QAL[1])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Agriculture_Low") & (nd3$StdTmeanAnomalyRS > QAL[2])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Agriculture_High") & (nd3$StdTmeanAnomalyRS < QAH[1])),] <- NA
-a.preds.tmean[which((nd3$UI2=="Agriculture_High") & (nd3$StdTmeanAnomalyRS > QAH[2])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Primary vegetation") & (nd3$StdTmaxAnomalyRS < QPV[1])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Primary vegetation") & (nd3$StdTmaxAnomalyRS > QPV[2])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Secondary vegetation") & (nd3$StdTmaxAnomalyRS < QSV[1])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Secondary vegetation") & (nd3$StdTmaxAnomalyRS > QSV[2])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Agriculture_Low") & (nd3$StdTmaxAnomalyRS < QAL[1])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Agriculture_Low") & (nd3$StdTmaxAnomalyRS > QAL[2])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Agriculture_High") & (nd3$StdTmaxAnomalyRS < QAH[1])),] <- NA
+a.preds.tmean[which((nd3$UI2=="Agriculture_High") & (nd3$StdTmaxAnomalyRS > QAH[2])),] <- NA
 
 # Get the median, upper and lower quants for the plot
 nd3$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
@@ -1708,8 +1726,8 @@ nd3$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 
-p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+p3 <- ggplot(data = nd3, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
@@ -1718,52 +1736,56 @@ p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylab("Change in Species Richness (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 200)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
         legend.title = element_blank()) + 
-  ggtitle("c. Non-tropical Realm")
+  ggtitle("c Non-tropical Realm")
 
 
 
-### 4. MeanRichTrop ###
+### 4. MaxRichTrop ###
 
 
 nd4 <- expand.grid(
-  StdTmeanAnomalyRS=seq(from = min(MeanRichTrop$data$StdTmeanAnomalyRS),
-                        to = max(MeanRichTrop$data$StdTmeanAnomalyRS),
-                        length.out = 100),
+  StdTmaxAnomalyRS=seq(from = min(MaxRichTrop$data$StdTmaxAnomalyRS),
+                        to = max(MaxRichTrop$data$StdTmaxAnomalyRS),
+                        length.out = 300),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MeanRichTrop$data$UI2)))
+             levels = levels(MaxRichTrop$data$UI2)))
 
 # back transform the predictors
-nd4$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd4$StdTmeanAnomalyRS,
-  originalX = predictsSites$StdTmeanAnomaly)
+nd4$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+  transformedX = nd4$StdTmaxAnomalyRS,
+  originalX = predictsSites$StdTmaxAnomaly)
 
 # set richness and abundance to 0 - to be predicted
 nd4$LogAbund <- 0
 nd4$Species_richness <- 0
 
 # reference for % difference = primary vegetation and positive anomaly closest to 0
-refRow <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmeanAnomaly==min(abs(nd4$StdTmeanAnomaly))))
+refRow <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(nd4$StdTmaxAnomaly))))
 
 # adjust plot 1: mean anomaly and abundance
 
-QPV <- quantile(x = MeanRichTrop$data$StdTmeanAnomalyRS[
-  MeanRichTrop$data$UI2=="Primary vegetation"],
+QPV <- quantile(x = MaxRichTrop$data$StdTmaxAnomalyRS[
+  MaxRichTrop$data$UI2=="Primary vegetation"],
   probs = exclQuantiles)
-QSV <- quantile(x = MeanRichTrop$data$StdTmeanAnomalyRS[
-  MeanRichTrop$data$UI2=="Secondary vegetation"],
+QSV <- quantile(x = MaxRichTrop$data$StdTmaxAnomalyRS[
+  MaxRichTrop$data$UI2=="Secondary vegetation"],
   probs = exclQuantiles)
-QAL <- quantile(x = MeanRichTrop$data$StdTmeanAnomalyRS[
-  MeanRichTrop$data$UI2=="Agriculture_Low"],
+QAL <- quantile(x = MaxRichTrop$data$StdTmaxAnomalyRS[
+  MaxRichTrop$data$UI2=="Agriculture_Low"],
   probs = exclQuantiles)
-QAH <- quantile(x = MeanRichTrop$data$StdTmeanAnomalyRS[
-  MeanRichTrop$data$UI2=="Agriculture_High"],
+QAH <- quantile(x = MaxRichTrop$data$StdTmaxAnomalyRS[
+  MaxRichTrop$data$UI2=="Agriculture_High"],
   probs = exclQuantiles)
 
 # predict the results
-a.preds.tmean <- PredictGLMERRandIter(model = MeanRichTrop$model,data = nd4)
+a.preds.tmean <- PredictGLMERRandIter(model = MaxRichTrop$model,data = nd4)
 
 # back transform the abundance values
 a.preds.tmean <- exp(a.preds.tmean)
@@ -1772,14 +1794,14 @@ a.preds.tmean <- exp(a.preds.tmean)
 a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
 
 # remove anything above and below the quantiles
-a.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmeanAnomalyRS < QPV[1])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmeanAnomalyRS > QPV[2])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmeanAnomalyRS < QSV[1])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmeanAnomalyRS > QSV[2])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmeanAnomalyRS < QAL[1])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmeanAnomalyRS > QAL[2])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmeanAnomalyRS < QAH[1])),] <- NA
-a.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmeanAnomalyRS > QAH[2])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1])),] <- NA
+a.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2])),] <- NA
 
 # Get the median, upper and lower quants for the plot
 nd4$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
@@ -1790,8 +1812,8 @@ nd4$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                          FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 
-p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+p4 <- ggplot(data = nd4, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed") + 
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
@@ -1800,10 +1822,14 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   ylab("Change in Species Richness (%)") +
   xlab("Maximum Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
+  ylim(c(-100, 100)) + 
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
         legend.title = element_blank()) + 
-  ggtitle("d. Tropical Realm")
+  ggtitle("d Tropical Realm")
 
 
 
@@ -1820,5 +1846,6 @@ cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"),
 
 
 ggsave(file = paste0(outDir, "/Extended_Data5_MaxAnom_TempTrop.pdf"), width = 8, height = 8.5)
+ggsave(filename = paste0(outDir, "Extended_Data5_MaxAnom_TempTrop.jpeg"), plot = last_plot(), width = 183, height = 200, units = "mm", dpi = 300)
 
 

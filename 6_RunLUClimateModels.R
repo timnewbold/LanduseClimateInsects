@@ -6,6 +6,7 @@
 
 # This script runs the mixed effects models looking at the effect of climate
 # change and landuse/use intensity.
+rm(list = ls())
 
 # load libraries
 library(devtools)
@@ -15,6 +16,7 @@ library(StatisticalModels)
 library(predictsFunctions)
 source("Functions.R")
 library(sjPlot)
+library(cowplot)
 
 # directories 
 predictsDataDir <- "5_PREDICTSMatchPropNatHab/"
@@ -248,14 +250,14 @@ write.csv(MaxRichStats, file = paste0(outDir, "/MaxAnomRich_Stats.csv"), row.nam
 # set quantiles of predicted result to be presented in the plots
 exclQuantiles <- c(0.025,0.975)
 
-
-pdf(file = paste0(outDir, "/Figure2_MeanAnom_Abun_Rich.pdf"), width = 8, height = 4)
-
-par(mfrow=c(1,2))
-par(las=1)
-par(mgp=c(1.6,0.3,0)) # 
-par(mar=c(2.6,2.6,1,1)) # margins around plot
-par(tck=-0.01) # tick mark size
+# 
+# pdf(file = paste0(outDir, "/Figure2_MeanAnom_Abun_Rich.pdf"), width = 8, height = 4)
+# 
+# par(mfrow=c(1,2))
+# par(las=1)
+# par(mgp=c(1.6,0.3,0)) # 
+# par(mar=c(2.6,2.6,1,1)) # margins around plot
+# par(tck=-0.01) # tick mark size
 #par(pty="s") # set plot type to be square
 
 nd <- expand.grid(
@@ -319,56 +321,89 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                           FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
   
-  # plot #
   
-  # set up plotting window
-  plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-       ylim=c(-70,80),
-       xlab="Standardised Temperature Anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
-  
-  title("a", adj = 0, cex.main = 1)
+  # set factor levels
+  nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
   
   
-  invisible(mapply(FUN = function(preds,col){
-    
-    preds <- na.omit(preds)
-    
-    X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
-               rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
-    Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-               rev(preds$PredUpper), (preds$PredLower)[1])
-    
-    polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-    
-    points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-    
-  },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+  # plot
+  p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+    geom_line(aes(col = UI2), size = 0.75) +
+    geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+    geom_hline(yintercept = 0, lty = "dashed", size = 0.2) +
+    scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+    scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+    theme_bw() + 
+    scale_x_continuous(breaks = c(0,0.5, 1,1.5, 2), limits = c(0, 2)) +
+    scale_y_continuous(breaks = c(-75, -50, -25, 0, 25, 50, 75, 100), limits = c(-75, 100)) +
+    labs(fill = "% NH", col = "% NH") + 
+    ylab("Change in total abundance (%)") +
+    xlab("Standardised Temperature Anomaly") +
+    #xlim(c(-1, 5)) +
+    #ylim(c(-65, 60)) + 
+    theme(aspect.ratio = 1, 
+          title = element_text(size = 8, face = "bold"),
+          axis.text = element_text(size = 7),
+          axis.title = element_text(size = 7),
+          legend.position = c(0.2, 0.8),
+          legend.text = element_text(size = 6), 
+          legend.title = element_blank(), 
+          legend.background = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          panel.border = element_rect(size = 0.2)) + 
+    ggtitle("a")
   
-  # add some gridlines
-  abline(h=150,lty=1,col="#0000000C")
-  abline(h=100,lty=1,col="#0000000C")
-  abline(h=50,lty=1,col="#0000000C")
-  abline(h=0,lty=2,col="#030303")
-  abline(h=-50,lty=1,col="#0000000C")
-  abline(v=0,lty=1,col="#0000000C")
-  abline(v=0.5,lty=1,col="#0000000C")
-  abline(v=1,lty=1,col="#0000000C")
-  abline(v=1.5,lty=1,col="#0000000C")
-  abline(v=2,lty=1,col="#0000000C")
   
-  # add legend
-  legend(
-    x = -0.1, y = 80,bty="n",
-    legend = c("Primary","Secondary",
-               "Agriculture_Low",
-               "Agriculture_High"),
-    col = c("#009E73", "#0072B2",
-            "#E69F00", "#D55E00"),
-    lty=1,lwd=2, cex = 0.8)
-  
+  # # plot #
+  # 
+  # # set up plotting window
+  # plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
+  #      ylim=c(-70,80),
+  #      xlab="Standardised Temperature Anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
+  # 
+  # title("a", adj = 0, cex.main = 1)
+  # 
+  # 
+  # invisible(mapply(FUN = function(preds,col){
+  #   
+  #   preds <- na.omit(preds)
+  #   
+  #   X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
+  #              rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
+  #   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
+  #              rev(preds$PredUpper), (preds$PredLower)[1])
+  #   
+  #   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
+  #   
+  #   points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
+  #   
+  # },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+  # 
+  # # add some gridlines
+  # abline(h=150,lty=1,col="#0000000C")
+  # abline(h=100,lty=1,col="#0000000C")
+  # abline(h=50,lty=1,col="#0000000C")
+  # abline(h=0,lty=2,col="#030303")
+  # abline(h=-50,lty=1,col="#0000000C")
+  # abline(v=0,lty=1,col="#0000000C")
+  # abline(v=0.5,lty=1,col="#0000000C")
+  # abline(v=1,lty=1,col="#0000000C")
+  # abline(v=1.5,lty=1,col="#0000000C")
+  # abline(v=2,lty=1,col="#0000000C")
+  # 
+  # # add legend
+  # legend(
+  #   x = -0.1, y = 80,bty="n",
+  #   legend = c("Primary","Secondary",
+  #              "Agriculture_Low",
+  #              "Agriculture_High"),
+  #   col = c("#009E73", "#0072B2",
+  #           "#E69F00", "#D55E00"),
+  #   lty=1,lwd=2, cex = 0.8)
+  # 
 
 ## now the species richness plot 
-  nd <- expand.grid(
+  nd2 <- expand.grid(
     StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
                           to = max(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
                           length.out = 100),
@@ -376,16 +411,16 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
                levels = levels(MeanAnomalyModelRich$data$UI2)))
   
   # back transform the predictors
-  nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-    transformedX = nd$StdTmeanAnomalyRS,
+  nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+    transformedX = nd2$StdTmeanAnomalyRS,
     originalX = predictsSites$StdTmeanAnomaly)
   
   # set richness and abundance to 0 - to be predicted
-  nd$LogAbund <- 0
-  nd$Species_richness <- 0
+  nd2$LogAbund <- 0
+  nd2$Species_richness <- 0
   
   # reference for % difference = primary vegetation and positive anomaly closest to 0
-  refRow <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))))
+  refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))))
   
   # adjust plot 1: mean anomaly and abundance
   
@@ -403,7 +438,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     probs = exclQuantiles)
   
   # predict the results
-  a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd, nIters = 10000)
+  a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd2, nIters = 10000)
   
   # back transform the abundance values
   a.preds.tmean <- exp(a.preds.tmean)
@@ -412,88 +447,128 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow,],FUN = '/')
   
   # remove anything above and below the quantiles
-  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1])),] <- NA
-  a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1])),] <- NA
+  a.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2])),] <- NA
   
   # Get the median, upper and lower quants for the plot
-  nd$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
+  nd2$PredMedian <- ((apply(X = a.preds.tmean,MARGIN = 1,
                            FUN = median,na.rm=TRUE))*100)-100
-  nd$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
+  nd2$PredUpper <- ((apply(X = a.preds.tmean,MARGIN = 1,
                           FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-  nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
+  nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
                           FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
   
-  # plot #
+  # set factor levels
+  nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
   
-  # set up plotting window
-  plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-       ylim=c(-70,80),
-       xlab="Standardised Temperature Anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
+  # plot 
+  p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+    geom_line(aes(col = UI2), size = 0.75) +
+    geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = UI2), alpha = 0.2) +
+    geom_hline(yintercept = 0, lty = "dashed", size = 0.2) +
+    scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+    scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+    scale_x_continuous(breaks = c(0,0.5, 1,1.5, 2), limits = c(0, 2)) +
+    scale_y_continuous(breaks = c(-75, -50, -25, 0, 25, 50, 75, 100), limits = c(-75, 100)) +
+    theme_bw() + 
+    labs(fill = "% NH", col = "% NH") + 
+    ylab("Change in species richness (%)") +
+    xlab("Standardised Temperature Anomaly") +
+    # xlim(c(-1, 5)) +
+    # ylim(c(-65, 60)) + 
+    theme(aspect.ratio = 1, 
+          title = element_text(size = 8, face = "bold"),
+          axis.text = element_text(size = 7),
+          axis.title = element_text(size = 7),
+          legend.position = "none",
+          legend.text = element_text(size = 6), 
+          legend.title = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(size = 0.5),
+          panel.border = element_rect(size = 0.2)) + 
+    ggtitle("b")
   
-  title("b", adj = 0, cex.main = 1)
+ 
+  # combine plots
+  plot_grid(p1, p2)
   
-  
-  invisible(mapply(FUN = function(preds,col){
-    
-    preds <- na.omit(preds)
-    
-    X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
-               rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
-    Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-               rev(preds$PredUpper), (preds$PredLower)[1])
-    
-    polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-    
-    points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-    
-  },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
-  
-  # add some gridlines
-  abline(h=150,lty=1,col="#0000000C")
-  abline(h=100,lty=1,col="#0000000C")
-  abline(h=50,lty=1,col="#0000000C")
-  abline(h=0,lty=2,col="#030303")
-  abline(h=-50,lty=1,col="#0000000C")
-  abline(v=0,lty=1,col="#0000000C")
-  abline(v=0.5,lty=1,col="#0000000C")
-  abline(v=1,lty=1,col="#0000000C")
-  abline(v=1.5,lty=1,col="#0000000C")
-  abline(v=2,lty=1,col="#0000000C")
-  
-  # add legend
-  # legend(
-  #   x = 0,y = 90,bty="n",
-  #   legend = c("Primary","Secondary",
-  #              "Agriculture_Low",
-  #              "Agriculture_High"),
-  #   col = c("#009E73", "#0072B2",
-  #           "#E69F00", "#D55E00"),
-  #   lty=1,lwd=2, cex = 0.8)
+  ggsave(filename = paste0(outDir, "Figure2_MeanAnom_Abun_Rich.pdf"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
   
   
-  dev.off()
   
-  
+  #  # plot #
+  # 
+  # # set up plotting window
+  # plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
+  #      ylim=c(-70,80),
+  #      xlab="Standardised Temperature Anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
+  # 
+  # title("b", adj = 0, cex.main = 1)
+  # 
+  # 
+  # invisible(mapply(FUN = function(preds,col){
+  #   
+  #   preds <- na.omit(preds)
+  #   
+  #   X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
+  #              rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
+  #   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
+  #              rev(preds$PredUpper), (preds$PredLower)[1])
+  #   
+  #   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
+  #   
+  #   points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
+  #   
+  # },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+  # 
+  # # add some gridlines
+  # abline(h=150,lty=1,col="#0000000C")
+  # abline(h=100,lty=1,col="#0000000C")
+  # abline(h=50,lty=1,col="#0000000C")
+  # abline(h=0,lty=2,col="#030303")
+  # abline(h=-50,lty=1,col="#0000000C")
+  # abline(v=0,lty=1,col="#0000000C")
+  # abline(v=0.5,lty=1,col="#0000000C")
+  # abline(v=1,lty=1,col="#0000000C")
+  # abline(v=1.5,lty=1,col="#0000000C")
+  # abline(v=2,lty=1,col="#0000000C")
+  # 
+  # # add legend
+  # # legend(
+  # #   x = 0,y = 90,bty="n",
+  # #   legend = c("Primary","Secondary",
+  # #              "Agriculture_Low",
+  # #              "Agriculture_High"),
+  # #   col = c("#009E73", "#0072B2",
+  # #           "#E69F00", "#D55E00"),
+  # #   lty=1,lwd=2, cex = 0.8)
+  # 
+  # 
+  # dev.off()
+  # 
+  # 
 
-  #### Extended data fig 3 - Max Anom ####
+  #### Extended data fig 2 - Max Anom ####
   
   #pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
   #pdf(file = paste0(outDir,"LUClimateAnomalyInteractions_Mean_anom.pdf"),width = 17.5/2.54,height = 16/2.54)
-  pdf(file = paste0(outDir,"Extended_Data2_MaxAnom.pdf"),width = 8,height = 4)
   
-  par(mfrow=c(1,2))
-  par(las=1)
-  par(mgp=c(1.6,0.3,0)) # 
-  par(mar=c(2.6,2.6,1,1)) # margins around plot
-  par(tck=-0.01) # tick mark size
-  #par(pty="s") # set plot type to be square
-  
+  # #pdf(file = paste0(outDir,"Extended_Data2_MaxAnom.pdf"),width = 8,height = 4)
+  # jpeg(file = paste0(outDir,"Extended_Data2_MaxAnom.jpeg"),width = 8,height = 4, units = "mm")
+  # 
+  # par(mfrow=c(1,2))
+  # par(las=1)
+  # par(mgp=c(1.6,0.3,0)) # 
+  # par(mar=c(2.6,2.6,1,1)) # margins around plot
+  # par(tck=-0.01) # tick mark size
+  # #par(pty="s") # set plot type to be square
+  # 
   
   # # create matrix for predictions
   # nd <- expand.grid(
@@ -735,56 +810,106 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     nd$PredLower <- ((apply(X = a.preds.tmax,MARGIN = 1,
                             FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
     
-    plot(-9e99,-9e99,xlim=c(-1,max(nd$StdTmaxAnomaly)),
-         ylim=c(-60,60),
-         xlab="Maximum temperature anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
-    
-    title("a", adj = 0, cex.main = 1)
-    
-    invisible(mapply(FUN = function(preds,col){
-      
-      preds <- na.omit(preds)
-      
-      X.Vec <- c(preds$StdTmaxAnomaly, max(preds$StdTmaxAnomaly), 
-                 rev(preds$StdTmaxAnomaly), min(preds$StdTmaxAnomaly))
-      Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-                 rev(preds$PredUpper), (preds$PredLower)[1])
-      
-      polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-      
-      points(x = preds$StdTmaxAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-      
-    },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
-    
-    abline(h=40,lty=1,col="#0000000C")
-    abline(h=20,lty=1,col="#0000000C")
-    abline(h=0,lty=2,col="#030303")
-    abline(h=-20,lty=1,col="#0000000C")
-    abline(h=-40,lty=1,col="#0000000C")
-    abline(h=-60,lty=1,col="#0000000C")
-    abline(v=-1,lty=1,col="#0000000C")
-    abline(v=0,lty=1,col="#0000000C")
-    abline(v=1,lty=1,col="#0000000C")
-    abline(v=2,lty=1,col="#0000000C")
-    abline(v=3,lty=1,col="#0000000C")
-    abline(v=4,lty=1,col="#0000000C")
-    abline(v=5,lty=1,col="#0000000C")
-    
-    legend(
-      x = -1,y = 60 ,bty="n",
-      legend = c("Primary","Secondary",
-                 "Agriculture_Low",
-                 "Agriculture_High"),
-      col = c("#009E73", "#0072B2",
-              "#E69F00", "#D55E00"),
-      lty=1,lwd=2, cex = 0.8)
-    
-    #p3 <- recordPlot()
     
     
-
+    # set factor levels
+    nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
+    
+    
+    # plot
+    p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+      geom_line(aes(col = UI2), size = 0.75) +
+      geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
+      geom_hline(yintercept = 0, lty = "dashed") +
+      scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+      scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+      theme_bw() + 
+      scale_x_continuous(breaks = c(-1,0,1,2,3,4,5), limits = c(-1, 5)) +
+      scale_y_continuous(breaks = c(-60, -40, -20, 0, 20, 40, 60), limits = c(-65, 60)) +
+      labs(fill = "% NH", col = "% NH") + 
+      ylab("Change in total abundance (%)") +
+      xlab("Maximum Temperature Anomaly") +
+      #xlim(c(-1, 5)) +
+      #ylim(c(-65, 60)) + 
+      theme(aspect.ratio = 1, 
+            title = element_text(size = 8, face = "bold"),
+            axis.text = element_text(size = 7),
+            legend.position = c(0.2, 0.8),
+            legend.text = element_text(size = 6), 
+            legend.title = element_blank(), 
+            legend.background = element_blank()) + 
+      ggtitle("a")
+    
+    
+    # 
+    # 
+    # 
+    # plot(-9e99,-9e99,xlim=c(-1,max(nd$StdTmaxAnomaly)),
+    #      ylim=c(-60,60),
+    #      xlab="Maximum temperature anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
+    # 
+    # title("a", adj = 0, cex.main = 1)
+    # 
+    # invisible(mapply(FUN = function(preds,col){
+    #   
+    #   preds <- na.omit(preds)
+    #   
+    #   X.Vec <- c(preds$StdTmaxAnomaly, max(preds$StdTmaxAnomaly), 
+    #              rev(preds$StdTmaxAnomaly), min(preds$StdTmaxAnomaly))
+    #   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
+    #              rev(preds$PredUpper), (preds$PredLower)[1])
+    #   
+    #   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
+    #   
+    #   points(x = preds$StdTmaxAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
+    #   
+    # },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+    # 
+    # abline(h=40,lty=1,col="#0000000C")
+    # abline(h=20,lty=1,col="#0000000C")
+    # abline(h=0,lty=2,col="#030303")
+    # abline(h=-20,lty=1,col="#0000000C")
+    # abline(h=-40,lty=1,col="#0000000C")
+    # abline(h=-60,lty=1,col="#0000000C")
+    # abline(v=-1,lty=1,col="#0000000C")
+    # abline(v=0,lty=1,col="#0000000C")
+    # abline(v=1,lty=1,col="#0000000C")
+    # abline(v=2,lty=1,col="#0000000C")
+    # abline(v=3,lty=1,col="#0000000C")
+    # abline(v=4,lty=1,col="#0000000C")
+    # abline(v=5,lty=1,col="#0000000C")
+    # 
+    # legend(
+    #   x = -1,y = 60 ,bty="n",
+    #   legend = c("Primary","Secondary",
+    #              "Agriculture_Low",
+    #              "Agriculture_High"),
+    #   col = c("#009E73", "#0072B2",
+    #           "#E69F00", "#D55E00"),
+    #   lty=1,lwd=2, cex = 0.8)
+    # 
+    # #p3 <- recordPlot()
+    # 
+    
+    
+    # Organise table to values to be predicted
+    
+    nd2 <- expand.grid(
+      StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelAbund$data$StdTmaxAnomalyRS),
+                           to = max(MaxAnomalyModelAbund$data$StdTmaxAnomalyRS),
+                           length.out = 200),
+      UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+                 levels = levels(MaxAnomalyModelAbund$data$UI2)))
+    nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+      transformedX = nd2$StdTmaxAnomalyRS,
+      originalX = predictsSites$StdTmaxAnomaly)
+    nd2$LogAbund <- 0
+    nd2$Species_richness <- 0
+    
+    # set a reference row for percentage change
+    refRow <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomaly==min(abs(nd2$StdTmaxAnomaly))))
   
-  
+  # determine the quantiles of the available data
   QPV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
     MaxAnomalyModelRich$data$UI2=="Primary vegetation"],
     probs = exclQuantiles)
@@ -798,65 +923,102 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     MaxAnomalyModelRich$data$UI2=="Agriculture_High"],
     probs = exclQuantiles)
   
-
-    s.preds.tmax <- PredictGLMERRandIter(model = MaxAnomalyModelRich$model,data = nd, nIters = 10000)
+    # predict values
+    s.preds.tmax <- PredictGLMERRandIter(model = MaxAnomalyModelRich$model,data = nd2, nIters = 10000)
     s.preds.tmax <- exp(s.preds.tmax)
     
+    # convert to percentage change relative to reference row
     s.preds.tmax <- sweep(x = s.preds.tmax,MARGIN = 2,STATS = s.preds.tmax[refRow,],FUN = '/')
     
-    s.preds.tmax[which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomalyRS < QPV[1])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Primary vegetation") & (nd$StdTmaxAnomalyRS > QPV[2])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Secondary vegetation") & (nd$StdTmaxAnomalyRS < QSV[1])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Secondary vegetation") & (nd$StdTmaxAnomalyRS > QSV[2])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Agriculture_Low") & (nd$StdTmaxAnomalyRS < QAL[1])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Agriculture_Low") & (nd$StdTmaxAnomalyRS > QAL[2])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Agriculture_High") & (nd$StdTmaxAnomalyRS < QAH[1])),] <- NA
-    s.preds.tmax[which((nd$UI2=="Agriculture_High") & (nd$StdTmaxAnomalyRS > QAH[2])),] <- NA
+    # exclude extreme ends of data
+    s.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS < QPV[1])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmaxAnomalyRS > QPV[2])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS < QSV[1])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmaxAnomalyRS > QSV[2])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS < QAL[1])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmaxAnomalyRS > QAL[2])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS < QAH[1])),] <- NA
+    s.preds.tmax[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmaxAnomalyRS > QAH[2])),] <- NA
     
-    nd$PredMedian <- ((apply(X = s.preds.tmax,MARGIN = 1,
+    # get the median and quantiles for plotting
+    nd2$PredMedian <- ((apply(X = s.preds.tmax,MARGIN = 1,
                              FUN = median,na.rm=TRUE))*100)-100
-    nd$PredUpper <- ((apply(X = s.preds.tmax,MARGIN = 1,
+    nd2$PredUpper <- ((apply(X = s.preds.tmax,MARGIN = 1,
                             FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-    nd$PredLower <- ((apply(X = s.preds.tmax,MARGIN = 1,
+    nd2$PredLower <- ((apply(X = s.preds.tmax,MARGIN = 1,
                             FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
     
-    plot(-9e99,-9e99,xlim=c(-1,max(nd$StdTmaxAnomaly)),
-         ylim=c(-60,60),
-         xlab="Maximum temperature anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
+    # set factor levels
+    nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
     
-    title("b", adj = 0, cex.main = 1)
+    # plot 
+    p2 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+      geom_line(aes(col = UI2), size = 0.75) +
+      geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = UI2), alpha = 0.2) +
+      geom_hline(yintercept = 0, lty = "dashed") +
+      scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+      scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00","#D55E00")) +
+      scale_x_continuous(breaks = c(-1,0,1,2,3,4,5), limits = c(-1, 5)) +
+      scale_y_continuous(breaks = c(-60, -40, -20, 0, 20, 40, 60), limits = c(-65, 60)) +
+      theme_bw() + 
+      labs(fill = "% NH", col = "% NH") + 
+      ylab("Change in species richness (%)") +
+      xlab("Maximum Temperature Anomaly") +
+      # xlim(c(-1, 5)) +
+      # ylim(c(-65, 60)) + 
+      theme(aspect.ratio = 1, 
+            title = element_text(size = 8, face = "bold"),
+            axis.text = element_text(size = 7),
+            legend.position = "none",
+            legend.text = element_text(size = 6), 
+            legend.title = element_blank()) + 
+      ggtitle("b")
     
-    invisible(mapply(FUN = function(preds,col){
-      
-      preds <- na.omit(preds)
-      
-      X.Vec <- c(preds$StdTmaxAnomaly, max(preds$StdTmaxAnomaly), 
-                 rev(preds$StdTmaxAnomaly), min(preds$StdTmaxAnomaly))
-      Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-                 rev(preds$PredUpper), (preds$PredLower)[1])
-      
-      polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-      
-      points(x = preds$StdTmaxAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-      
-    },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+    # combine plots
+    plot_grid(p1, p2)
     
-    abline(h=40,lty=1,col="#0000000C")
-    abline(h=20,lty=1,col="#0000000C")
-    abline(h=0,lty=2,col="#030303")
-    abline(h=-20,lty=1,col="#0000000C")
-    abline(h=-40,lty=1,col="#0000000C")
-    abline(h=-60,lty=1,col="#0000000C")
-    abline(v=-1,lty=1,col="#0000000C")
-    abline(v=0,lty=1,col="#0000000C")
-    abline(v=1,lty=1,col="#0000000C")
-    abline(v=2,lty=1,col="#0000000C")
-    abline(v=3,lty=1,col="#0000000C")
-    abline(v=4,lty=1,col="#0000000C")
-    abline(v=5,lty=1,col="#0000000C")
-    #p4 <- recordPlot()
+    ggsave(filename = paste0(outDir, "Extended_Data2_MaxAnom.jpeg"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
     
     
-
-  
-  invisible(dev.off())
+  #   
+  #   
+  #   plot(-9e99,-9e99,xlim=c(-1,max(nd$StdTmaxAnomaly)),
+  #        ylim=c(-60,60),
+  #        xlab="Maximum temperature anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
+  #   
+  #   title("b", adj = 0, cex.main = 1)
+  #   
+  #   invisible(mapply(FUN = function(preds,col){
+  #     
+  #     preds <- na.omit(preds)
+  #     
+  #     X.Vec <- c(preds$StdTmaxAnomaly, max(preds$StdTmaxAnomaly), 
+  #                rev(preds$StdTmaxAnomaly), min(preds$StdTmaxAnomaly))
+  #     Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
+  #                rev(preds$PredUpper), (preds$PredLower)[1])
+  #     
+  #     polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
+  #     
+  #     points(x = preds$StdTmaxAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
+  #     
+  #   },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
+  #   
+  #   abline(h=40,lty=1,col="#0000000C")
+  #   abline(h=20,lty=1,col="#0000000C")
+  #   abline(h=0,lty=2,col="#030303")
+  #   abline(h=-20,lty=1,col="#0000000C")
+  #   abline(h=-40,lty=1,col="#0000000C")
+  #   abline(h=-60,lty=1,col="#0000000C")
+  #   abline(v=-1,lty=1,col="#0000000C")
+  #   abline(v=0,lty=1,col="#0000000C")
+  #   abline(v=1,lty=1,col="#0000000C")
+  #   abline(v=2,lty=1,col="#0000000C")
+  #   abline(v=3,lty=1,col="#0000000C")
+  #   abline(v=4,lty=1,col="#0000000C")
+  #   abline(v=5,lty=1,col="#0000000C")
+  #   #p4 <- recordPlot()
+  #   
+  #   
+  # 
+  # 
+  # invisible(dev.off())
