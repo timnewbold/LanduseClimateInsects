@@ -134,6 +134,19 @@ a.preds.lower <- ((apply(X = a.preds,MARGIN = 1,FUN = quantile,probs = 0.025))*1
 
 
 
+# combine data into one table for plotting
+abun_res <- as.data.frame(cbind(a.preds.median, a.preds.lower, a.preds.upper))
+rich_res <- as.data.frame(cbind(s.preds.median, s.preds.lower, s.preds.upper))
+colnames(abun_res) <- c("median", "lower", "upper")
+colnames(rich_res) <- c("median", "lower", "upper")
+abun_res$metric <- "abun"
+rich_res$metric <- "rich"
+abun_res$LU <- factor(c("Primary vegetation","Secondary vegetation", "Agriculture_Low","Agriculture_High"), levels = c("Primary vegetation","Secondary vegetation", "Agriculture_Low","Agriculture_High"))
+rich_res$LU <- factor(c("Primary vegetation","Secondary vegetation", "Agriculture_Low","Agriculture_High"), levels = c("Primary vegetation","Secondary vegetation", "Agriculture_Low","Agriculture_High"))
+
+abun_res[abun_res$LU == "Primary vegetation", c("lower", "upper")] <- NA
+rich_res[abun_res$LU == "Primary vegetation", c("lower", "upper")] <- NA
+
 #### plot species richness and abundance predictions ####
 
 # Figure 1, includes map of sites:
@@ -152,72 +165,128 @@ p1 <-ggplot() +
         panel.background = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        plot.title = element_text(hjust=0.05, size = 11, face = 'bold'))
+        #plot.title = element_text(hjust=0.05, size = 8, face = 'bold')
+        title = element_text(size = 8, face = "bold"))+
+  ggtitle("a")
 
 #pdf(file = paste0(outDir,"LUI_Plot.pdf"),width = 8.5/2.54,height = 12/2.54, onefile = T)
 
 
-#par(mfrow=c(2,1))
-par(cex=1)
-par(cex.lab=1)
-par(cex.axis=1)
-par(cex.main=1)
-par(ps=10)
-par(las=1)
-par(mgp=c(2.5,1,0))
-par(mar=c(4,3.5,0.1,1.5))
-par(tck=-0.01)
+# point plots
 
-# set colours
-errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00")
-
-# species richness plot
-
-
-errbar(x = 1:4,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
-       col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,0),xaxt="n",
-       ylab="Change in species richness (%)",xlab="",bty="l")
-
-axis(side = 1,at = 1:4, labels = c("Primary","Secondary","Agriculture\nLow","Agriculture\nHigh"), cex.axis = 1, las = 2)
-
-
-abline(h=0,col="#00000077",lty=2)
-
-#title(main = "b.", adj = 0, cex.main = 1, line = 1)
-
-p3 <- recordPlot()
-
-# abundance plot
-
-errbar(x = 1:4,y = a.preds.median,yplus = a.preds.upper,yminus = a.preds.lower,
-       col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,0),xaxt="n",
-       ylab="Change in total abundance (%)",xlab="",bty="l")
-
-axis(side = 1,at = 1:4,labels = c("Primary","Secondary","Agriculture\nLow","Agriculture\nHigh"), cex.axis = 1, las = 2)
-
-abline(h=0,col="#00000077",lty=2)
-
-#title(main = "c.", adj = 0, cex.main = 1, line = 1)
-
-p2 <- recordPlot()
+p2 <- ggplot(data = abun_res) +
+      geom_point(aes(x = LU, y = median, col = LU), size = 1.2) + 
+      geom_errorbar(aes(x = LU, ymin = lower, ymax = upper, col = LU), size = 0.2, width = 0.2)+
+      geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+      xlab("") +
+      ylab("Change in total abundance (%)") +
+      scale_color_manual(values = c("#009E73","#0072B2","#E69F00","#D55E00")) +
+      theme(legend.position = "none", 
+            aspect.ratio = 1, 
+            title = element_text(size = 8, face = "bold"),
+            axis.text.y = element_text(size = 7),
+            axis.text.x = element_text(size = 7, angle = 45, vjust = 0.5),
+            axis.title = element_text(size = 7),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.border = element_blank(), 
+            panel.background = element_blank(), 
+            axis.ticks = element_line(size = 0.2), 
+            axis.line = element_line(size = 0.2)) +
+      ggtitle("b")
 
 
-#invisible(dev.off())
+p3 <- ggplot(data = rich_res) +
+  geom_point(aes(x = LU, y = median, col = LU), size = 1.2) + 
+  geom_errorbar(aes(x = LU, ymin = lower, ymax = upper, col = LU), size = 0.2, width = 0.2)+
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+  xlab("") +
+  ylab("Change in species richness (%)") +
+  scale_color_manual(values = c("#009E73","#0072B2","#E69F00","#D55E00")) +
+  ylim(c(-50, 0)) +
+  theme(legend.position = "none", 
+        aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 7, angle = 45, vjust = 0.5),
+        axis.title = element_text(size = 7),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(), 
+        panel.background = element_blank(), 
+        axis.ticks = element_line(size = 0.2), 
+        axis.line = element_line(size = 0.2)) +
+  ggtitle("c")
 
-# Organise the plots
+
+p5 <- plot_grid(p1, plot_grid(p2, p3), ncol = 1, rel_heights = c(1, 1))
+
+ggsave(filename = paste0(outDir, "Figure1_map_simplemods.pdf"), plot = last_plot(), width = 120, height = 150, units = "mm", dpi = 300)
+
+
+### plotting using base plot ###
+
+# #par(mfrow=c(2,1))
+# par(cex=1)
+# par(cex.lab=1)
+# par(cex.axis=1)
+# par(cex.main=1)
+# par(ps=10)
+# par(las=1)
+# par(mgp=c(2.5,1,0))
+# par(mar=c(4,3.5,0.1,1.5))
+# par(tck=-0.01)
 # 
-# p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85, labels = c("a", "b", "c"), label_x = 0.1)
+# # set colours
+# errbar.cols <- c("#009E73","#0072B2","#E69F00","#D55E00")
 # 
-# # save figure
-# save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
+# # species richness plot
 # 
-
-# alternative fig 1 format
-
-p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.78, labels = c("b", "c"), label_x = 0.2), ncol = 1, rel_heights = c(0.7, 1), labels = c("a"), label_x = 0.1)
-
-save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 9, base_width = 9)
-
+# 
+# errbar(x = 1:4,y = s.preds.median,yplus = s.preds.upper,yminus = s.preds.lower,
+#        col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,0),xaxt="n",
+#        ylab="Change in species richness (%)",xlab="",bty="l")
+# 
+# axis(side = 1,at = 1:4, labels = c("Primary","Secondary","Agriculture\nLow","Agriculture\nHigh"), cex.axis = 1, las = 2)
+# 
+# 
+# abline(h=0,col="#00000077",lty=2)
+# 
+# #title(main = "b.", adj = 0, cex.main = 1, line = 1)
+# 
+# p3 <- recordPlot()
+# 
+# # abundance plot
+# 
+# errbar(x = 1:4,y = a.preds.median,yplus = a.preds.upper,yminus = a.preds.lower,
+#        col=errbar.cols,errbar.col = errbar.cols,ylim=c(-50,0),xaxt="n",
+#        ylab="Change in total abundance (%)",xlab="",bty="l")
+# 
+# axis(side = 1,at = 1:4,labels = c("Primary","Secondary","Agriculture\nLow","Agriculture\nHigh"), cex.axis = 1, las = 2)
+# 
+# abline(h=0,col="#00000077",lty=2)
+# 
+# #title(main = "c.", adj = 0, cex.main = 1, line = 1)
+# 
+# p2 <- recordPlot()
+# 
+# 
+# #invisible(dev.off())
+# 
+# # Organise the plots
+# # 
+# # p4 <- plot_grid(p1, p2, p3, ncol = 1, scale = 0.85, labels = c("a", "b", "c"), label_x = 0.1)
+# # 
+# # # save figure
+# # save_plot(paste0(outDir, "Figure_1.pdf"), p4, base_height = 8, base_width = 6)
+# # 
+# 
+# # alternative fig 1 format
+# 
+# p5 <- plot_grid(p1, plot_grid(p2, p3, scale = 0.78, labels = c("b", "c"), label_x = 0.2), ncol = 1, rel_heights = c(0.7, 1), labels = c("a"), label_x = 0.1)
+# 
+# save_plot(paste0(outDir, "Figure_1_alt.pdf"), p5, base_height = 9, base_width = 9)
+# 
 
 
 ##%######################################################%##
