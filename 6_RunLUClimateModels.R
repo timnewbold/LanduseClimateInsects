@@ -336,7 +336,6 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     theme_bw() + 
     scale_x_continuous(breaks = c(0,0.5, 1,1.5, 2), limits = c(0, 2)) +
     scale_y_continuous(breaks = c(-75, -50, -25, 0, 25, 50, 75, 100), limits = c(-75, 100)) +
-    labs(fill = "% NH", col = "% NH") + 
     ylab("Change in total abundance (%)") +
     xlab("Standardised Temperature Anomaly") +
     #xlim(c(-1, 5)) +
@@ -346,11 +345,13 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
           axis.text = element_text(size = 7),
           axis.title = element_text(size = 7),
           legend.position = c(0.2, 0.8),
+          legend.background = element_blank(), 
           legend.text = element_text(size = 6), 
           legend.title = element_blank(), 
-          legend.background = element_blank(), 
-          panel.grid.minor = element_blank(), 
-          panel.border = element_rect(size = 0.2)) + 
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(size = 0.2),
+          panel.border = element_rect(size = 0.2), 
+          axis.ticks = element_line(size = 0.2)) + 
     ggtitle("a")
   
   
@@ -477,7 +478,6 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     scale_x_continuous(breaks = c(0,0.5, 1,1.5, 2), limits = c(0, 2)) +
     scale_y_continuous(breaks = c(-75, -50, -25, 0, 25, 50, 75, 100), limits = c(-75, 100)) +
     theme_bw() + 
-    labs(fill = "% NH", col = "% NH") + 
     ylab("Change in species richness (%)") +
     xlab("Standardised Temperature Anomaly") +
     # xlim(c(-1, 5)) +
@@ -490,16 +490,17 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
           legend.text = element_text(size = 6), 
           legend.title = element_blank(), 
           panel.grid.minor = element_blank(),
-          panel.grid.major = element_line(size = 0.5),
-          panel.border = element_rect(size = 0.2)) + 
+          panel.grid.major = element_line(size = 0.2),
+          panel.border = element_rect(size = 0.2), 
+          axis.ticks = element_line(size = 0.2)) + 
     ggtitle("b")
   
  
   # combine plots
   plot_grid(p1, p2)
   
-  ggsave(filename = paste0(outDir, "Figure2_MeanAnom_Abun_Rich.pdf"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
-  
+  ggsave(filename = paste0(outDir, "Figure2_MeanAnom_Abun_Rich.pdf"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
+
   
   
   #  # plot #

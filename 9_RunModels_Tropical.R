@@ -106,414 +106,414 @@ cor(temp$avg_temp, temp$StdTmeanAnomaly) # -0.66
 cor(temp$TmeanAnomaly, temp$StdTmeanAnomaly) # 0.62
 
 
-# 1. Abundance, mean anomaly
-MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
-                                     fitFamily = "gaussian",
-                                     fixedFactors = c("UI2", "Tropical"),
-                                     fixedTerms = list(StdTmeanAnomalyRS=1),
-                                     randomStruct = "(1|SS)+(1|SSB)",
-                                     fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)",
-                                                           "UI2:Tropical",
-                                                           "Tropical:poly(StdTmeanAnomalyRS,1)",
-                                                           "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
-                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
-
-summary(MeanAnomalyModelAbund$model)
-
-# model is rank deficient
-
-# selected model:
-# LogAbund ~ UI2 + poly(StdTmeanAnomalyRS, 1) + Tropical +
-# UI2:Tropical +
-# Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
-# (1 | SS) + (1 | SSB)
-
-
-check_collinearity(MeanAnomalyModelAbund$model)
-
-# the 3 way interaction between land use, climate and realm has a high VIF
-
-
-
-# save the model output
-save(MeanAnomalyModelAbund, file = paste0(outDir, "/MeanAnomalyModelAbund_3way.rdata"))
-
-# 2. Richness, mean anomaly
-MeanAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
-                                    fitFamily = "poisson",
-                                    fixedFactors = c("UI2", "Tropical"),
-                                    fixedTerms = list(StdTmeanAnomalyRS=1),
-                                    randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-                                    fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)",
-                                                          "UI2:Tropical",
-                                                          "Tropical:poly(StdTmeanAnomalyRS,1)",
-                                                          "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
-                                    saveVars = c("Total_abundance", "SSBS", "NH_3000"))
-
-summary(MeanAnomalyModelRich$model)
-
-# selected model:
-# Species_richness ~ UI2 + Tropical + poly(StdTmeanAnomalyRS, 1) +  
-# UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical +  
-# Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
-# (1 | SS) +  (1 | SSB) + (1 | SSBS)
-
-# Model failed to converge: degenerate  Hessian with 2 negative eigenvalues
-
-check_collinearity(MeanAnomalyModelAbund$model)
-
-
-# the 3 way interaction between land use, climate and realm has a high VIF
-
-
-# save model output
-save(MeanAnomalyModelRich, file = paste0(outDir, "/MeanAnomalyModelRich_3way.rdata"))
-
-
-# 3. Abundance, max anomaly
-MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
-                                    fitFamily = "gaussian",
-                                    fixedFactors = c("UI2", "Tropical"),
-                                    fixedTerms = list(StdTmaxAnomalyRS=1),
-                                    randomStruct = "(1|SS)+(1|SSB)",
-                                    fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)",
-                                                          "UI2:Tropical",
-                                                          "Tropical:poly(StdTmaxAnomalyRS,1)",
-                                                          "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),
-                                    saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
-
-summary(MaxAnomalyModelAbund$model)
-
-# selected model:
-# LogAbund ~ UI2 + UI2:Tropical + Tropical + (1 | SS) + (1 | SSB)
-
-# save model output
-save(MaxAnomalyModelAbund, file = paste0(outDir, "/MaxAnomalyModelAbund_3way.rdata"))
-
-
-# 4. Richness, max anomaly
-MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
-                                   fitFamily = "poisson",
-                                   fixedFactors = c("UI2", "Tropical"),
-                                   fixedTerms = list(StdTmaxAnomalyRS=1),
-                                   randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-                                   fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)",
-                                                         "UI2:Tropical",
-                                                         "Tropical:poly(StdTmaxAnomalyRS,1)",
-                                                         "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),  
-                                   saveVars = c("Total_abundance", "SSBS", "NH_3000"))
-
-summary(MaxAnomalyModelRich$model)
-
-# selected model:
-# Species_richness ~ UI2 + Tropical + poly(StdTmaxAnomalyRS, 1) + 
-# UI2:poly(StdTmaxAnomalyRS, 1) + UI2:Tropical + Tropical:poly(StdTmaxAnomalyRS, 1):UI2 +  
-# (1 | SS) + (1 | SSB) + (1 | SSBS)
-
-
-# Model failed to converge with max|grad| = 0.00613945 (tol = 0.001, component 1)
-
-
-
-# save model output
-save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
-
-
-#load(paste0(outDir, "MeanAnomalyModelAbund_3way.rdata"))
-#load(paste0(outDir, "/MeanAnomalyModelRich_3way.rdata"))
-#load(paste0(outDir, "/MaxAnomalyModelAbund_3way.rdata"))
-#load(paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
-
-
-summary(MeanAnomalyModelAbund$model)
-summary(MeanAnomalyModelRich$model)
-summary(MaxAnomalyModelAbund$model)
-summary(MaxAnomalyModelRich$model)
-
-############## plotting ##############
-
-
-## Realm/anomaly/LU interactions
-
-
-
-### 1. Abundance, mean anomaly
-
-nd <- expand.grid(
-  StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
-                        to = max(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
-                        length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MeanAnomalyModelAbund$data$UI2)),
-  Tropical = factor(c("Tropical", "Temperate"),
-                    levels = levels(MeanAnomalyModelAbund$data$Tropical)))
-
-# back transform the predictors
-nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd$StdTmeanAnomalyRS,
-  originalX = predictsSites$StdTmeanAnomaly)
-
-# set richness and abundance to 0 - to be predicted
-nd$LogAbund <- 0
-nd$Species_richness <- 0
-
-
-# reference for % difference = primary vegetation and positive anomaly closest to 0
-refRow1 <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & (nd$Tropical == "Tropical"))
-refRow2 <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & (nd$Tropical == "Temperate"))
-refRow2 <- refRow2 -400
-
-# adjust plot 1: mean anomaly and abundance
-
-exclQuantiles <- c(0.025,0.975)
-
-
-QPV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelAbund$data$UI2=="Primary vegetation"],
-  probs = exclQuantiles)
-QSV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelAbund$data$UI2=="Secondary vegetation"],
-  probs = exclQuantiles)
-QAL <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelAbund$data$UI2=="Agriculture_Low"],
-  probs = exclQuantiles)
-QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelAbund$data$UI2=="Agriculture_High"],
-  probs = exclQuantiles)
-
-
-# predict the results
-a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelAbund$model,data = nd)
-
-# back transform the abundance values
-a.preds.tmean <- exp(a.preds.tmean)-0.01
-
-
-a.preds.tmean_t <- a.preds.tmean[1:400, ] # tropical set
-a.preds.tmean <- a.preds.tmean[401:800, ] # temperate set
-
-# convert to relative to reference
-a.preds.tmean_t <- sweep(x = a.preds.tmean_t,MARGIN = 2,STATS = a.preds.tmean_t[refRow1,],FUN = '/') # tropical
-a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow2,],FUN = '/') # temperate
-
-# remove anything above and below the quantiles
-a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Tropical"),] <- NA
-a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Tropical"),] <- NA
-
-# remove anything above and below the quantiles
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Temperate")-400,] <- NA
-a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Temperate")-400,] <- NA
-
-# Get the median, upper and lower quants for the plot
-nd$PredMedian[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
-                         FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
-                        FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
-                        FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-nd$PredMedian[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
-                         FUN = median,na.rm=TRUE))*100)-100
-nd$PredUpper[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
-                        FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd$PredLower[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
-                        FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-
-nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
-
-plot_data <- nd[nd$Tropical == "Temperate",]
-
-p1 <- ggplot(data = plot_data, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = plot_data$PredLower, ymax = plot_data$PredUpper, fill = UI2), alpha = 0.2) +
-  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  #facet_wrap(~Tropical, ncol = 2) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Change in total abundance (%)") +
-  xlab("Standardised Temperature Anomaly") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 750)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12)) +
-  ggtitle("Temperate")
-
-
-plot_data2 <- nd[nd$Tropical == "Tropical",]
-
-p2 <- ggplot(data = plot_data2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = plot_data2$PredLower, ymax = plot_data2$PredUpper, fill = UI2), alpha = 0.2) +
-  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  #facet_wrap(~Tropical, ncol = 2) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Change in total abundance (%)") +
-  xlab("Standardised Climate Anomaly") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none") +
-  ggtitle("Tropical")
-
-
-legend <- get_legend(p1)
-p3 <- cowplot::plot_grid(p1+theme(legend.position = "none"), p2, legend, ncol = 3)
-
-
-### 2. SR mean anomaly
-
-nd2 <- expand.grid(
-  StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
-                        to = max(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
-                        length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MeanAnomalyModelRich$data$UI2)),
-  Tropical = factor(c("Tropical", "Temperate"),
-                    levels = levels(MeanAnomalyModelRich$data$Tropical)))
-
-# back transform the predictors
-nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd2$StdTmeanAnomalyRS,
-  originalX = predictsSites$StdTmeanAnomaly)
-
-# set richness and abundance to 0 - to be predicted
-nd2$LogAbund <- 0
-nd2$Species_richness <- 0
-
-
-# reference for % difference = primary vegetation and positive anomaly closest to 0
-
-# reference for % difference = primary vegetation and positive anomaly closest to 0
-refRow1 <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & (nd2$Tropical == "Tropical"))
-refRow2 <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & (nd2$Tropical == "Temperate"))
-refRow2 <- refRow2 -400
-
-
-# quantiles of data to show on the plot
-exclQuantiles <- c(0.025,0.975)
-
-
-QPV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelRich$data$UI2=="Primary vegetation"],
-  probs = exclQuantiles)
-QSV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelRich$data$UI2=="Secondary vegetation"],
-  probs = exclQuantiles)
-QAL <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelRich$data$UI2=="Agriculture_Low"],
-  probs = exclQuantiles)
-QAH <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
-  MeanAnomalyModelRich$data$UI2=="Agriculture_High"],
-  probs = exclQuantiles)
-
-# predict the results
-sr.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd2)
-
-# back transform the abundance values
-sr.preds.tmean <- exp(sr.preds.tmean)
-
-
-sr.preds.tmean_t <- sr.preds.tmean[1:400, ] # tropical set
-sr.preds.tmean <- sr.preds.tmean[401:800, ] # temperate set
-
-# convert to relative to reference
-sr.preds.tmean_t <- sweep(x = sr.preds.tmean_t,MARGIN = 2,STATS = sr.preds.tmean_t[refRow1,],FUN = '/')
-sr.preds.tmean <- sweep(x = sr.preds.tmean,MARGIN = 2,STATS = sr.preds.tmean[refRow2,],FUN = '/')
-
-# remove anything above and below the quantiles
-sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Tropical"),] <- NA
-
-# remove anything above and below the quantiles
-sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Temperate")-400,] <- NA
-
-# Get the median, upper and lower quants for the plot
-nd2$PredMedian[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
-                                FUN = median,na.rm=TRUE))*100)-100
-nd2$PredUpper[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
-                               FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd2$PredLower[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
-                               FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-nd2$PredMedian[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
-                                  FUN = median,nsr.rm=TRUE))*100)-100
-nd2$PredUpper[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
-                                 FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd2$PredLower[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
-                                 FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-
-nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
-
-
-plotdata <- nd2[nd2$Tropical == "Temperate", ]
-  
-p4 <- ggplot(data = plotdata, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = plotdata$PredLower, ymax = plotdata$PredUpper, fill = UI2), alpha = 0.2) +
-  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #facet_wrap(~Tropical, ncol = 2) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Change in species richness (%)") +
-  xlab("Standardised Climate Anomaly") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 950)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))+
-  ggtitle("Temperate")
-
-
-
-plotdata2 <- nd2[nd2$Tropical == "Tropical", ]
-
-p5 <- ggplot(data = plotdata2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = plotdata2$PredLower, ymax = plotdata2$PredUpper, fill = UI2), alpha = 0.2) +
-  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #facet_wrap(~Tropical, ncol = 2) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Change in species richness (%)") +
-  xlab("Standardised Climate Anomaly") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none")+
-  ggtitle("Tropical")
-
-legend2 <- get_legend(p4)
-p6 <- cowplot::plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 3)
-
+# # 1. Abundance, mean anomaly
+# MeanAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
+#                                      fitFamily = "gaussian",
+#                                      fixedFactors = c("UI2", "Tropical"),
+#                                      fixedTerms = list(StdTmeanAnomalyRS=1),
+#                                      randomStruct = "(1|SS)+(1|SSB)",
+#                                      fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)",
+#                                                            "UI2:Tropical",
+#                                                            "Tropical:poly(StdTmeanAnomalyRS,1)",
+#                                                            "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
+#                                      saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+# 
+# summary(MeanAnomalyModelAbund$model)
+# 
+# # model is rank deficient
+# 
+# # selected model:
+# # LogAbund ~ UI2 + poly(StdTmeanAnomalyRS, 1) + Tropical +
+# # UI2:Tropical +
+# # Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
+# # (1 | SS) + (1 | SSB)
+# 
+# 
+# check_collinearity(MeanAnomalyModelAbund$model)
+# 
+# # the 3 way interaction between land use, climate and realm has a high VIF
+# 
+# 
+# 
+# # save the model output
+# save(MeanAnomalyModelAbund, file = paste0(outDir, "/MeanAnomalyModelAbund_3way.rdata"))
+# 
+# # 2. Richness, mean anomaly
+# MeanAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
+#                                     fitFamily = "poisson",
+#                                     fixedFactors = c("UI2", "Tropical"),
+#                                     fixedTerms = list(StdTmeanAnomalyRS=1),
+#                                     randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+#                                     fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)",
+#                                                           "UI2:Tropical",
+#                                                           "Tropical:poly(StdTmeanAnomalyRS,1)",
+#                                                           "Tropical:poly(StdTmeanAnomalyRS,1):UI2"),
+#                                     saveVars = c("Total_abundance", "SSBS", "NH_3000"))
+# 
+# summary(MeanAnomalyModelRich$model)
+# 
+# # selected model:
+# # Species_richness ~ UI2 + Tropical + poly(StdTmeanAnomalyRS, 1) +  
+# # UI2:poly(StdTmeanAnomalyRS, 1) + UI2:Tropical +  
+# # Tropical:poly(StdTmeanAnomalyRS, 1):UI2 + 
+# # (1 | SS) +  (1 | SSB) + (1 | SSBS)
+# 
+# # Model failed to converge: degenerate  Hessian with 2 negative eigenvalues
+# 
+# check_collinearity(MeanAnomalyModelAbund$model)
+# 
+# 
+# # the 3 way interaction between land use, climate and realm has a high VIF
+# 
+# 
+# # save model output
+# save(MeanAnomalyModelRich, file = paste0(outDir, "/MeanAnomalyModelRich_3way.rdata"))
+# 
+# 
+# # 3. Abundance, max anomaly
+# MaxAnomalyModelAbund <- GLMERSelect(modelData = predictsSites,responseVar = "LogAbund",
+#                                     fitFamily = "gaussian",
+#                                     fixedFactors = c("UI2", "Tropical"),
+#                                     fixedTerms = list(StdTmaxAnomalyRS=1),
+#                                     randomStruct = "(1|SS)+(1|SSB)",
+#                                     fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)",
+#                                                           "UI2:Tropical",
+#                                                           "Tropical:poly(StdTmaxAnomalyRS,1)",
+#                                                           "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),
+#                                     saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
+# 
+# summary(MaxAnomalyModelAbund$model)
+# 
+# # selected model:
+# # LogAbund ~ UI2 + UI2:Tropical + Tropical + (1 | SS) + (1 | SSB)
+# 
+# # save model output
+# save(MaxAnomalyModelAbund, file = paste0(outDir, "/MaxAnomalyModelAbund_3way.rdata"))
+# 
+# 
+# # 4. Richness, max anomaly
+# MaxAnomalyModelRich <- GLMERSelect(modelData = predictsSites,responseVar = "Species_richness",
+#                                    fitFamily = "poisson",
+#                                    fixedFactors = c("UI2", "Tropical"),
+#                                    fixedTerms = list(StdTmaxAnomalyRS=1),
+#                                    randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
+#                                    fixedInteractions = c("UI2:poly(StdTmaxAnomalyRS,1)",
+#                                                          "UI2:Tropical",
+#                                                          "Tropical:poly(StdTmaxAnomalyRS,1)",
+#                                                          "Tropical:poly(StdTmaxAnomalyRS,1):UI2"),  
+#                                    saveVars = c("Total_abundance", "SSBS", "NH_3000"))
+# 
+# summary(MaxAnomalyModelRich$model)
+# 
+# # selected model:
+# # Species_richness ~ UI2 + Tropical + poly(StdTmaxAnomalyRS, 1) + 
+# # UI2:poly(StdTmaxAnomalyRS, 1) + UI2:Tropical + Tropical:poly(StdTmaxAnomalyRS, 1):UI2 +  
+# # (1 | SS) + (1 | SSB) + (1 | SSBS)
+# 
+# 
+# # Model failed to converge with max|grad| = 0.00613945 (tol = 0.001, component 1)
+# 
+# 
+# 
+# # save model output
+# save(MaxAnomalyModelRich, file = paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
+# 
+# 
+# #load(paste0(outDir, "MeanAnomalyModelAbund_3way.rdata"))
+# #load(paste0(outDir, "/MeanAnomalyModelRich_3way.rdata"))
+# #load(paste0(outDir, "/MaxAnomalyModelAbund_3way.rdata"))
+# #load(paste0(outDir, "/MaxAnomalyModelRich_3way.rdata"))
+# 
+# 
+# summary(MeanAnomalyModelAbund$model)
+# summary(MeanAnomalyModelRich$model)
+# summary(MaxAnomalyModelAbund$model)
+# summary(MaxAnomalyModelRich$model)
+# 
+# ############## plotting ##############
+# 
+# 
+# ## Realm/anomaly/LU interactions
+# 
+# 
+# 
+# ### 1. Abundance, mean anomaly
+# 
+# nd <- expand.grid(
+#   StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+#                         to = max(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
+#                         length.out = 100),
+#   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+#              levels = levels(MeanAnomalyModelAbund$data$UI2)),
+#   Tropical = factor(c("Tropical", "Temperate"),
+#                     levels = levels(MeanAnomalyModelAbund$data$Tropical)))
+# 
+# # back transform the predictors
+# nd$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+#   transformedX = nd$StdTmeanAnomalyRS,
+#   originalX = predictsSites$StdTmeanAnomaly)
+# 
+# # set richness and abundance to 0 - to be predicted
+# nd$LogAbund <- 0
+# nd$Species_richness <- 0
+# 
+# 
+# # reference for % difference = primary vegetation and positive anomaly closest to 0
+# refRow1 <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & (nd$Tropical == "Tropical"))
+# refRow2 <- which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomaly==min(abs(nd$StdTmeanAnomaly))) & (nd$Tropical == "Temperate"))
+# refRow2 <- refRow2 -400
+# 
+# # adjust plot 1: mean anomaly and abundance
+# 
+# exclQuantiles <- c(0.025,0.975)
+# 
+# 
+# QPV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelAbund$data$UI2=="Primary vegetation"],
+#   probs = exclQuantiles)
+# QSV <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelAbund$data$UI2=="Secondary vegetation"],
+#   probs = exclQuantiles)
+# QAL <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelAbund$data$UI2=="Agriculture_Low"],
+#   probs = exclQuantiles)
+# QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelAbund$data$UI2=="Agriculture_High"],
+#   probs = exclQuantiles)
+# 
+# 
+# # predict the results
+# a.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelAbund$model,data = nd)
+# 
+# # back transform the abundance values
+# a.preds.tmean <- exp(a.preds.tmean)-0.01
+# 
+# 
+# a.preds.tmean_t <- a.preds.tmean[1:400, ] # tropical set
+# a.preds.tmean <- a.preds.tmean[401:800, ] # temperate set
+# 
+# # convert to relative to reference
+# a.preds.tmean_t <- sweep(x = a.preds.tmean_t,MARGIN = 2,STATS = a.preds.tmean_t[refRow1,],FUN = '/') # tropical
+# a.preds.tmean <- sweep(x = a.preds.tmean,MARGIN = 2,STATS = a.preds.tmean[refRow2,],FUN = '/') # temperate
+# 
+# # remove anything above and below the quantiles
+# a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Tropical"),] <- NA
+# a.preds.tmean_t[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Tropical"),] <- NA
+# 
+# # remove anything above and below the quantiles
+# a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS < QPV[1]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Primary vegetation") & (nd$StdTmeanAnomalyRS > QPV[2]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS < QSV[1]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Secondary vegetation") & (nd$StdTmeanAnomalyRS > QSV[2]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS < QAL[1]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Agriculture_Low") & (nd$StdTmeanAnomalyRS > QAL[2]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS < QAH[1]) & nd$Tropical == "Temperate")-400,] <- NA
+# a.preds.tmean[which((nd$UI2=="Agriculture_High") & (nd$StdTmeanAnomalyRS > QAH[2]) & nd$Tropical == "Temperate")-400,] <- NA
+# 
+# # Get the median, upper and lower quants for the plot
+# nd$PredMedian[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
+#                          FUN = median,na.rm=TRUE))*100)-100
+# nd$PredUpper[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
+#                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd$PredLower[1:400] <- ((apply(X = a.preds.tmean_t,MARGIN = 1,
+#                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# nd$PredMedian[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
+#                          FUN = median,na.rm=TRUE))*100)-100
+# nd$PredUpper[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
+#                         FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd$PredLower[401:800] <- ((apply(X = a.preds.tmean,MARGIN = 1,
+#                         FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# 
+# nd$UI2 <- factor(nd$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
+# 
+# plot_data <- nd[nd$Tropical == "Temperate",]
+# 
+# p1 <- ggplot(data = plot_data, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = UI2), size = 1) +
+#   geom_ribbon(aes(ymin = plot_data$PredLower, ymax = plot_data$PredUpper, fill = UI2), alpha = 0.2) +
+#   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   #facet_wrap(~Tropical, ncol = 2) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Change in total abundance (%)") +
+#   xlab("Standardised Temperature Anomaly") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 750)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12)) +
+#   ggtitle("Temperate")
+# 
+# 
+# plot_data2 <- nd[nd$Tropical == "Tropical",]
+# 
+# p2 <- ggplot(data = plot_data2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = UI2), size = 1) +
+#   geom_ribbon(aes(ymin = plot_data2$PredLower, ymax = plot_data2$PredUpper, fill = UI2), alpha = 0.2) +
+#   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   #facet_wrap(~Tropical, ncol = 2) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Change in total abundance (%)") +
+#   xlab("Standardised Climate Anomaly") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 100)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none") +
+#   ggtitle("Tropical")
+# 
+# 
+# legend <- get_legend(p1)
+# p3 <- cowplot::plot_grid(p1+theme(legend.position = "none"), p2, legend, ncol = 3)
+# 
+# 
+# ### 2. SR mean anomaly
+# 
+# nd2 <- expand.grid(
+#   StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
+#                         to = max(MeanAnomalyModelRich$data$StdTmeanAnomalyRS),
+#                         length.out = 100),
+#   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+#              levels = levels(MeanAnomalyModelRich$data$UI2)),
+#   Tropical = factor(c("Tropical", "Temperate"),
+#                     levels = levels(MeanAnomalyModelRich$data$Tropical)))
+# 
+# # back transform the predictors
+# nd2$StdTmeanAnomaly <- BackTransformCentreredPredictor(
+#   transformedX = nd2$StdTmeanAnomalyRS,
+#   originalX = predictsSites$StdTmeanAnomaly)
+# 
+# # set richness and abundance to 0 - to be predicted
+# nd2$LogAbund <- 0
+# nd2$Species_richness <- 0
+# 
+# 
+# # reference for % difference = primary vegetation and positive anomaly closest to 0
+# 
+# # reference for % difference = primary vegetation and positive anomaly closest to 0
+# refRow1 <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & (nd2$Tropical == "Tropical"))
+# refRow2 <- which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomaly==min(abs(nd2$StdTmeanAnomaly))) & (nd2$Tropical == "Temperate"))
+# refRow2 <- refRow2 -400
+# 
+# 
+# # quantiles of data to show on the plot
+# exclQuantiles <- c(0.025,0.975)
+# 
+# 
+# QPV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelRich$data$UI2=="Primary vegetation"],
+#   probs = exclQuantiles)
+# QSV <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelRich$data$UI2=="Secondary vegetation"],
+#   probs = exclQuantiles)
+# QAL <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelRich$data$UI2=="Agriculture_Low"],
+#   probs = exclQuantiles)
+# QAH <- quantile(x = MeanAnomalyModelRich$data$StdTmeanAnomalyRS[
+#   MeanAnomalyModelRich$data$UI2=="Agriculture_High"],
+#   probs = exclQuantiles)
+# 
+# # predict the results
+# sr.preds.tmean <- PredictGLMERRandIter(model = MeanAnomalyModelRich$model,data = nd2)
+# 
+# # back transform the abundance values
+# sr.preds.tmean <- exp(sr.preds.tmean)
+# 
+# 
+# sr.preds.tmean_t <- sr.preds.tmean[1:400, ] # tropical set
+# sr.preds.tmean <- sr.preds.tmean[401:800, ] # temperate set
+# 
+# # convert to relative to reference
+# sr.preds.tmean_t <- sweep(x = sr.preds.tmean_t,MARGIN = 2,STATS = sr.preds.tmean_t[refRow1,],FUN = '/')
+# sr.preds.tmean <- sweep(x = sr.preds.tmean,MARGIN = 2,STATS = sr.preds.tmean[refRow2,],FUN = '/')
+# 
+# # remove anything above and below the quantiles
+# sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Tropical"),] <- NA
+# 
+# # remove anything above and below the quantiles
+# sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS < QPV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Primary vegetation") & (nd2$StdTmeanAnomalyRS > QPV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS < QSV[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Secondary vegetation") & (nd2$StdTmeanAnomalyRS > QSV[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS < QAL[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Agriculture_Low") & (nd2$StdTmeanAnomalyRS > QAL[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS < QAH[1]) & nd2$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd2$UI2=="Agriculture_High") & (nd2$StdTmeanAnomalyRS > QAH[2]) & nd2$Tropical == "Temperate")-400,] <- NA
+# 
+# # Get the median, upper and lower quants for the plot
+# nd2$PredMedian[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
+#                                 FUN = median,na.rm=TRUE))*100)-100
+# nd2$PredUpper[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
+#                                FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd2$PredLower[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
+#                                FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# nd2$PredMedian[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
+#                                   FUN = median,nsr.rm=TRUE))*100)-100
+# nd2$PredUpper[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
+#                                  FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd2$PredLower[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
+#                                  FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# 
+# nd2$UI2 <- factor(nd2$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
+# 
+# 
+# plotdata <- nd2[nd2$Tropical == "Temperate", ]
+#   
+# p4 <- ggplot(data = plotdata, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = UI2), size = 1) +
+#   geom_ribbon(aes(ymin = plotdata$PredLower, ymax = plotdata$PredUpper, fill = UI2), alpha = 0.2) +
+#   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   #facet_wrap(~Tropical, ncol = 2) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Change in species richness (%)") +
+#   xlab("Standardised Climate Anomaly") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 950)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12))+
+#   ggtitle("Temperate")
+# 
+# 
+# 
+# plotdata2 <- nd2[nd2$Tropical == "Tropical", ]
+# 
+# p5 <- ggplot(data = plotdata2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = UI2), size = 1) +
+#   geom_ribbon(aes(ymin = plotdata2$PredLower, ymax = plotdata2$PredUpper, fill = UI2), alpha = 0.2) +
+#   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   #facet_wrap(~Tropical, ncol = 2) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Change in species richness (%)") +
+#   xlab("Standardised Climate Anomaly") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 100)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none")+
+#   ggtitle("Tropical")
+# 
+# legend2 <- get_legend(p4)
+# p6 <- cowplot::plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 3)
+# 
 
 
 
@@ -605,160 +605,160 @@ p6 <- cowplot::plot_grid(p4+theme(legend.position = "none"), p5, legend, ncol = 
 #  theme(aspect.ratio = 1, text = element_text(size = 12))
 
 
-
-
-
-### 4. Species richness, max anomaly
-
-
-nd4 <- expand.grid(
-  StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelRich$data$StdTmaxAnomalyRS),
-                       to = max(MaxAnomalyModelRich$data$StdTmaxAnomalyRS),
-                       length.out = 100),
-  UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MaxAnomalyModelRich$data$UI2)),
-  Tropical = factor(c("Tropical", "Temperate"),
-                    levels = levels(MaxAnomalyModelRich$data$Tropical)))
-
-# back transform the predictors
-nd4$StdTmaxAnomaly <- BackTransformCentreredPredictor(
-  transformedX = nd4$StdTmaxAnomalyRS,
-  originalX = predictsSites$StdTmaxAnomaly)
-
-# set richness and abundance to 0 - to be predicted
-nd4$LogAbund <- 0
-nd4$Species_richness <- 0
-
-
-# reference for % difference = primary vegetation and positive anomaly closest to 0
-refRow1 <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(nd4$StdTmaxAnomaly))) & (nd4$Tropical == "Tropical"))
-refRow2 <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(nd4$StdTmaxAnomaly))) & (nd4$Tropical == "Temperate"))
-refRow2 <- refRow2 -400
-
-# quantiles of data to show on the plot
-exclQuantiles <- c(0.025,0.975)
-
-
-QPV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
-  MaxAnomalyModelRich$data$UI2=="Primary vegetation"],
-  probs = exclQuantiles)
-QSV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
-  MaxAnomalyModelRich$data$UI2=="Secondary vegetation"],
-  probs = exclQuantiles)
-QAL <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
-  MaxAnomalyModelRich$data$UI2=="Agriculture_Low"],
-  probs = exclQuantiles)
-QAH <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
-  MaxAnomalyModelRich$data$UI2=="Agriculture_High"],
-  probs = exclQuantiles)
-
-# predict the results
-sr.preds.tmean <- PredictGLMERRandIter(model = MaxAnomalyModelRich$model,data = nd4)
-
-# back transform the abundance values
-sr.preds.tmean <- exp(sr.preds.tmean)
-
-
-sr.preds.tmean_t <- sr.preds.tmean[1:400, ] # tropical set
-sr.preds.tmean <- sr.preds.tmean[401:800, ] # temperate set
-
-# convert to relative to reference
-sr.preds.tmean_t <- sweep(x = sr.preds.tmean_t,MARGIN = 2,STATS = sr.preds.tmean_t[refRow1,],FUN = '/')
-sr.preds.tmean <- sweep(x = sr.preds.tmean,MARGIN = 2,STATS = sr.preds.tmean[refRow2,],FUN = '/')
-
-# remove anything above and below the quantiles
-sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Tropical"),] <- NA
-sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Tropical"),] <- NA
-
-# remove anything above and below the quantiles
-sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Temperate")-400,] <- NA
-sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Temperate")-400,] <- NA
-
-# Get the median, upper and lower quants for the plot
-nd4$PredMedian[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
-                                 FUN = median,na.rm=TRUE))*100)-100
-nd4$PredUpper[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
-                                FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd4$PredLower[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
-                                FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-nd4$PredMedian[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
-                                   FUN = median,na.rm=TRUE))*100)-100
-nd4$PredUpper[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
-                                  FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
-nd4$PredLower[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
-                                  FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
-
-
-
-nd4$UI2 <- factor(nd4$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
-
-plot.data <- nd4[nd4$Tropical == "Temperate",]
-
-p7 <- ggplot(data = plot.data, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = plot.data$PredLower, ymax = plot.data$PredUpper, fill = UI2), alpha = 0.2) +
-  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  #facet_wrap(~Tropical, ncol = 2) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Species Richness (%)") +
-  xlab("Standardised Climate \nAnomaly Maximum") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12))+
-  ggtitle("Temperate")
-
-plot.data2 <- nd4[nd4$Tropical =="Tropical",]
-
-p8 <- ggplot(data = plot.data2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
-  geom_ribbon(aes(ymin = plot.data2$PredLower, ymax = plot.data2$PredUpper, fill = UI2), alpha = 0.2) +
-  scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
-  #facet_wrap(~Tropical, ncol = 2) + 
-  theme_bw() + 
-  labs(fill = "% NH", col = "% NH") + 
-  ylab("Species Richness (%)") +
-  xlab("Standardised Climate \nAnomaly Maximum") +
-  xlim(c(-0.5, 2)) +
-  ylim(c(-100, 100)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none") + 
-  ggtitle("Tropical")
-
-#"#009E73" - green
-#"#0072B2" - blue
-#"#E69F00" - yellow
-#"#D55E00" - red
-
-legend3 <- get_legend(p7)
-p9 <- plot_grid(p7+theme(legend.position = "none"), p8, legend, ncol = 3)
-
-
-
-# organise plots into one document
-
-plot_grid(p3, p6,  p9, ncol = 1, 
-          labels = c("A", "B", "C"), label_size = 12, rel_widths = c(1,1,0.5))
-
-# save plot
-ggsave(filename = paste0(outDir, "Plots_climate_LU_Tropical_ALL_allinteractions.pdf"), width = 9, height = 9, units = "in")
-
-
-
+# 
+# 
+# 
+# ### 4. Species richness, max anomaly
+# 
+# 
+# nd4 <- expand.grid(
+#   StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelRich$data$StdTmaxAnomalyRS),
+#                        to = max(MaxAnomalyModelRich$data$StdTmaxAnomalyRS),
+#                        length.out = 100),
+#   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
+#              levels = levels(MaxAnomalyModelRich$data$UI2)),
+#   Tropical = factor(c("Tropical", "Temperate"),
+#                     levels = levels(MaxAnomalyModelRich$data$Tropical)))
+# 
+# # back transform the predictors
+# nd4$StdTmaxAnomaly <- BackTransformCentreredPredictor(
+#   transformedX = nd4$StdTmaxAnomalyRS,
+#   originalX = predictsSites$StdTmaxAnomaly)
+# 
+# # set richness and abundance to 0 - to be predicted
+# nd4$LogAbund <- 0
+# nd4$Species_richness <- 0
+# 
+# 
+# # reference for % difference = primary vegetation and positive anomaly closest to 0
+# refRow1 <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(nd4$StdTmaxAnomaly))) & (nd4$Tropical == "Tropical"))
+# refRow2 <- which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomaly==min(abs(nd4$StdTmaxAnomaly))) & (nd4$Tropical == "Temperate"))
+# refRow2 <- refRow2 -400
+# 
+# # quantiles of data to show on the plot
+# exclQuantiles <- c(0.025,0.975)
+# 
+# 
+# QPV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
+#   MaxAnomalyModelRich$data$UI2=="Primary vegetation"],
+#   probs = exclQuantiles)
+# QSV <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
+#   MaxAnomalyModelRich$data$UI2=="Secondary vegetation"],
+#   probs = exclQuantiles)
+# QAL <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
+#   MaxAnomalyModelRich$data$UI2=="Agriculture_Low"],
+#   probs = exclQuantiles)
+# QAH <- quantile(x = MaxAnomalyModelRich$data$StdTmaxAnomalyRS[
+#   MaxAnomalyModelRich$data$UI2=="Agriculture_High"],
+#   probs = exclQuantiles)
+# 
+# # predict the results
+# sr.preds.tmean <- PredictGLMERRandIter(model = MaxAnomalyModelRich$model,data = nd4)
+# 
+# # back transform the abundance values
+# sr.preds.tmean <- exp(sr.preds.tmean)
+# 
+# 
+# sr.preds.tmean_t <- sr.preds.tmean[1:400, ] # tropical set
+# sr.preds.tmean <- sr.preds.tmean[401:800, ] # temperate set
+# 
+# # convert to relative to reference
+# sr.preds.tmean_t <- sweep(x = sr.preds.tmean_t,MARGIN = 2,STATS = sr.preds.tmean_t[refRow1,],FUN = '/')
+# sr.preds.tmean <- sweep(x = sr.preds.tmean,MARGIN = 2,STATS = sr.preds.tmean[refRow2,],FUN = '/')
+# 
+# # remove anything above and below the quantiles
+# sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Tropical"),] <- NA
+# sr.preds.tmean_t[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Tropical"),] <- NA
+# 
+# # remove anything above and below the quantiles
+# sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS < QPV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Primary vegetation") & (nd4$StdTmaxAnomalyRS > QPV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS < QSV[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Secondary vegetation") & (nd4$StdTmaxAnomalyRS > QSV[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS < QAL[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Agriculture_Low") & (nd4$StdTmaxAnomalyRS > QAL[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS < QAH[1]) & nd4$Tropical == "Temperate")-400,] <- NA
+# sr.preds.tmean[which((nd4$UI2=="Agriculture_High") & (nd4$StdTmaxAnomalyRS > QAH[2]) & nd4$Tropical == "Temperate")-400,] <- NA
+# 
+# # Get the median, upper and lower quants for the plot
+# nd4$PredMedian[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
+#                                  FUN = median,na.rm=TRUE))*100)-100
+# nd4$PredUpper[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
+#                                 FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd4$PredLower[1:400] <- ((apply(X = sr.preds.tmean_t,MARGIN = 1,
+#                                 FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# nd4$PredMedian[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
+#                                    FUN = median,na.rm=TRUE))*100)-100
+# nd4$PredUpper[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
+#                                   FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+# nd4$PredLower[401:800] <- ((apply(X = sr.preds.tmean,MARGIN = 1,
+#                                   FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+# 
+# 
+# 
+# nd4$UI2 <- factor(nd4$UI2, levels = c("Primary vegetation", "Secondary vegetation", "Agriculture_Low", "Agriculture_High"))
+# 
+# plot.data <- nd4[nd4$Tropical == "Temperate",]
+# 
+# p7 <- ggplot(data = plot.data, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = UI2), size = 1) +
+#   geom_ribbon(aes(ymin = plot.data$PredLower, ymax = plot.data$PredUpper, fill = UI2), alpha = 0.2) +
+#   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   #facet_wrap(~Tropical, ncol = 2) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Species Richness (%)") +
+#   xlab("Standardised Climate \nAnomaly Maximum") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 100)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12))+
+#   ggtitle("Temperate")
+# 
+# plot.data2 <- nd4[nd4$Tropical =="Tropical",]
+# 
+# p8 <- ggplot(data = plot.data2, aes(x = StdTmaxAnomaly, y = PredMedian)) + 
+#   geom_line(aes(col = UI2), size = 1) +
+#   geom_ribbon(aes(ymin = plot.data2$PredLower, ymax = plot.data2$PredUpper, fill = UI2), alpha = 0.2) +
+#   scale_fill_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
+#   #facet_wrap(~Tropical, ncol = 2) + 
+#   theme_bw() + 
+#   labs(fill = "% NH", col = "% NH") + 
+#   ylab("Species Richness (%)") +
+#   xlab("Standardised Climate \nAnomaly Maximum") +
+#   xlim(c(-0.5, 2)) +
+#   ylim(c(-100, 100)) + 
+#   theme(aspect.ratio = 1, text = element_text(size = 12), legend.position = "none") + 
+#   ggtitle("Tropical")
+# 
+# #"#009E73" - green
+# #"#0072B2" - blue
+# #"#E69F00" - yellow
+# #"#D55E00" - red
+# 
+# legend3 <- get_legend(p7)
+# p9 <- plot_grid(p7+theme(legend.position = "none"), p8, legend, ncol = 3)
+# 
+# 
+# 
+# # organise plots into one document
+# 
+# plot_grid(p3, p6,  p9, ncol = 1, 
+#           labels = c("A", "B", "C"), label_size = 12, rel_widths = c(1,1,0.5))
+# 
+# # save plot
+# ggsave(filename = paste0(outDir, "Plots_climate_LU_Tropical_ALL_allinteractions.pdf"), width = 9, height = 9, units = "in")
+# 
+# 
+# 
 
 
 
@@ -1070,18 +1070,27 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 
 p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-        geom_line(aes(col = UI2), size = 1) +
+        geom_line(aes(col = UI2), size = 0.75) +
         geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = UI2), alpha = 0.2) +
-        geom_hline(yintercept = 0, linetype = "dashed") +
+        geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
         scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
         scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
         theme_bw() + 
-        ylab("Change in Total Abundance (%)") +
+        ylab("Change in total abundance (%)") +
         xlab("Standardised Temperature Anomaly") +
         xlim(c(-0.5, 2)) +
         ylim(c(-100, 150)) + 
-        theme(aspect.ratio = 1, text = element_text(size = 12),
-              legend.title = element_blank()) + 
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        #legend.position = "none",
+        legend.text = element_text(size = 6), 
+        legend.title = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.2),
+        panel.border = element_rect(size = 0.2), 
+        axis.ticks = element_line(size = 0.2)) + 
         ggtitle("a Non-tropical Realm")
 
 
@@ -1152,19 +1161,28 @@ nd2$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 
 p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Change in Total Abundance (%)") +
+  ylab("Change in total abundance (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        legend.title = element_blank()) + 
-  ggtitle("b. Tropical Realm")
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
+        legend.title = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.2),
+        panel.border = element_rect(size = 0.2), 
+        axis.ticks = element_line(size = 0.2)) + 
+  ggtitle("b Tropical Realm")
 
 
 
@@ -1236,19 +1254,28 @@ nd3$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 
 p3 <- ggplot(data = nd3, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   theme_bw() + 
-  ylab("Change in Species Richness (%)") +
+  ylab("Change in species richness (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
-  ylim(c(-100, 200)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        legend.title = element_blank()) + 
-  ggtitle("c. Non-tropical Realm")
+  scale_y_continuous(breaks = c(-100, -50, 0, 50, 100, 150), limits = c(-100, 170)) +
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
+        legend.title = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.2),
+        panel.border = element_rect(size = 0.2), 
+        axis.ticks = element_line(size = 0.2)) + 
+  ggtitle("c Non-tropical Realm")
 
 
 
@@ -1318,9 +1345,9 @@ nd4$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 
 p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = UI2), size = 1) +
+  geom_line(aes(col = UI2), size = 0.75) +
   geom_ribbon(aes(ymin = PredLower, ymax = PredUpper, fill = UI2), alpha = 0.2) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
   scale_fill_manual(values = c("#009E73", "#0072B2", "#E69F00", "#D55E00")) +
   scale_colour_manual(values = c("#009E73", "#0072B2","#E69F00", "#D55E00")) +
   theme_bw() + 
@@ -1328,9 +1355,18 @@ p4 <- ggplot(data = nd4, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        legend.title = element_blank()) + 
-  ggtitle("d. Tropical Realm")
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        legend.position = "none",
+        legend.text = element_text(size = 6), 
+        legend.title = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.2),
+        panel.border = element_rect(size = 0.2), 
+        axis.ticks = element_line(size = 0.2)) +  
+  ggtitle("d Tropical Realm")
 
 
 
@@ -1346,7 +1382,7 @@ cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"),
           leg, nrow= 2, rel_heights = c(5,1))
 
 
-ggsave(file = paste0(outDir, "/Extended_Data4_MeanAnom_TempTrop.pdf"), width = 8, height = 8.5)
+ggsave(filename = paste0(outDir, "Figure3_MeanAnom_TempTrop.pdf"), plot = last_plot(), width = 180, height = 170, units = "mm", dpi = 300)
 
 
 

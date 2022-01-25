@@ -764,20 +764,31 @@ nd2 <- nd2[nd2$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
 p1 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) + 
-  geom_line(aes(col = NH_5000), size = 1) +
+  geom_line(aes(col = NH_5000), size = 0.75) +
   geom_ribbon(aes(ymin = nd2$PredLower, ymax = nd2$PredUpper, fill = NH_5000), alpha = 0.2) +
-  geom_hline(yintercept = 0, lty = "dashed") +
+  geom_hline(yintercept = 0, lty = "dashed", size = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a              Agriculture_Low", 'Agriculture_High' = "b              Agriculture_High"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a                 Agriculture_Low", 'Agriculture_High' = "b                    Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Change in total abundance (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) + 
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        strip.text.x = element_text(hjust = 0, size = 8, face = "bold"),
+        legend.position = "right",
+        legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 7), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.2),
+        panel.border = element_rect(size = 0.2), 
+        axis.ticks = element_line(size = 0.2), 
+        strip.background = element_rect(size = 0.2)) 
 
 # save
 #ggsave(filename = paste0(outDir, "Figure_3_ab_mean.pdf"), height = 4, width = 8)
@@ -867,20 +878,31 @@ nd <- nd[nd$UI2 %in% c("Agriculture_Low", "Agriculture_High"), ]
 
 # plot
 p2 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
-  geom_line(aes(col = NH_5000), size = 1) +
+  geom_line(aes(col = NH_5000), size = 0.75) +
   geom_ribbon(aes(ymin = nd$PredLower, ymax = nd$PredUpper, fill = NH_5000), alpha = 0.2) +
-  geom_hline(yintercept = 0, lty = "dashed") +
+  geom_hline(yintercept = 0, lty = "dashed", size = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c              Agriculture_Low", 'Agriculture_High' = "d              Agriculture_High"))) +
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c                  Agriculture_Low", 'Agriculture_High' = "d                  Agriculture_High"))) +
   theme_bw() +
   labs(fill = "% NH", col = "% NH") +
   ylab("Change in species richness (%)") +
   xlab("Standardised Temperature Anomaly") +
   xlim(c(-0.5, 2)) +
   ylim(c(-100, 150)) +
-  theme(aspect.ratio = 1, text = element_text(size = 12),
-        strip.text.x = element_text(hjust = 0, size = 12, face = "bold"))
+  theme(aspect.ratio = 1, 
+        title = element_text(size = 8, face = "bold"),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        strip.text.x = element_text(hjust = 0, size = 8, face = "bold"),
+        legend.position = "right",
+        legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 7), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.2),
+        panel.border = element_rect(size = 0.2), 
+        axis.ticks = element_line(size = 0.2), 
+        strip.background = element_rect(size = 0.2))
 
 
 library(cowplot)
@@ -888,8 +910,9 @@ library(cowplot)
 cowplot::plot_grid(p1, p2, nrow = 2)
 
 # save
-ggsave(filename = paste0(outDir, "Figure_3_ab_sr.pdf"), height = 8, width = 8)
+ggsave(filename = paste0(outDir, "Figure_4_absr_NH.pdf"), height = 8, width = 8)
 
+ggsave(filename = paste0(outDir, "Figure_4_absr_NH.pdf.pdf"), plot = last_plot(), width = 180, height = 170, units = "mm", dpi = 300)
 
 #### extended data - max anom
 # 
