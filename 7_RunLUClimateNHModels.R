@@ -769,7 +769,7 @@ p1 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_hline(yintercept = 0, lty = "dashed", size = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a                 Agriculture_Low", 'Agriculture_High' = "b                    Agriculture_High"))) + 
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "a                       Agriculture_Low", 'Agriculture_High' = "b                        Agriculture_High"))) + 
   theme_bw() + 
   labs(fill = "% NH", col = "% NH") + 
   ylab("Change in total abundance (%)") +
@@ -883,7 +883,7 @@ p2 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
   geom_hline(yintercept = 0, lty = "dashed", size = 0.2) +
   scale_fill_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
   scale_colour_manual(values = rev(c("#a50026","#f46d43","#74add1","#313695"))) +
-  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c                  Agriculture_Low", 'Agriculture_High' = "d                  Agriculture_High"))) +
+  facet_wrap(~UI2, ncol = 2, labeller = as_labeller(c('Agriculture_Low' = "c                       Agriculture_Low", 'Agriculture_High' = "d                        Agriculture_High"))) +
   theme_bw() +
   labs(fill = "% NH", col = "% NH") +
   ylab("Change in species richness (%)") +
@@ -905,14 +905,11 @@ p2 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         strip.background = element_rect(size = 0.2))
 
 
-library(cowplot)
 
 cowplot::plot_grid(p1, p2, nrow = 2)
 
 # save
-ggsave(filename = paste0(outDir, "Figure_4_absr_NH.pdf"), height = 8, width = 8)
-
-ggsave(filename = paste0(outDir, "Figure_4_absr_NH.pdf.pdf"), plot = last_plot(), width = 180, height = 170, units = "mm", dpi = 300)
+ggsave(filename = paste0(outDir, "Figure_4_absr_NH.pdf"), plot = last_plot(), width = 180, height = 170, units = "mm", dpi = 300)
 
 #### extended data - max anom
 # 
