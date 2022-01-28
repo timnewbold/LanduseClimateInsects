@@ -1,6 +1,6 @@
-Agriculture and climate change reshape insect biodiversity worldwide
+# Agriculture and climate change reshape insect biodiversity worldwide
 
-Charlotte L. Outhwaite, Peter McCann, Tim Newbold
+*Charlotte L. Outhwaite, Peter McCann, Tim Newbold*
 
 The scripts in this repository are associated with the above paper. 
 
