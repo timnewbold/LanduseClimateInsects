@@ -6,6 +6,9 @@
 
 # This script organises the climate data associated with each PREDICTS site
 
+# updated version with mean anomaly based on active months and edited max anomaly
+# July 2021
+
 
 ##Read in packages
 library(raster)
@@ -50,17 +53,33 @@ predicts_sp <- SpatialPointsDataFrame(
 ##Create a layer of mean monthly temperatures from 1901 to 1930
 tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
 
-##Calculate the mean of 1901 to 1905 mean monthly temperatUres
-tmp1901_1930mean <- raster::calc(tmp1901_1930, base::mean)
+##Read in tmax data
+tmx <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmx.dat.nc"),varname = "tmx")
+
+#Create raster stack for 1901 to 1930
+tmx1901_1930 <- tmx[[names(tmx)[1:360]]]
 
 ##Names of tmp layer, needed for subsettting
-names <- names(tmp)
+names_tmp <- names(tmp)
 
 ##Create a list of a all names of tmp layers, that will be used for matching later on
-names_sub <- substr(names, 2, 8) 
+names_sub <- substr(names_tmp, 2, 8) 
 
 ##Spatial points for rasterizing
 SP <- SpatialPoints(predicts_sp, proj4string=wgs84)
+
+### set the threshold temperature for insect activity
+thresh <- 10
+
+
+#### calculating the mean based anomaly for each site ####
+
+# this now looks at the 5 years preceding each sample data
+# assesses which months are above the temp threshold
+# then uses these months to calculate the present and baseline temperature means
+# and the baseline temperature sd. 
+
+# Time difference of 7.857316 mins
 
 nCores <- parallel::detectCores()
 
@@ -68,179 +87,199 @@ st1 <- Sys.time()
 
 cl <- snow::makeCluster(nCores-1)
 
-# Time difference of 8.01447 mins
+# export to clusters
 snow::clusterExport(
   cl = cl,
-  list = c('predicts_sp','names_sub','names',
-           'tmp','SP','rasterize','crop','trim',
-           'cellStats'),envir = environment())
+  list = c('predicts_sp','names_sub','names_tmp', 'values', 'names', 'length', 'mean', 'sd',
+           'tmp', 'tmx', 'SP','rasterize','crop','trim', 'grep', 'sapply', 'strsplit',
+           'cellStats', 'thresh', 'tmp1901_1930', 'tmx1901_1930'),envir = environment())
 
 temperatureVars <- data.frame(t(parSapply(
   cl = cl,X = (1:nrow(predicts_sp)),FUN = function(i){
-  
-  #Get end sample date for sample in predicts
-  sampDate <- predicts_sp$Sample_end_latest[i]
 
-  #Reformat date for string matching
-  sampDate <- substr(sampDate,1, 7)
-  sampDate <- gsub("-", ".", sampDate, fixed = TRUE)
-
-  #Match date in predicts with month in CRU climate data
-  month_match <- which(names_sub==sampDate)
-  surrounding_months <- names[(month_match-11):(month_match)]
-
-  #Create a layer for average temperature in the year preceding end sample date
-  temp <- tmp[[surrounding_months]]
-
-  ## Mask to improve speed
-
-  mask <- trim(rasterize(SP[i, ], temp[[1]]))
-  mapCrop <- crop(temp, mask)
-
-  avg_temp <- mean(cellStats(mapCrop, stat = "mean"))
-  sd_temp <- sd(cellStats(mapCrop, stat = "mean"))
-
-  return(c(avg_temp=avg_temp,sd_temp=sd_temp))
-  
-})))
-
-snow::stopCluster(cl)
-
-st2 <- Sys.time()
-
-print(st2 - st1)
-
-#Calculate climate anomaly from sample compared with 1901 to 1930 mean
-predicts_sp$avg_temp <- temperatureVars$avg_temp
-predicts_sp$avg_temp_sd <- temperatureVars$sd_temp
-predicts_sp$climate_anomaly <- temperatureVars$avg_temp-extract(tmp1901_1930mean, predicts_sp)
-
-#####TMAX
-
-##Read in tmax data
-tmx <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmx.dat.nc"))
-
-#Create raster stack for 1901 to 1930
-tmx1901_1930 <- tmx[[names(tmx)[1:360]]]
-names(tmx1901_1930)
-
-#Function to calculate mean of hottest quarter
-max_quarter_fast <- function(x) {
-  
-  mean(Rfast::Sort(x, TRUE)[1:3])
-  
-}
-
-#Hottest quarter for each year
-tmx1901max <- calc(tmx1901_1930[[(names(tmx)[1:12])]], max_quarter_fast)
-tmx1902max <- calc(tmx1901_1930[[(names(tmx)[13:24])]], max_quarter_fast)
-tmx1903max <- calc(tmx1901_1930[[(names(tmx)[25:36])]], max_quarter_fast)
-tmx1904max <- calc(tmx1901_1930[[(names(tmx)[37:48])]], max_quarter_fast)
-tmx1905max <- calc(tmx1901_1930[[(names(tmx)[49:60])]], max_quarter_fast)
-tmx1906max <- calc(tmx1901_1930[[(names(tmx)[61:72])]], max_quarter_fast)
-tmx1907max <- calc(tmx1901_1930[[(names(tmx)[73:84])]], max_quarter_fast)
-tmx1908max <- calc(tmx1901_1930[[(names(tmx)[85:96])]], max_quarter_fast)
-tmx1909max <- calc(tmx1901_1930[[(names(tmx)[97:108])]], max_quarter_fast)
-tmx1910max <- calc(tmx1901_1930[[(names(tmx)[109:120])]], max_quarter_fast)
-tmx1911max <- calc(tmx1901_1930[[(names(tmx)[121:132])]], max_quarter_fast)
-tmx1912max <- calc(tmx1901_1930[[(names(tmx)[133:144])]], max_quarter_fast) 
-tmx1913max <- calc(tmx1901_1930[[(names(tmx)[145:156])]], max_quarter_fast)
-tmx1914max <- calc(tmx1901_1930[[(names(tmx)[157:168])]], max_quarter_fast)
-tmx1915max <- calc(tmx1901_1930[[(names(tmx)[169:180])]], max_quarter_fast)
-tmx1916max <- calc(tmx1901_1930[[(names(tmx)[181:192])]], max_quarter_fast)
-tmx1917max <- calc(tmx1901_1930[[(names(tmx)[193:204])]], max_quarter_fast)
-tmx1918max <- calc(tmx1901_1930[[(names(tmx)[205:216])]], max_quarter_fast)
-tmx1919max <- calc(tmx1901_1930[[(names(tmx)[217:228])]], max_quarter_fast)
-tmx1920max <- calc(tmx1901_1930[[(names(tmx)[229:240])]], max_quarter_fast)
-tmx1921max <- calc(tmx1901_1930[[(names(tmx)[241:252])]], max_quarter_fast)
-tmx1922max <- calc(tmx1901_1930[[(names(tmx)[253:264])]], max_quarter_fast)
-tmx1923max <- calc(tmx1901_1930[[(names(tmx)[265:276])]], max_quarter_fast)
-tmx1924max <- calc(tmx1901_1930[[(names(tmx)[277:288])]], max_quarter_fast)
-tmx1925max <- calc(tmx1901_1930[[(names(tmx)[289:300])]], max_quarter_fast)
-tmx1926max <- calc(tmx1901_1930[[(names(tmx)[301:312])]], max_quarter_fast)
-tmx1927max <- calc(tmx1901_1930[[(names(tmx)[313:324])]], max_quarter_fast)
-tmx1928max <- calc(tmx1901_1930[[(names(tmx)[325:336])]], max_quarter_fast)
-tmx1929max <- calc(tmx1901_1930[[(names(tmx)[337:348])]], max_quarter_fast)
-tmx1930max <- calc(tmx1901_1930[[(names(tmx)[349:360])]], max_quarter_fast)
-
-#Stack hottest quarters
-tmx1901_1930max <- stack(tmx1901max, tmx1902max, tmx1903max, tmx1904max, tmx1905max,
-                         tmx1906max, tmx1907max, tmx1908max, tmx1909max, tmx1910max,
-                         tmx1911max, tmx1912max, tmx1913max, tmx1914max, tmx1915max,
-                         tmx1916max, tmx1917max, tmx1918max, tmx1919max, tmx1920max,
-                         tmx1921max, tmx1922max, tmx1923max, tmx1924max, tmx1925max,
-                         tmx1926max, tmx1927max, tmx1928max, tmx1929max, tmx1930max)
-
-#Mean of hottest quarter
-tmx1901_1930max_mean <- calc(tmx1901_1930max, mean) 
-
-#Baseline tmax
-predicts_sp$tmax_baseline <- extract(tmx1901_1930max_mean, predicts_sp)
-
-##names of tmax layer needed for subsetting
-names_tmx <- names(tmx)
-
-##For matching
-names_sub_tmx <- substr(names_tmx, 2, 8)
-
-st1 <- Sys.time()
-
-# Time difference of 7.953608 mins
-cl <- snow::makeCluster(nCores-1)
-
-snow::clusterExport(
-  cl = cl,
-  list = c('predicts_sp','names_sub_tmx','names_tmx','tmx',
-           'trim','rasterize','crop','cellStats','SP',
-           'max_quarter_fast'))
-
-temperatureVarsTmax <- data.frame(t(parSapply(
-  cl = cl,X = 1:nrow(predicts_sp),FUN = function(i){
+    #for testing
+    #temperatureVars <- NULL
+    #for(i in 1538:nrow(predicts_sp)){
+    #for(i in 1538:1580){
+    #print(i)
     
+    #Get end sample date for sample in predicts
     sampDate <- predicts_sp$Sample_end_latest[i]
-    sampDate<- substr(sampDate,1, 7)
+    
+    #Reformat date for string matching
+    sampDate <- substr(sampDate,1, 7)
     sampDate <- gsub("-", ".", sampDate, fixed = TRUE)
     
-    month_match <- which(names_sub_tmx==sampDate)
-    surrounding_months <- names_tmx[(month_match-11):(month_match)]
+    #Match date in predicts with month in CRU climate data
+    month_match <- which(names_sub==sampDate)
     
-    max_temp <- tmx[[surrounding_months]]
+    # edit: use months from 5 year pre-sample, rather than 1 year
+    surrounding_months <- names_tmp[(month_match-59):(month_match)]
+    
+    #Create a layer for average temperature in the year preceding end sample date
+    temp <- tmp[[surrounding_months]]
+    temp_mx <- tmx[[surrounding_months]]
     
     ## Mask to improve speed
+    mask <- trim(rasterize(SP[i, ], temp[[1]]))
+    mapCrop <- crop(temp, mask)
     
-    mask <- trim(rasterize(SP[i, ], max_temp[[1]]))
-    crop <- crop(max_temp, mask)
+
+    # there are instances where there are no months above the threshold and
+    # other instances where points do not line up with the tmp layers (in the sea?)
+    # so this if statement is necessary to avoid errors in those instances.
+    if(!length(names(mapCrop)[values(mapCrop) >= thresh]) == 0 & length(values(mapCrop)[!is.na(values(mapCrop))]) > 0 ){
+      
+      # Get the average temperature for each month across 5 years
+      vals <- NULL
+      
+      # for each month, get the average temp over the 5 years
+      for(j in 1:12){
+        
+        if(j < 10){ mon <- paste0(0, j) }else {mon <- j}
+        
+        monthmean <- values(mean(mapCrop[[grep(mon, sapply(strsplit(names(mapCrop), "[.]"), "[[", 2))  ]]))
+        
+        vals <- rbind(vals, c(mon, monthmean))
+        
+      }
+      
+
+      vals <- as.data.frame(vals)
+      vals$V2 <- as.numeric(as.character(vals$V2))
+      
+      # which months are the 5 year average >= the threshold
+      vals <- vals[vals$V2 >= thresh, ]
+      
+      
+      # which are the good months
+      months <- vals$V1
+      
+      # how many months are at or above the threshold?
+      n_months <- length(months)
+      
+      # calculate the "present day" mean and sd
+      avg_temp <- mean(vals$V2)
+      #sd_temp <- sd(vals$V2) # don't actually use this
+      
+      
+      
+      # get 3 hottest month vals for those months that meet the threshold
+      
+      # loop through each year, get the 3 hottest months
+      
+      mask_mx <- trim(rasterize(SP[i, ], temp_mx[[1]]))
+      mapCrop_mx <- crop(temp_mx, mask_mx)
+      
+      # for each year get the 3 hottest monts then take the mean of these
+      yr1 <- mean(sort(values(mapCrop_mx[[1:12]]), decreasing = T)[1:3])
+      yr2 <- mean(sort(values(mapCrop_mx[[13:24]]), decreasing = T)[1:3])
+      yr3 <- mean(sort(values(mapCrop_mx[[25:36]]), decreasing = T)[1:3])
+      yr4 <- mean(sort(values(mapCrop_mx[[37:48]]), decreasing = T)[1:3])
+      yr5 <- mean(sort(values(mapCrop_mx[[49:60]]), decreasing = T)[1:3])
+      
+      # then take the mean across years to get one max value for the present
+      # this is the mean for the "present day" max (mean of 3 hottest months)
+      max_temp <- mean(yr1, yr2, yr3, yr4, yr5)
+      
+
+      ### now work out the baseline mean and sd for the active months and hottest months ###
+
+      # get the values for that grid cell across all years
+      baseline <- crop(tmp1901_1930, mask)
+      
+      # subset the baseline to just the required months
+      baseline <-  baseline[[names(baseline)[sapply(strsplit(names(baseline), "[.]"), "[[", 2) %in% months]]]
+      
+      # get the mean and sd
+      mean_baseline <- mean(values(baseline))
+      sd_mean_baseline <- sd(values(baseline))
+      
+      
+      
+      ### now max temps, get 3 hottest years for each year ###
+      baseline_max <- crop(tmx1901_1930, mask_mx)
+      
+      # for each year, get the 3 hottest years #
+      # get the year names
+      yrs <- unique(gsub("\\..*", "", names(baseline_max)))
+      
+      max_vals <- NULL
+      
+      for(yr in yrs){
+        
+        mx3 <- sort(values(baseline_max[[grep(yr, names(baseline_max))]]), decreasing = T)[1:3]
+        
+        max_vals <- c(max_vals, mx3)
+        
+      }
     
-    tmax <- max(cellStats(crop, stat = "mean"))
-    tmax_quarter <- max_quarter_fast(cellStats(crop, stat = "mean"))
+      # get the baseline values for this site
+      mean_baseline_mx <- mean(max_vals)
+      sd_baseline_mx <- sd(max_vals)
     
-    return(c(tmax=tmax,tmax_quarter=tmax_quarter))
+    
+      ### now calc the anomaly for that site, using the site specific baselines ###
+      
+      Anom <- avg_temp - mean_baseline
+      StdAnom <-  Anom/sd_mean_baseline
+      
+      tmax_anomaly <- max_temp - mean_baseline_mx
+      StdTmaxAnomaly <- tmax_anomaly/sd_baseline_mx
+      
+      
+      return(c(avg_temp=avg_temp, Anom = Anom, StdAnom = StdAnom, n_months = n_months,
+               max_temp = max_temp, tmax_anomaly = tmax_anomaly, StdTmaxAnomaly = StdTmaxAnomaly))
+      
+      
+      #temperatureVars <- rbind(temperatureVars, c(avg_temp=avg_temp, Anom = Anom, StdAnom = StdAnom, n_months = n_months,
+      #max_temp = max_temp, tmax_anomaly = tmax_anomaly, StdTmaxAnomaly = StdTmaxAnomaly))
+      
+    }else{
+      avg_temp <- NA
+      Anom <- NA
+      StdAnom <- NA
+      n_months = 0
+      max_temp <- NA
+      tmax_anomaly <- NA
+      StdTmaxAnomaly <- NA
+      
+      #temperatureVars <- rbind(temperatureVars, c(avg_temp=avg_temp, Anom = Anom, StdAnom = StdAnom, n_months = n_months,
+      #max_temp = max_temp, tmax_anomaly = tmax_anomaly, StdTmaxAnomaly = StdTmaxAnomaly))
+      
+      return(c(avg_temp=avg_temp, Anom = Anom, StdAnom = StdAnom, n_months = n_months,
+               max_temp = max_temp, tmax_anomaly = tmax_anomaly, StdTmaxAnomaly = StdTmaxAnomaly))      
+    }
     
     
-  })))
+  }
+  
+)))
+
 
 snow::stopCluster(cl)
 
 st2 <- Sys.time()
 
-print(st2 - st1)
+print(st2 - st1) # Time difference of 7.857316 mins
 
-predicts_sp$tmax <- temperatureVarsTmax$tmax
-predicts_sp$tmax_quarter <- temperatureVarsTmax$tmax_quarter
 
-predicts_sp$tmax_anomaly <- predicts_sp$tmax - predicts_sp$tmax_baseline
-predicts_sp$tmax_quarter_anomaly <- predicts_sp$tmax_quarter - predicts_sp$tmax_baseline
+# organise the anomaly info along with the predicts data
+temperatureVars <- as.data.frame(temperatureVars)
 
-####### Historic variability in temperatures (Standard deviation of 1901 to 1905 Mean Monthly T )
 
-tmp1901_1930sd <- calc(tmp1901_1930, stats::sd)
-predicts_sp$historic_sd <- extract(tmp1901_1930sd, predicts_sp)
-tmx1901_1930_sd <- calc(tmx1901_1930, stats::sd)
-predicts_sp$historic_sd_tmax <- extract(tmx1901_1930_sd, predicts_sp)
+## add new values in temperatureVars into predicts dataset
+predicts_sp$avg_temp <- temperatureVars$avg_temp
+predicts_sp$TmeanAnomaly <- temperatureVars$Anom
+predicts_sp$StdTmeanAnomaly <- temperatureVars$StdAnom
+predicts_sp$n_months <- temperatureVars$n_months
+predicts_sp$max_temp <- temperatureVars$max_temp
+predicts_sp$TmaxAnomaly <- temperatureVars$tmax_anomaly
+predicts_sp$StdTmaxAnomaly <- temperatureVars$StdTmaxAnomaly
 
-##Save results
 
-saveRDS(object = predicts_sp, file = paste0(outDir,"PREDICTSSitesWithClimateData.rds"))
+# save
+saveRDS(object = predicts_sp, file = paste0(outDir,"PREDICTSSitesWithClimateData_update.rds"))
 
 
 
