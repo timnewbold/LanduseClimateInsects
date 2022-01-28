@@ -43,15 +43,21 @@ install_github(repo = "timnewbold/StatisticalModels")
 # https://data.nhm.ac.uk/dataset/the-2016-release-of-the-predicts-database
 
 
-
 # CRU data - TMP and TMX data for mean and max monthly temperatures
 # https://crudata.uea.ac.uk/cru/data/hrg/
 
+# Download and unzip into a 0_data folder the "cru_ts4.03.1901.2018.tmx.dat.nc.gz" 
+# AND "cru_ts4.03.1901.2018.tmp.dat.nc.gz" from the "tmx" and "tmp" folders respectively.
+
+# Hoskins et al data - primary and secondary vegetation layers (PRI_2005 and SEC_2005),
+# which are then combined into a "natural habitat" layer.
+# http://doi.org/10.4225/08/56DCD9249B224
 
 
-# Hoskins data - primary and secondary vegetation layers, which are then combined
-# into a "natural habitat" layer.
-# http://doi.org/10.4225/08/ 56DCD9249B224
+# Datasets downloaded from the above links shoud be saved into a directory named 0_data
+datadir <- "0_data/"
+
+if(!dir.exists(datadir)) dir.create(datadir)
 
 
 # To see a list of all R packages used in this work, please run the following code from a 
