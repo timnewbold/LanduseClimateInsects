@@ -7,15 +7,24 @@
 # This script runs simple models of biodiversity responses to
 # land use/use intensity only
 
+# directories
+inDir <- "1_PreparePREDICTSData/"
+outDir <- "2_RunSimpleLUIModel/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 # load required libraries
 library(StatisticalModels)
 library(ggplot2)
 library(cowplot)
 
-
-# directories
-inDir <- "1_PreparePREDICTSData/"
-outDir <- "2_RunSimpleLUIModel/"
+sessionInfo()
 
 # read in the formatted PREDICTS data
 sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6095 rows
@@ -364,3 +373,9 @@ R2GLMER(am3_2$model)
 tab_model(sm3_2$model, transform = NULL, file = paste0(outDir, "/SRLU_output_table.html"))
 summary(sm3_2$model)
 R2GLMER(sm3_2$model)
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
