@@ -1,21 +1,12 @@
-TO DO LIST
-1. Make Natural habitat figure clearer (add figure legends etc)
-2. Update Standardised Climate anomaly figure to correct scale
-3. Test wider climate baselines? Do they influence results?
+Agriculture and climate change reshape insect biodiversity worldwide
 
+Charlotte L. Outhwaite, Peter McCann, Tim Newbold
 
+The scripts in this repository are associated with the above paper. 
 
+Script 0_data_package_requirements outlines everything that is needed to reproduce the 
+analyses in the paper. 
 
+All downloaded datasets should be saved into a directory named 0_data. 
 
-For these scripts to run you will need the CRUv4.03 climate data and the Hoskins (2016) land use data. 
-
-CRU v4.03 Climate data can be downloaded from:
-https://crudata.uea.ac.uk/cru/data/hrg/cru_ts_4.03/cruts.1905011326.v4.03/
-
-Download and unzip into the data folder "cru_ts4.03.1901.2018.tmx.dat.nc.gz" AND "cru_ts4.03.1901.2018.tmp.dat.nc.gz" from the "tmx" and "tmp" folders respectively.
-
-Hoskins land use data can be obtained from:
-Download and unzip the archive into the data folder, available from:
-https://data.csiro.au/collections/#collection/CIcsiro:15276v3
-
-Scripts are numbered in the order that they should be run. Outputs for the scripts to obtain climate/natural habitat data are included and the predicts database is already included in the Data folder.
+Scripts are then numbered in the order that they should be run.
