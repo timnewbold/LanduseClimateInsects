@@ -7,20 +7,23 @@
 # This script takes the complete PREDICTS database, selects those entries for
 # insects, and organises the data for analysis.
 
+# directories
+dataDir <- "0_data/"
+outDir <- "1_PreparePREDICTSData/"
 
-rm(list = ls())
+if(!dir.exists(outDir)) dir.create(outDir)
 
-#library(devtools)
-#install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions")
-#install_github(repo = "timnewbold/StatisticalModels")
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
 
 # load required libraries
 library(predictsFunctions)
 library(ggplot2)
 
-# directories
-dataDir <- "0_data/"
-outDir <- "1_PreparePREDICTSData/"
+sessionInfo()
 
 # Set the path to your local copy of the database
 predicts.path <- paste0(dataDir,"database.rds")
@@ -30,9 +33,6 @@ predicts <- ReadPREDICTS(predicts.path)
 
 # Select only data for insects
 predicts <- predicts[(predicts$Class=="Insecta"),]
-
-# hosts <- read.csv(paste0(dataDir,"HostSpecies_PREDICTS.csv"))
-# predicts <- predicts[(predicts$Best_guess_binomial %in% hosts$Host.binomial),]
 
 # Correct effort-sensitive abundance measures (assumes linear relationship between effort and recorded abundance)
 predicts <- CorrectSamplingEffort(diversity = predicts)
@@ -231,7 +231,6 @@ table(sites$Biome, sites$UI2)
 
 table(sites[!is.na(sites$LogAbund), 'Biome'], sites[!is.na(sites$LogAbund), 'UI2'])
 
-
 #                                                          Agriculture_High Agriculture_Low Primary vegetation Secondary vegetation
 # Boreal Forests/Taiga                                                    2               6                172                   13
 # Temperate Conifer Forests                                               4             103                 10                   88
@@ -246,3 +245,9 @@ table(sites[!is.na(sites$LogAbund), 'Biome'], sites[!is.na(sites$LogAbund), 'UI2
 # Tropical & Subtropical Dry Broadleaf Forests                           62              66                 13                   50
 # Tropical & Subtropical Moist Broadleaf Forests                        265             110                354                  204
 # Mangroves                                                               8               0                  5                    7
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()

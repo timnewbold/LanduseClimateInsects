@@ -8,6 +8,16 @@
 # run the analyses associated with the paper by Outhwaite et al on the
 # interactions between land use/use intensity and climate change on insects.
 
+outDir <- "0_data_package_requirements/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 ############ 1. R packages required from github ############
 
 # A number of R packages have been developed by Dr Tim Newbold for use when
@@ -24,8 +34,6 @@ install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions")
 # The StatisticalModels package includes various functions for analysing the
 # PREDICTS database
 install_github(repo = "timnewbold/StatisticalModels")
-
-
 
 ############ 2. Data to be downloaded ############
 
@@ -51,3 +59,11 @@ install_github(repo = "timnewbold/StatisticalModels")
 library(renv) 
 pckgs <- unique(dependencies(getwd()))
 unique(pckgs$Package)
+
+sessionInfo()
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
