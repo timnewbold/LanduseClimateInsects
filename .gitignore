@@ -6,3 +6,16 @@
 0_data_package_requirements/
 1_PreparePREDICTSData
 2_RunSimpleLUIModel
+3_PrepareClimateIndexMaps
+4_PREDICTSMatchClimateIndex
+5_PREDICTSMatchPropNatHab
+6_RunLUClimateModels
+7_RunLUClimateNHModels
+8_Predictions
+9_RunModels_Tropical
+10_SCA_Baseline_Testing
+11_Model_Checks
+12_Anomaly_Recalc_active_months
+13_Exploring_CRU_data
+14_Additional_Tests
+LanduseClimateInsects.Rproj
