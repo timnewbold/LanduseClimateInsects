@@ -4,7 +4,7 @@
 
 The scripts in this repository are associated with the above paper. 
 
-Script 0_data_package_requirements outlines everything that is needed to reproduce the 
+Script 0_data_package_requirements.R outlines everything that is needed to reproduce the 
 analyses in the paper. 
 
 All downloaded datasets should be saved into a directory named 0_data. 
