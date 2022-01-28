@@ -5,7 +5,7 @@
 ##%######################################################%##
 
 # In this script, different baselines for the climate anomaly are tested.
-# In the main analysis the baseline years are 1901-1905. 
+# In the main analysis the baseline years are 1901-1930. 
 
 # alternatives to test:
 # 5 year, 10 year and 20 year baselines

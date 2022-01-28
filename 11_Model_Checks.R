@@ -4,15 +4,15 @@
 #                                                          #
 ##%######################################################%##
 
-# run checks for models used in paper
+# In this scripts, model checks are carried out and plots presented in 
+# supplementary information generated.
 
 rm(list = ls())
 
 # load libraries
 library(cowplot)
 library(ggplot2)
-library(roquefort)
-
+library(StatisticalModels)
 
 # directories
 LUclimmod <- "6_RunLUClimateModels/"
@@ -69,7 +69,7 @@ invisible(dev.off())
 
 ## 3. Check for spatial autocorrelation
 
-sa_test<-roquefort::SpatialAutocorrelationTest(model=get(x), all.data=predictsSites)
+sa_test<-SpatialAutocorrelationTest(model=get(x), all.data=predictsSites)
 
 #summary(sa_test)
 
@@ -156,14 +156,8 @@ rm(perc_auto)
 
 # additional plots for the abundance models to investigate residuals
 
-library(ggplot2)
-library(cowplot)
-
-
 mod_list <- c("MeanAnomalyModelAbund", "MaxAnomalyModelAbund", 
               "AbundMeanAnomalyModel1",  "AbundMaxAnomalyModel1")
-
-
 
 
 mod_res <- resid(MeanAnomalyModelAbund$model)

@@ -4,7 +4,7 @@
 #                                                          #
 ##%######################################################%##
 
-# in this script I will test models using average temperature, the anomaly 
+# in this script we test models using average temperature, the anomaly 
 # (difference in temperature) and the standardused anomaly and compare them.
 
 rm(list = ls())

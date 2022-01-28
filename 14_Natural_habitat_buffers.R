@@ -5,8 +5,8 @@
 #                                                          #
 ##%######################################################%##
 
-# testing the difference between model results when different 
-# buffer sizes are used
+# In this script, we test the difference between model results when different 
+# buffer sizes are used to determine amount of nearby natural habitat. 
 
 
 rm(list = ls())

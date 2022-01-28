@@ -4,6 +4,7 @@
 #                                                          #
 ##%######################################################%##
 
+# in this script, models are run using Chao-estimated species richness
 
 rm(list = ls())
 
@@ -15,7 +16,6 @@ rm(list = ls())
 library(predictsFunctions)
 library(ggplot2)
 library(StatisticalModels)
-library(yarg)
 source("Functions.R")
 
 # directories
@@ -60,7 +60,6 @@ nrow(predicts.complete)
 # 779,912 records
 
 # Calculate site metrics of diversity
-# this needs Tim's yarg package
 sites <- SiteMetrics(diversity = predicts,
                      extra.cols = c("Predominant_land_use",
                                     "SSB","SSBS", "Biome"),

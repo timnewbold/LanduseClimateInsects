@@ -4,6 +4,9 @@
 #                                                          #
 ##%######################################################%##
 
+
+# In this script, we test an alternative transformation of the abundance values. 
+
 rm(list = ls())
 
 

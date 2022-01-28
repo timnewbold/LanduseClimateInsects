@@ -4,6 +4,10 @@
 #                                                          #
 ##%######################################################%##
 
+# In this script, models are run that include average temperature as well as
+# the standardised anomaly. 
+
+rm(list = ls())
 
 # load libraries
 library(devtools)
@@ -23,11 +27,8 @@ outDir <- "14_Additional_Tests/"
 predictsSites <- readRDS(file = paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 
-
 # rescale average temperature variable
 predictsSites$avg_tempRS <- StdCenterPredictor(predictsSites$avg_temp)
-
-
 
 # 1. Abundance, mean anomaly
 

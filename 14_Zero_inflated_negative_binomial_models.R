@@ -4,10 +4,9 @@
 #                                                          #
 ##%######################################################%##
 
-# look into this package: https://cran.r-project.org/web/packages/glmmTMB/vignettes/glmmTMB.pdf
-
-# start by testing a zero inflated negative binomial model for total abundance
-# then try just zero inflated versions of the scaled abundance and richness models
+# In this script we start by testing a zero inflated negative binomial model for 
+# total abundance then try just zero inflated versions of the scaled abundance 
+# and richness models
 
 
 rm(list = ls())

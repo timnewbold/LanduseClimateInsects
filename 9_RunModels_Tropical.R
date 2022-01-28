@@ -4,8 +4,11 @@
 #                                                          #
 ##%######################################################%##
 
-# running models from script 6 and 7 but with the inclusion of realm to 
-# check whether responses differ between tropical and temperate regions
+# In this script, separate models are run for subsets of the PREDICTS database
+# based on which realm the sites are found in. 
+
+# Inclusion of Realm in the model results in high multicolinearity between variables
+# so subsets of the data and separate models are run instead.
 
 
 # load libraries

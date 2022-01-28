@@ -5,10 +5,8 @@
 #                                                          #
 ##%######################################################%##
 
-# testing some lower temperature thresholds for active months. 
+# testing some lower temperature thresholds for insect active months. 
 # There are going to be some insects active at temps lower than 10 degrees. 
-
-# copied script 4 and then models from script 6. 
 
 rm(list = ls())
 
