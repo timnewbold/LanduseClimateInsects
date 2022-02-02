@@ -22,6 +22,8 @@ library(cowplot)
 predictsDataDir <- "5_PREDICTSMatchPropNatHab/"
 outDir <- "6_RunLUClimateModels/"
 
+if(!dir.exists(outDir)) dir.create(outDir)
+
 
 ###Create Models for all insects in predicts for standardised climate anomaly and Land interactions
 
@@ -30,18 +32,11 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSitesWithClimateAndNatH
 predictsSites <- predictsSites@data
 
 # remove the Urban sites
-#predictsSites$UI2[(predictsSites$UI2=="Urban")] <- NA
 predictsSites$UI2 <- factor(predictsSites$UI2)
 predictsSites$UI2 <- relevel(predictsSites$UI2,ref="Primary vegetation")
 
-# organise the climate anomaly data
-#predictsSites$TmeanAnomaly <- predictsSites$climate_anomaly
-#predictsSites$StdTmeanAnomaly <- predictsSites$TmeanAnomaly / predictsSites$historic_sd
-predictsSites$StdTmeanAnomalyRS <- StdCenterPredictor(predictsSites$StdTmeanAnomaly)
-
-#predictsSites$TmaxAnomaly <- predictsSites$tmax_quarter_anomaly
-#predictsSites$StdTmaxAnomaly <- predictsSites$TmaxAnomaly / predictsSites$historic_sd_tmax
 # rescale the variable
+predictsSites$StdTmeanAnomalyRS <- StdCenterPredictor(predictsSites$StdTmeanAnomaly)
 predictsSites$StdTmaxAnomalyRS <- StdCenterPredictor(predictsSites$StdTmaxAnomaly)
 
 # organise NH data - combine primary and secondary vegetation at each scale
@@ -84,17 +79,20 @@ cor(predictsSites$TmeanAnomaly, predictsSites$StdTmeanAnomaly) # 0.21
 
 # save the dataset
 saveRDS(object = predictsSites,file = paste0(outDir,"PREDICTSSiteData.rds"))
-
-
 #predictsSites <- readRDS(file = paste0(outDir,"PREDICTSSiteData.rds"))
 
-# running the model selection process
+##%######################################################%##
+#                                                          #
+####        Running the model selection process         ####
+#                                                          #
+##%######################################################%##
+
 
 
 
 # 1. Abundance, mean anomaly
 
-model_data <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5759
+model_data <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5735
 model_data <- model_data[!is.na(model_data$StdTmeanAnomalyRS), ] # 5735
 
 
@@ -108,8 +106,9 @@ MeanAnomalyModelAbund <- GLMERSelect(modelData = model_data,responseVar = "LogAb
 # save the model output
 save(MeanAnomalyModelAbund, file = paste0(outDir, "/MeanAnomalyModelAbund.rdata"))
 
-# 2. Richness, mean anomaly
 
+
+# 2. Richness, mean anomaly
 
 model_data <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ] # 6069
 
@@ -126,7 +125,7 @@ save(MeanAnomalyModelRich, file = paste0(outDir, "/MeanAnomalyModelRich.rdata"))
 
 # 3. Abundance, max anomaly
 
-model_data <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5759
+model_data <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5735
 model_data <- model_data[!is.na(model_data$StdTmeanAnomalyRS), ] # 5735
 
 
@@ -225,9 +224,6 @@ write.csv(MeanAbunStats, file = paste0(outDir, "/MeanAnomAbun_Stats.csv"), row.n
 write.csv(MeanRichStats, file = paste0(outDir, "/MeanAnomRich_Stats.csv"), row.names = FALSE)
 write.csv(MaxAbunStats, file = paste0(outDir, "/MaxAnomAbun_Stats.csv"), row.names = FALSE)
 write.csv(MaxRichStats, file = paste0(outDir, "/MaxAnomRich_Stats.csv"), row.names = FALSE)
-
-
-
 
 
 
@@ -355,7 +351,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
     ggtitle("a")
   
   
-  # # plot #
+  # # plottin with base R #
   # 
   # # set up plotting window
   # plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
@@ -497,13 +493,13 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   
  
   # combine plots
-  plot_grid(p1, p2)
+  cowplot::plot_grid(p1, p2)
   
   ggsave(filename = paste0(outDir, "Figure2_MeanAnom_Abun_Rich.pdf"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
 
   
   
-  #  # plot #
+  #  # plotting with base R#
   # 
   # # set up plotting window
   # plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
@@ -759,7 +755,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   # }
   
   
-  
+  ### Extended Data 2 - maximum anomaly ###
   
   nd <- expand.grid(
     StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelAbund$data$StdTmaxAnomalyRS),
@@ -976,7 +972,7 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
       ggtitle("b")
     
     # combine plots
-    plot_grid(p1, p2)
+    cowplot::plot_grid(p1, p2)
     
     ggsave(filename = paste0(outDir, "Extended_Data2_MaxAnom.jpeg"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
     
