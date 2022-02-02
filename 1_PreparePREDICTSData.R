@@ -43,6 +43,7 @@ table(predicts$Diversity_metric)
 
 # insects should not have diversity metric "percent cover", this is a mistake in the database
 # remove those sites that are the problem
+# problem reported to NHM PREDICTS team.
 predicts <- predicts[!predicts$Diversity_metric == "percent cover", ]
 
 
@@ -67,7 +68,6 @@ order.counts <- tapply(X = species$Taxon_name_entered,
                        FUN = function(sp) length(unique(sp)))
 
 
-
 # Calculate site metrics of diversity
 sites <- SiteMetrics(diversity = predicts,
                      extra.cols = c("Predominant_land_use",
@@ -78,9 +78,6 @@ sites$LandUse <- paste(sites$Predominant_land_use)
 
 # Drop classification where land use could not be identified
 sites$LandUse[(sites$LandUse=="Cannot decide")] <- NA
-
-# Drop classification where the stage of recovery of secondary vegetation is unknown
-# sites$LandUse[(sites$LandUse=="Secondary vegetation (indeterminate age)")] <- NA
 
 # Now make the variable a factor, and set the reference level to primary vegetation
 sites$LandUse <- factor(sites$LandUse)
@@ -130,7 +127,7 @@ sites$Use_intensity[((sites$LandUse=="Intermediate secondary vegetation") &
 sites$Use_intensity[((sites$LandUse=="Young secondary vegetation") & 
                        (sites$Use_intensity=="Intense use"))] <- "Light use"
 
-# remove the urban sites and NA in UI2
+# remove the urban sites and sites that are NA in UI2
 sites <- sites[!sites$UI2 == "Urban", ]
 sites <- sites[!is.na(sites$UI2), ]
 
@@ -174,9 +171,14 @@ order.counts <- tapply(X = species$Taxon_name_entered,
                        FUN = function(sp) length(unique(sp)))
 
 sum(order.counts)
-# 17889
+# 17,889
 
-#### basic map of PREDICTS sites ####
+##%######################################################%##
+#                                                          #
+####            basic map of PREDICTS sites             ####
+#                                                          #
+##%######################################################%##
+
 
 # plot the raster in ggplot
 map.world <- map_data('world')
