@@ -5,6 +5,8 @@
 ##%######################################################%##
 
 # This script explores the climate data, produces anomalies and associated maps.
+# This script can also be used to generate datasets of the anomaly using different
+# temperature thresholds. The threshold used in the paper is 10 degrees C. 
 
 # load required libraries
 library(raster)
@@ -40,18 +42,14 @@ tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
 #tmp1901_1920 <- tmp[[names(tmp)[1:240]]]
 
 
-# take the current predicts time data
+# present day temperature range (mid year 2005)
 tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 
-# more recent data
+# more recent data, used for maps in Extended Data Figure 7.
 #tmp2016_18<- tmp[[names(tmp)[1381:1416]]]
 
 # what is the active months threshold
 thresh <- 10 # 6, 8, 10 degrees C
-# thresh <- - 100 # want all months so setting crazy low threshold
-
-# create a function that can be run in parallel to produce maps
-
 
 # which raster to use as present
 pre_ras <- tmp2004_6 
@@ -208,8 +206,8 @@ st2 <- Sys.time()
 print(st2 - st1) # Time difference of 1.013413 hours
 
 # save
-save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_ALLMonths.rdata"))
-#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, ".rdata"))
+#save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_ALLMonths.rdata"))
+save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, ".rdata"))
 #save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2016_18_thresh_", thresh, ".rdata"))
 #save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline5.rdata"))
 #save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2004_06_thresh_", thresh, "_baseline10.rdata"))
@@ -228,7 +226,7 @@ temperatureVars <- as.data.frame(temperatureVars) # 67420 rows
 # remove the NAs
 temp_data <- temperatureVars[!is.na(temperatureVars$avg_temp), ] # 58319 rows
 
-cor(temp_data$avg_temp, temp_data$Anom) # -0.21, 2004-6 version
+cor(temp_data$avg_temp, temp_data$Anom) # -0.21, 2004-6 version, thresh 10
 
 ggplot(data = temp_data, aes(x = avg_temp, y = Anom)) + 
   geom_point( size = 0.5) + 
@@ -244,7 +242,7 @@ ggsave(filename = paste0(outDir, "Correlation_global_avgtemp_Anom.pdf"))
 nrow(temp_data[temp_data$StdAnom >12, ]) # 6 rows
 temp_data <- temp_data[temp_data$StdAnom < 12, ] # 58313 rows
 
-cor(temp_data$avg_temp, temp_data$StdAnom) # -0.15, 2004-06
+cor(temp_data$avg_temp, temp_data$StdAnom) # -0.15, 2004-06, thresh 10
 
 ggplot(data = temp_data, aes(x = avg_temp, y = StdAnom)) + 
   geom_point( size = 0.5) + 
@@ -268,7 +266,7 @@ ggplot(data = temp_data[temp_data$StdAnom <=3, ], aes(x = avg_temp, y = StdAnom)
 ggsave(filename = paste0(outDir, "Correlation_global_avgtemp_StdAnom_outliersrem.pdf"))
 
 
-cor(temp_data$Anom, temp_data$StdAnom) # 0.34, 2004-06
+cor(temp_data$Anom, temp_data$StdAnom) # 0.36, 2004-06, thresh 10
 
 # now take a look at the realms
 # add in the lat/lons
@@ -286,6 +284,8 @@ SP_df[is.na(SP_df$Tropical), 'Tropical'] <- "Temperate"
 SP_df <- SP_df[!is.na(SP_df$avg_temp), ]
 
 table(SP_df$Tropical)
+# Temperate  Tropical 
+# 40042     18277
 
 cor_temp <- round(cor(SP_df[SP_df$Tropical == "Temperate", "avg_temp"], SP_df[SP_df$Tropical == "Temperate", "Anom"]), digits = 2) # 0.02
 cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "avg_temp"], SP_df[SP_df$Tropical == "Tropical", "Anom"]), digits = 2) # 0.14
@@ -314,8 +314,6 @@ SP_df[is.na(SP_df$Tropical), 'Tropical'] <- "Temperate"
 SP_df <- SP_df[SP_df$StdAnom < 12, ] # 58313 rows
 
 cor_temp <- round(cor(SP_df[SP_df$Tropical == "Temperate", "avg_temp"], SP_df[SP_df$Tropical == "Temperate", "StdAnom"]), digits = 2) # -0.55
-
-
 cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "avg_temp"], SP_df[SP_df$Tropical == "Tropical", "StdAnom"]), digits = 2) # 0.08
 
 SP_df$Tropical2 <- sub("Temperate", paste0("Temperate, cor = ", cor_temp), SP_df$Tropical)
@@ -333,188 +331,7 @@ ggplot(data = SP_df, aes(x = avg_temp, y = StdAnom)) +
 ggsave(filename = paste0(outDir, "Correlation_global_avgtemp_StdAnom_REALM_1618.pdf"))
 
 
-
-
-cor(SP_df[SP_df$Tropical == "Temperate", "avg_temp"], SP_df[SP_df$Tropical == "Temperate", "StdAnom"])
-
-test <- SP_df[SP_df$StdAnom <= 4, ]
-cor(test[test$Tropical == "Temperate", "avg_temp"], test[test$Tropical == "Temperate", "StdAnom"])
-plot(test[test$Tropical == "Temperate", "avg_temp"], test[test$Tropical == "Temperate", "StdAnom"])
-
-
 cor_temp <- round(cor(SP_df[SP_df$Tropical == "Temperate", "Anom"], SP_df[SP_df$Tropical == "Temperate", "StdAnom"]), digits = 2) # 0.37, 2004-6
-cor_trop <- round(cor(SP_df[SP_df$Tropical == "Tropical", "Anom"], SP_df[SP_df$Tropical == "Tropical", "StdAnom"]), digits = 2) # 0.46, 2004-6
-
-
-# prev version code
-# 
-# 
-# 
-# 
-# # calculate the mean and sd of the baseline values
-# tmp1901_1930mean <- calc(tmp1901_1930, base::mean)
-# tmp1901_1930sd <- calc(tmp1901_1930, stats::sd)
-# 
-# ### Note: 2005 is the mean year for insect data
-# 
-# par(mfrow=c(1,1))
-# par(oma=c(5,5,5,5))
-# 
-# ##### 2004 to 2006 maps #####
-# 
-# tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
-# 
-# 
-# ### Calculate the standardised anomaly ###
-# 
-# # calc the mean for present time period
-# tmp2004_6mean <- calc(tmp[[names(tmp)[1237:1272]]], base::mean)
-# 
-# # calc mean for baseline
-# tmp2004_6_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1930mean)
-# 
-# # standardise the baseline
-# tmp2004_6std_climate_anomaly <- (calc(tmp2004_6, base::mean)-tmp1901_1930mean)  / tmp1901_1930sd
-# 
-# # info for map
-# breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5, 10)
-# pallete <- colorRampPalette(c("lightblue","red", "black"))
-# 
-# # plot map
-# plot(tmp2004_6std_climate_anomaly, breaks=breaks, col=pallete(12), main="Mean Standardized Climate Anomaly 2004 to 2006")
-# 
-# 
-# 
-# ## Climate anomaly (non standardised, for comparison) ##
-# warming2004_6 <- calc(tmp2004_6, base::mean)-tmp1901_1905mean
-# breaks2 <- c(0,0.25,0.5,0.75, 1 ,1.5,2,2.5,3, 4)
-# length(breaks2)
-# pallete2 <- colorRampPalette(c("lightblue","red", "black"))
-# plot(warming2004_6, breaks=breaks2, col=pallete2(11), main="Mean warming 2004 to 2006 Since 1901")
-# 
-# 
-# 
-# ## anomaly in 1970 ##
-# 
-# names(tmp)[829:840] ##1970
-# tmp1970sd <-  calc(tmp[[names(tmp)[829:840]]], stats::sd)
-# tmp1970mean <-  calc(tmp[[names(tmp)[829:840]]], base::mean)
-# tmp1970std_climate_anomaly <- (tmp1970mean-tmp1901_1930mean)  / tmp1901_1930sd
-# breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5)
-# pallete <- colorRampPalette(c("lightblue","red", "black"))
-# plot(tmp1970std_climate_anomaly, breaks=breaks, col=pallete(12), main="1970")
-# 
-# 
-# 
-# ## anomaly, present 2016 to 2018 ##
-# 
-# names(tmp)[1381:1416] ## 2016 to 2018 
-# tmp2016_18sd <-  calc(tmp[[names(tmp)[1381:1416]]], stats::sd)
-# tmp2016_18mean <-  calc(tmp[[names(tmp)[1381:1416]]], base::mean)
-# tmp2016_18std_climate_anomaly_2 <-  (tmp2016_18mean - tmp1901_1930mean) / tmp2016_18sd
-# tmp2016_18std_climate_anomaly <- (tmp2016_18mean-tmp1901_1930mean)  / tmp1901_1930sd
-# breaks <- c(-2,0,0.25, 0.5,0.75, 1,1.5, 2,2.5, 3,4,5, 15)
-# pallete <- colorRampPalette(c("lightblue","red", "black"))
-# plot(tmp2016_18std_climate_anomaly, breaks=breaks, col=pallete(12), main="2016_18")
-# 
-# 
-# #### Calculating future anomalies ####
-# 
-# months.1979.2013 <- 937:1356
-# 
-# hist.mean.temp.1979.2013 <- stack(stackApply(x = tmp[[months.1979.2013]],
-#                                              indices = (rep(1:35,each=12)),fun = mean))
-# hist.mean.temp.1979.2013 <- stackApply(x = hist.mean.temp.1979.2013,indices = rep(1,35),
-#                                        fun = mean)
-# 
-# # future temperature estimates from ISIMIP
-# futureClimateDir <- "0_data/ISIMIPAnomalies"
-# 
-# # selection of years
-# years <- 2069:2071
-# 
-# # file path for ISIMIP data
-# all.files <- dir(path = futureClimateDir,recursive = TRUE,full.names = TRUE)
-# 
-# # Behrman projection 
-# behrCRS <- CRS('+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs')
-# 
-# # using RCP 8.5
-# mean.temp.2069.2071 <- stack(lapply(X = years,FUN = function(yr){
-#   
-#   print(yr)
-#   
-#   all.model.files <- all.files[grepl("rcp85",all.files) & grepl(yr,all.files)]
-#   
-#   # Check that there are the same files for each scenario-year combination
-#   stopifnot(all(sapply(
-#     X = gsub("0_data/ISIMIPAnomalies/","",all.model.files),function(f) return(strsplit(x = f,split = "[-_]",fixed = FALSE)[[1]][1]))==
-#       c("GFDL","HadGEM2","IPSL","MIROC5")))
-#   
-#   # what are each of these files?
-#   
-#   # 
-#   meant.anom <- mean(stack(lapply(X = all.model.files,function(f){
-#     
-#     ras <- stack(f)$"X0.1"
-#     
-#   })),na.rm=TRUE)
-#   
-#   meant <- hist.mean.temp.1979.2013 + (meant.anom/10)
-#   
-#   return(meant)
-#   
-# }))
-# 
-# mean.temp.2069.2071 <- stackApply(x = mean.temp.2069.2071,indices = rep(1,3),fun = mean)
-# 
-# # calc the anomalies for the future years
-# tmp2069_71_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1930mean)
-# tmp2069_71std_climate_anomaly <- (mean.temp.2069.2071-tmp1901_1930mean)  / tmp1901_1930sd
-# 
-# brks <- c(-50,-5,-2,-1,-0.5,-0.2,-0.1,0,0.1,0.2,0.5,0.75,1,1.5,2,5,50)
-# brks2 <- c(-1,-0.75,-0.5,-0.25,-0.1,0,0.1,0.25,0.5,0.75,1,1.5,3.1)
-# cols <- c(rev(brewer.pal(n = 9,name = "Greens"))[3:9],
-#           (brewer.pal(n = 9,name = "Purples"))[4:8],
-#           (brewer.pal(n = 9,name = "Oranges"))[6:9])
-# cols2 <- c(rev(brewer.pal(n = 9,name = "Blues"))[5:9],
-#            (brewer.pal(n = 9,name = "Reds"))[3:9])
-# 
-# pdf(file = paste0(outDir,"ClimateIndexMaps.pdf"),width = 8.5/2.54,height = 14.77/2.54)
-# 
-# par(ps=10)
-# par(cex=1)
-# par(cex.lab=1)
-# par(cex.axis=1)
-# par(cex.main=1)
-# 
-# layout.mat <- matrix(data = 1:5,nrow = 5,ncol = 1,byrow = TRUE)
-# layout(mat = layout.mat,widths = 8.5,heights = c(2,3.59,3.59,3.59,2))
-# 
-# # par(mfrow=c(3,1))
-# 
-# par(mar=c(0,0,0,0))
-# 
-# # image(tmp1970std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
-# plot.new()
-# legend(0,1,c("< -0.75","-0.75 : -0.5","-0.5 : -0.25","-0.25 : -0.1","-0.1 : 0",
-#              "0 : 0.1","0.1 : 0.25","0.25 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","> 1.5"),
-#        ncol=4,fill=cols2,bty="n",cex=1)
-# image(tmp2004_6_climate_anomaly,breaks=brks2,col=cols2,xaxt="n",yaxt="n",bty="n",
-#       xlim=c(-180,180),ylim=c(-68,84))
-# text(-175,-20,"2005\n(Absolute)",pos=4)
-# image(tmp2004_6std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
-# text(-175,-20,"2005\n(Standardised)",pos=4)
-# image(tmp2069_71std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
-# text(-175,-20,"2070 - RCP 8.5\n(Standardised)",pos=4)
-# plot.new()
-# legend(0,1,c("< -5","-5 : -2","-2 : -1","-1 : -0.5","-0.5 : -0.2","-0.2 : -0.1","-0.1 : 0",
-#              "0 : 0.1","0.1 : 0.2","0.2 : 0.5","0.5 : 0.75","0.75 : 1","1 : 1.5","1.5 : 2","2 : 5","> 5"),
-#        ncol=4,fill=cols,bty="n",cex=1)
-# # image(tmp2016_18std_climate_anomaly,breaks=brks,col=cols,xaxt="n",yaxt="n",bty="n")
-# 
-# invisible(dev.off())
-# 
 
 
 ##%######################################################%##
@@ -570,27 +387,6 @@ plot_data$bins <- cut(plot_data$Anom,
 # get worldmap for outline
 world_map <- map_data("world")
 
-# plot the raster
-# p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) + 
-#   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white",  size = 0.1) +
-#   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
-#   scale_fill_manual(values = cols) + 
-#   xlab("") +
-#   ylab("") +
-#   labs(fill = "Absolute Temperature Change") +
-#   theme_bw() +
-#   theme(legend.position = 'bottom', 
-#         panel.border = element_blank(), 
-#         panel.grid = element_blank(),
-#         axis.text = element_blank(),
-#         #legend.key.width = unit(3, "cm"),
-#         axis.ticks = element_blank(), 
-#         legend.text = element_text(size = 14), 
-#         legend.title = element_text(size = 16), 
-#         legend.key.size = unit(0.2,"cm"),
-#         title = element_text(size = 14)) +
-#   #guides(fill = guide_colorbar(title.position = "top")) + 
-#   ggtitle("a.")
 
 # trying alternative legend
 p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) + 
@@ -613,8 +409,6 @@ p1 <- ggplot(plot_data[!is.na(plot_data$Anom),]) +
         title = element_text(size = 8, face = "bold")) +
   guides(fill = guide_legend(title.position = "top") ) + 
   ggtitle("a")
-
-
 
 
 
@@ -663,27 +457,6 @@ plot_data2$bins <- cut(plot_data2$StdAnom,
 
 plot_data2 <- plot_data2[!is.na(plot_data2$bins), ]
 
-# # plot the raster
-# p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 
-#   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
-#   geom_raster(aes(x = x, y = y, fill = bins), na.rm = TRUE) +
-#   scale_fill_manual(values = cols2) + 
-#   xlab("") +
-#   ylab("") +
-#   labs(fill = "Standardised Temperature Anomaly") +
-#   theme_bw() +
-#   theme(legend.position = 'bottom', 
-#         panel.border = element_blank(), 
-#         panel.grid = element_blank(),
-#         axis.text = element_blank(),
-#         #legend.key.width = unit(3, "cm"),
-#         axis.ticks = element_blank(), 
-#         legend.text = element_text(size = 14), 
-#         legend.title = element_text(size = 16), 
-#         legend.key.size = unit(0.2,"cm"),
-#         title = element_text(size = 14)) +
-#   #guides(fill = guide_colorbar(title.position = "top")) +
-#   ggtitle("b.")
 
 p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) + 
   geom_polygon(data = world_map, aes(x = long, y = lat, group = group), colour = "lightgrey", fill = "white", size = 0.1) +
@@ -731,18 +504,6 @@ p4 <- ggplot(data = ravg2) +
   coord_flip()
 
 
-# 
-# # setting up a black plot to fill the gap
-# p0 <- ggplot() +
-#   theme_bw() +
-#   theme(panel.border = element_blank(), 
-#         panel.grid = element_blank(),
-#         axis.text = element_blank(),
-#         axis.title = element_blank(),
-#         axis.ticks = element_blank()) 
-# 
-
-
 # organise the plots and legends into one object
 
 
@@ -754,32 +515,14 @@ final_plot <- cowplot::plot_grid(
       , nrow = 1
       , align = "hv"
       , rel_widths = c(3,1)),
-    # , cowplot::plot_grid(
-    #   get_legend(p1)
-    #   #, p0
-    #   #, ncol = 2
-    #   , rel_widths = c(2,1))
-    
-   # , nrow = 2
-   # , rel_heights = c(3, 1)
-  #),
+
   cowplot::plot_grid(
-   # cowplot::plot_grid(
       p3 
       , p4
       , nrow = 1
       , align = "hv"
       , rel_widths = c(3,1)),
-    # , cowplot::plot_grid(
-    #   get_legend(p3)
-    #   #  , NULL
-    #   #  , ncol = 2
-    #   , rel_widths = c(1,1))
-    
-    #, nrow = 2
-    #, rel_heights = c(3, 1)
-    
- # ),
+
   nrow = 2
 )
 
@@ -787,10 +530,6 @@ final_plot <- cowplot::plot_grid(
 ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".pdf"), plot = last_plot(), width = 183, height = 200, units = "mm", dpi = 300)
 ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_", thresh, ".jpeg"), plot = last_plot(), width = 183, height = 200, units = "mm", dpi = 300)
 
-#ggsave(filename = paste0(outDir, "Extended_Data1_maps_thresh_ALLMonths.pdf"), plot = last_plot(), width = 183, height = 247, units = "mm")
-
-# save final_plot as an rdata file to be used in later scripts
-#save(final_plot, file = paste0(outDir, "/abs_and_anom_maps.rdata"))
 
 
 #### Figure - map of number of active months ####
