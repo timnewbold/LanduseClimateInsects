@@ -23,6 +23,8 @@ print(t.start)
 library(StatisticalModels)
 library(ggplot2)
 library(cowplot)
+library(sjPlot)
+
 
 sessionInfo()
 
@@ -30,7 +32,12 @@ sessionInfo()
 sites <- readRDS(file = paste0(inDir,"PREDICTSSiteData.rds")) # 6095 rows
 
 
-## SPECIES RICHNESS MODELS ##
+##%######################################################%##
+#                                                          #
+####              SPECIES RICHNESS MODELS               ####
+#                                                          #
+##%######################################################%##
+
 
 # remove NAs in the specified columns
 model_data_sr <- na.omit(sites[,c('Species_richness','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
@@ -65,9 +72,19 @@ sm4 <- GLMER(modelData = model_data_sr,responseVar = "Species_richness",fitFamil
 
 # take a look at the AICs
 print(AIC(sm0$model,sm1$model,sm2$model,sm3$model,sm4$model))
+# df      AIC
+# sm0$model  4 35851.75
+# sm1$model 11 35581.07
+# sm2$model 13 35581.86
+# sm3$model  7 35614.58
+# sm4$model 24 35538.23
 
+##%######################################################%##
+#                                                          #
+####                 ABUNDANCE MODELS                   ####
+#                                                          #
+##%######################################################%##
 
-## ABUNDANCE MODELS ##
 
 model_data_ab <- na.omit(sites[,c('LogAbund','LandUse','Use_intensity','UI2','SS','SSB','SSBS')])
 
@@ -102,18 +119,27 @@ am4 <- GLMER(modelData = model_data_ab,responseVar = "LogAbund",fitFamily = "gau
 
 # take a look at the AICs
 print(AIC(am0$model,am1$model,am2$model,am3$model,am4$model))
+# df      AIC
+# am0$model  4 15504.51
+# am1$model 11 15380.29
+# am2$model 13 15380.70
+# am3$model  7 15378.95
+# am4$model 24 15347.04
+
+##%######################################################%##
+#                                                          #
+####          Predict responses for plotting            ####
+#                                                          #
+##%######################################################%##
 
 
-### Predict responses for plotting ###
-
-
+# create dataframe for values to predict response to
 nd <- data.frame(UI2=factor(c("Primary vegetation","Secondary vegetation",
                               "Agriculture_Low","Agriculture_High")),
                  Species_richness=0,
                  LogAbund=0)
 
 ## species richness predictions ##
-
 s.preds <- PredictGLMERRandIter(model = sm3$model, data = nd)
 
 s.preds <- exp(s.preds)
@@ -156,7 +182,13 @@ rich_res$LU <- factor(c("Primary vegetation","Secondary vegetation", "Agricultur
 abun_res[abun_res$LU == "Primary vegetation", c("lower", "upper")] <- NA
 rich_res[abun_res$LU == "Primary vegetation", c("lower", "upper")] <- NA
 
-#### plot species richness and abundance predictions ####
+
+##%######################################################%##
+#                                                          #
+####  plot species richness and abundance predictions   ####
+#                                                          #
+##%######################################################%##
+
 
 # Figure 1, includes map of sites:
 
@@ -233,7 +265,7 @@ p5 <- plot_grid(p1, plot_grid(p2, p3), ncol = 1, rel_heights = c(1, 1))
 ggsave(filename = paste0(outDir, "Figure1_map_simplemods.pdf"), plot = last_plot(), width = 120, height = 150, units = "mm", dpi = 300)
 
 
-### plotting using base plot ###
+### plotting using base plot if preferred ###
 
 # #par(mfrow=c(2,1))
 # par(cex=1)
@@ -309,7 +341,7 @@ ggsave(filename = paste0(outDir, "Figure1_map_simplemods.pdf"), plot = last_plot
 
 summary(sm3$model)
 
-# rerun the model using GLMERSelect function to get stats
+# rerun the model using GLMERSelect function to easily get stats
 
 sm3_2 <- GLMERSelect(modelData = model_data_sr,
                      responseVar = "Species_richness",
@@ -362,9 +394,9 @@ am3stats$significant <- sapply(X = am3stats$P, FUN = checksig)
 write.csv(sm3stats, file = paste0(outDir, "/SR_Stats.csv"), row.names = FALSE)
 write.csv(am3stats, file = paste0(outDir, "/Abun_Stats.csv"), row.names = FALSE)
 
-### save model output tables ###
 
-library(sjPlot)
+
+### save model output tables ###
 
 tab_model(am3_2$model, transform = NULL, file = paste0(outDir, "/AbunLU_output_table.html"))
 summary(am3_2$model)
