@@ -4,7 +4,8 @@
 #                                                          #
 ##%######################################################%##
 
-# This script explores the climate data, produces anomalies and associated maps.
+# This script explores the climate data, produces anomalies and associated map for the 
+# future time period explored in Extended Data Figure 7. 
 
 # load required libraries
 library(raster)
@@ -68,9 +69,7 @@ mean.anom.2069.2071 <- stack(lapply(X = years,FUN = function(yr){
     X = gsub("0_data/ISIMIPAnomalies/","",all.model.files),function(f) return(strsplit(x = f,split = "[-_]",fixed = FALSE)[[1]][1]))==
       c("GFDL","HadGEM2","IPSL","MIROC5")))
   
-  # what are each of these files? One for each model, taking an average across the 4.
-  
-  #
+  # One for each model, taking an average across the 4.
   meant.anom <- mean(stack(lapply(X = all.model.files,function(f){
     
     ras <- stack(f)$"X0.1"
@@ -252,11 +251,11 @@ print(st2 - st1) # Time difference of 1.013413 hours
 
 # save 
 save(temperatureVars, file = paste0(outDir, "Map_data_tempvars_2016_18_thresh_", thresh, "_FUTURE.rdata"))
+# 25 rows have infs from where the sd from baseline with 1 month of data is 0.
 
 
 # load(file = paste0(outDir, "Map_data_tempvars_2016_18_thresh_", thresh, "_FUTURE.rdata"))
 
-# 25 rows have infs from where the sd from baseline with 1 month of data is 0.
 
 
 
@@ -278,7 +277,7 @@ SP_df <- as.data.frame(SP)
 SP_df <- cbind(SP_df, temperatureVars2)
 
 
-# load in the 2017 data
+# load in the 2017 data, this can be generated in the other script 3
 load(file = paste0(outDir, "Map_data_tempvars_2016_18.rdata"))
 
 # add data to the point lat/lons
@@ -353,6 +352,5 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) +
 
 
 # save as a pdf and jpeg
-
 ggsave(filename = paste0(outDir, "/ExtendedData_7_Current_Future_panel_plot.pdf"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
 ggsave(filename = paste0(outDir, "/ExtendedData_7_Current_Future_panel_plot.jpeg"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
