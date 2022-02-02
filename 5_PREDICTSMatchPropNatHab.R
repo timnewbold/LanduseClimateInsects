@@ -5,8 +5,8 @@
 ##%######################################################%##
 
 
-# This script calculates the proportion NH surrounding each site 
-# in PREDICTS at multiple spatial scales, 1,3,5 and 10km.
+# This script calculates the proportion of NH surrounding each site 
+# in PREDICTS subset at multiple spatial scales: 1,3,5 and 10km.
 
 # load libraries
 library(raster)
@@ -19,13 +19,15 @@ dataDir <- "0_data/"
 predictsDir <- "4_PREDICTSMatchClimateIndex/"
 outDir <- "5_PREDICTSMatchPropNatHab/"
 
+if(!dir.exists(outDir)) dir.create(outDir)
+
 # required crs
 wgs84 <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
 
 # read in the predicts data with climate info
 predicts_sp <- readRDS(paste0(predictsDir,"PREDICTSSitesWithClimateData_update.rds"))
 
-# load the NH raster layers
+# load the NH raster layers from the Hoskins et al dataset
 PV <- raster(paste0(
   dataDir,"PRI_1km_2005_0ice.bil"), 
   crs=wgs84)
@@ -97,7 +99,7 @@ snow::stopCluster(cl)
 
 st2 <- Sys.time()
 
-print(st2 - st1)
+print(st2 - st1) # Time difference of 8.622247 mins
 
 predicts_sp$PV_1000 <- natHabitat$PV1
 predicts_sp$SV_1000 <- natHabitat$SV1

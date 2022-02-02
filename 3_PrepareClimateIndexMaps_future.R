@@ -26,6 +26,8 @@ library(snow)
 dataDir <- "0_data/"
 outDir <- "3_PrepareClimateIndexMaps/"
 
+if(!dir.exists(outDir)) dir.create(outDir)
+
 # load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
