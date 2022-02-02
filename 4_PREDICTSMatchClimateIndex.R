@@ -10,7 +10,7 @@
 # July 2021
 
 
-##Read in packages
+# load libraries
 library(raster)
 library(sp)
 library(dismo)
@@ -24,6 +24,9 @@ source("Functions.R")
 dataDir <- "0_data/"
 predictsDir <- "1_PreparePREDICTSData/"
 outDir <- "4_PREDICTSMatchClimateIndex/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
+
 
 ##Path for monthly mean temperature from CRUv4.03
 tmp.path <- "Data/cru_ts4.03.1901.2018.tmp.dat.nc"
@@ -126,7 +129,7 @@ temperatureVars <- data.frame(t(parSapply(
     
 
     # there are instances where there are no months above the threshold and
-    # other instances where points do not line up with the tmp layers (in the sea?)
+    # other instances where points do not line up with the tmp layers
     # so this if statement is necessary to avoid errors in those instances.
     if(!length(names(mapCrop)[values(mapCrop) >= thresh]) == 0 & length(values(mapCrop)[!is.na(values(mapCrop))]) > 0 ){
       
