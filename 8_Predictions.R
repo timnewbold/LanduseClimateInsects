@@ -5,7 +5,7 @@
 ##%######################################################%##
 
 # Here, values for certain fixed effect combinations are predicted and 
-# expressed as percentage declines for use in the text of the paper. 
+# expressed as percentage change for use in the text of the paper. 
 
 rm(list = ls())
 
@@ -18,8 +18,9 @@ source('Functions.R')
 # directories
 predictsDataDir <- "6_RunLUClimateModels/"
 moddir <- "6_RunLUClimateModels/"
-outdir <- "8_Predictions/"
-dir.create(outdir)
+outDir <- "8_Predictions/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
 
 # read in the predicts data
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
@@ -28,7 +29,7 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 #### Hyp 1: land use effect only ####
 
 # these values can be retrieved from the info in script 2_RunSimpleLUIModel.R
-# used the median values that were used for plotting of Figure 1.
+# the median values were also used for plotting of Figure 1.
 
 
 
@@ -100,10 +101,7 @@ all_res <- rbind(result.ab, result.sr)
 all_res$measure <- c(rep("ab", 5), rep("sr", 5))
 
 # save table
-write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC.csv"))
-
-
-
+write.csv(all_res, file = paste0(outDir, "/percentage_change_LU_CC.csv"))
 
 
 ### Hyp 3:  Land use, climate and natural habitat interactions ###
@@ -173,6 +171,6 @@ result.sr$metric <- "sr"
 all_res <- rbind(result.ab, result.sr)
 
 # save table
-write.csv(all_res, file = paste0(outdir, "/percentage_change_LU_CC_NH.csv"))
+write.csv(all_res, file = paste0(outDir, "/percentage_change_LU_CC_NH.csv"))
 
 
