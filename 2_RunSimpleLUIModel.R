@@ -260,7 +260,7 @@ p3 <- ggplot(data = rich_res) +
   ggtitle("c")
 
 
-p5 <- plot_grid(p1, plot_grid(p2, p3), ncol = 1, rel_heights = c(1, 1))
+p5 <- cowplot::plot_grid(p1, cowplot::plot_grid(p2, p3), ncol = 1, rel_heights = c(1, 1))
 
 ggsave(filename = paste0(outDir, "Figure1_map_simplemods.pdf"), plot = last_plot(), width = 120, height = 150, units = "mm", dpi = 300)
 

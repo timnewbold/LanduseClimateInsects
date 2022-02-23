@@ -8,6 +8,22 @@
 # This script can also be used to generate datasets of the anomaly using different
 # temperature thresholds. The threshold used in the paper is 10 degrees C. 
 
+
+# directories
+dataDir <- "0_data/"
+outDir <- "3_PrepareClimateIndexMaps/"
+#outDir <- "10_SCA_Baseline_testing/"
+#outDir <- "14_Additional_Tests/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
 # load required libraries
 library(raster)
 library(sp)
@@ -21,13 +37,6 @@ library(cowplot)
 library(ggplot2)
 library(viridis)
 library(snow)
-
-
-# directories
-dataDir <- "0_data/"
-outDir <- "3_PrepareClimateIndexMaps/"
-#outDir <- "10_SCA_Baseline_testing/"
-#outDir <- "14_Additional_Tests/"
 
 
 # load in the mean temperature data from CRU
@@ -557,6 +566,11 @@ ggplot(map_data[!is.na(map_data$n_months),]) +
 ggsave(filename = paste0(outDir, "Nmonths_plot_thresh_", thresh, ".pdf"), width = 4, height = 3)
 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 
 
 
