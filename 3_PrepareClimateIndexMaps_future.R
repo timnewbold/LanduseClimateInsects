@@ -7,6 +7,18 @@
 # This script explores the climate data, produces anomalies and associated map for the 
 # future time period explored in Extended Data Figure 7. 
 
+# directories
+dataDir <- "0_data/"
+outDir <- "3_PrepareClimateIndexMaps/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 # load required libraries
 library(raster)
 library(sp)
@@ -22,11 +34,7 @@ library(viridis)
 library(snow)
 
 
-# directories
-dataDir <- "0_data/"
-outDir <- "3_PrepareClimateIndexMaps/"
 
-if(!dir.exists(outDir)) dir.create(outDir)
 
 # load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
@@ -356,3 +364,11 @@ p3 <- ggplot(plot_data2[!is.na(plot_data2$StdAnom),]) +
 # save as a pdf and jpeg
 ggsave(filename = paste0(outDir, "/ExtendedData_7_Current_Future_panel_plot.pdf"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
 ggsave(filename = paste0(outDir, "/ExtendedData_7_Current_Future_panel_plot.jpeg"), plot = last_plot(), width = 183, height = 100, units = "mm", dpi = 300)
+
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
+
