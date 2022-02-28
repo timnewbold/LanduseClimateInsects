@@ -8,6 +8,20 @@
 # change and landuse/use intensity.
 rm(list = ls())
 
+# directories 
+predictsDataDir <- "5_PREDICTSMatchPropNatHab/"
+outDir <- "6_RunLUClimateModels/"
+
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
+
 # load libraries
 library(devtools)
 #install_github("timnewbold/StatisticalModels")
@@ -17,12 +31,6 @@ library(predictsFunctions)
 source("Functions.R")
 library(sjPlot)
 library(cowplot)
-
-# directories 
-predictsDataDir <- "5_PREDICTSMatchPropNatHab/"
-outDir <- "6_RunLUClimateModels/"
-
-if(!dir.exists(outDir)) dir.create(outDir)
 
 
 ###Create Models for all insects in predicts for standardised climate anomaly and Land interactions
@@ -1019,3 +1027,11 @@ QAH <- quantile(x = MeanAnomalyModelAbund$data$StdTmeanAnomalyRS[
   # 
   # 
   # invisible(dev.off())
+    
+    
+    t.end <- Sys.time()
+    
+    print(round(t.end - t.start,0))
+    
+    sink()
+    

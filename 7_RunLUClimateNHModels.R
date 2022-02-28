@@ -7,6 +7,21 @@
 # This script runs the more complex models looking at the buffering effect
 # of natural habitat on climate effects across land uses.
 
+
+# directories
+predictsDataDir <- "6_RunLUClimateModels/"
+outDir <- "7_RunLUClimateNHModels/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
+
 # load libraries
 library(StatisticalModels)
 library(predictsFunctions)
@@ -15,11 +30,6 @@ library(ggplot2)
 library(cowplot)
 library(sjPlot)
 
-# directories
-predictsDataDir <- "6_RunLUClimateModels/"
-outDir <- "7_RunLUClimateNHModels/"
-
-if(!dir.exists(outDir)) dir.create(outDir)
 
 # read in data
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
@@ -1104,3 +1114,8 @@ ggsave(filename = paste0(outDir, "Extended_Data6_sr_MAX.jpeg"), plot = last_plot
 # invisible(dev.off())
 # 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
