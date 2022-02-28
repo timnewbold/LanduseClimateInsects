@@ -9,6 +9,18 @@
 # updated version with mean anomaly based on active months and edited max anomaly
 # July 2021
 
+# directories
+dataDir <- "0_data/"
+predictsDir <- "1_PreparePREDICTSData/"
+outDir <- "4_PREDICTSMatchClimateIndex/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 
 # load libraries
 library(raster)
@@ -19,15 +31,6 @@ library(predictsFunctions)
 library(Rfast)
 library(snow)
 source("Functions.R")
-
-# directories
-dataDir <- "0_data/"
-predictsDir <- "1_PreparePREDICTSData/"
-outDir <- "4_PREDICTSMatchClimateIndex/"
-
-if(!dir.exists(outDir)) dir.create(outDir)
-
-
 ##Path for monthly mean temperature from CRUv4.03
 tmp.path <- "Data/cru_ts4.03.1901.2018.tmp.dat.nc"
 
@@ -284,6 +287,12 @@ predicts_sp$StdTmaxAnomaly <- temperatureVars$StdTmaxAnomaly
 # save
 saveRDS(object = predicts_sp, file = paste0(outDir,"PREDICTSSitesWithClimateData_update.rds"))
 
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 
 
 

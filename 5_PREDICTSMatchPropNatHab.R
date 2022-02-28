@@ -8,11 +8,6 @@
 # This script calculates the proportion of NH surrounding each site 
 # in PREDICTS subset at multiple spatial scales: 1,3,5 and 10km.
 
-# load libraries
-library(raster)
-library(sp)
-library(predictsFunctions)
-library(snow)
 
 # directories
 dataDir <- "0_data/"
@@ -20,6 +15,18 @@ predictsDir <- "4_PREDICTSMatchClimateIndex/"
 outDir <- "5_PREDICTSMatchPropNatHab/"
 
 if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+# load libraries
+library(raster)
+library(sp)
+library(predictsFunctions)
+library(snow)
 
 # required crs
 wgs84 <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
@@ -114,4 +121,9 @@ saveRDS(object = predicts_sp,file = paste0(outDir,"PREDICTSSitesWithClimateAndNa
 
 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 
