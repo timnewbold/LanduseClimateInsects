@@ -11,6 +11,17 @@
 # Inclusion of Realm in the model results in high multicolinearity between variables
 # so subsets of the data and separate models are run instead.
 
+# directories
+predictsDataDir <- "6_RunLUClimateModels/"
+outDir <- "9_RunModels_Tropical/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 
 # load libraries
 library(StatisticalModels)
@@ -22,11 +33,6 @@ library(sjPlot)
 library(performance)
 #library(pedometrics)
 #library(car)
-
-# directories
-predictsDataDir <- "6_RunLUClimateModels/"
-outDir <- "9_RunModels_Tropical/"
-if(!dir.exists(outDir)) dir.create(outDir)
 
 # read in PREDICTS data
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
@@ -1901,3 +1907,12 @@ ggsave(filename = paste0(outDir, "Extended_Data5_MaxAnom_TempTrop.jpeg"), plot =
 # 
 # 
 # 
+
+
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
+
