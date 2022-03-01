@@ -16,6 +16,21 @@
 
 rm(list = ls())
 
+
+# directories
+dataDir <- "0_data/"
+outDir <- "10_SCA_Baseline_testing/"
+if(!dir.exists(outDir)) dir.create(outDir)
+predictsDataDir <- "6_RunLUClimateModels/"
+
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
 # load libraries
 library(raster)
 library(sp)
@@ -34,34 +49,33 @@ library(predictsFunctions)
 library(Rfast)
 library(snow)
 
-# directories
-dataDir <- "0_data/"
-outDir <- "10_SCA_Baseline_testing/"
-dir.create(outDir)
-predictsDataDir <- "6_RunLUClimateModels/"
 
-
-# data required for the plots is created in script 3_PrepareClimateIndecMaps_update where 
+# data required for the plots is created in script 3_PrepareClimateIndecMaps where 
 # the map data can be generated for each of the different baseline lengths.
 
 # load in the datasets 
 
 load(paste0("3_PrepareClimateIndexMaps", "/Map_data_tempvars_2004_06.rdata"))
 plot_data_0130 <- temperatureVars
-load(paste0(outDir, "Map_data_tempvars_2004_06_thresh_10_baseline5.rdata"))
+load(paste0("3_PrepareClimateIndexMaps", "/Map_data_tempvars_2004_06_thresh_10_baseline5.rdata"))
 plot_data_0105 <- temperatureVars
-load(paste0(outDir, "Map_data_tempvars_2004_06_thresh_10_baseline10.rdata"))
+load(paste0("3_PrepareClimateIndexMaps", "/Map_data_tempvars_2004_06_thresh_10_baseline10.rdata"))
 plot_data_0110 <- temperatureVars
-load(paste0(outDir, "Map_data_tempvars_2004_06_thresh_10_baseline20.rdata"))
+load(paste0("3_PrepareClimateIndexMaps", "/Map_data_tempvars_2004_06_thresh_10_baseline20.rdata"))
 plot_data_0120 <- temperatureVars
 
 # load in the mean temperature data from CRU
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname="tmp")
 
 
-# take the current predicts time data
+# take the present data
 tmp2004_6 <- tmp[[names(tmp)[1237:1272]]]
 
+# for testing baseline lengths:
+tmp1901_1930 <- tmp[[names(tmp)[1:360]]]
+tmp1901_1905 <- tmp[[names(tmp)[1:60]]]
+tmp1901_1910 <- tmp[[names(tmp)[1:120]]]
+tmp1901_1920 <- tmp[[names(tmp)[1:240]]]
 
 # which raster to use as present
 pre_ras <- tmp2004_6 
@@ -71,7 +85,6 @@ pre_ras <- tmp2004_6
 ras <- pre_ras[[1]]
 
 # create a set of points based on the non NA cells
-
 wgs84 <- crs(tmp)
 
 pnts <- rasterToPoints(ras, spatial = T)
@@ -89,8 +102,7 @@ names(all_data)[3:6] <- c("1901-1905", "1901-1910", "1901-1920", "1901-1930")
 all_data <- melt(all_data, id.vars = c("x", "y"))
 
 
-# create maps of each anomaly
-
+### create maps of each anomaly ###
 all_plot <- all_data[!is.na(all_data$value), ]
 
 
@@ -119,7 +131,7 @@ names(year_labs) <- unique(all_plot$year)
 
 all_plot$year <- as.factor(all_plot$year)
 
-View(all_plot[is.na(all_plot$bins), ])
+View(all_plot[is.na(all_plot$bins), ]) #316 rows
 
 all_plot <- all_plot[!is.na(all_plot$bins), ]
 
@@ -185,7 +197,7 @@ SP <- SpatialPoints(predicts_sp, proj4string=wgs84)
 ##Names of tmp layer, needed for subsettting
 names_tmp <- names(tmp)
 
-##Create a list of a all names of tmp layers, that will be used for matching later on
+##Create a list of all names of tmp layers, that will be used for matching later on
 names_sub <- substr(names_tmp, 2, 8) 
 
 
@@ -198,7 +210,7 @@ names_sub <- substr(names_tmp, 2, 8)
 
 # Time difference of 7.857316 mins
 
-# run the code for each baseline
+# run the code for each baseline, replace or remove # at lines 315-318
 
 nCores <- parallel::detectCores()
 
@@ -393,9 +405,6 @@ temperatureVars_1901_1910 <- temperatureVars
 temperatureVars_1901_1920 <- temperatureVars
 temperatureVars_1901_1930 <- temperatureVars
 
-# # organise the anomaly info along with the predicts data
-# temperatureVars <- as.data.frame(temperatureVars)
-# 
 
 ## add new values in temperatureVars into predicts dataset
 predicts_sp$StdTmeanAnomaly_1901_1905 <- temperatureVars_1901_1905$StdAnom
@@ -420,7 +429,6 @@ saveRDS(object = predicts_sp, file = paste0(outDir,"PREDICTSSitesWithClimateData
 ##%######################################################%##
 
 # run the climate:LU model for abundance with each new baseline to compare results
-
 
 # centre the predictors
 predicts_sp$anomStd_0105RS <- StdCenterPredictor(predicts_sp$StdTmeanAnomaly_1901_1905)
@@ -502,8 +510,6 @@ summary(MeanAnomalyAbund_0130$model)
 #load(paste0(outDir, "/MeanAnomalyAbund_0110.rdata"))
 #load(paste0(outDir, "/MeanAnomalyAbund_0120.rdata"))
 #load(paste0(outDir, "/MeanAnomalyAbund_0130.rdata"))
-
-
 
 
 # set quantiles of predicted result to be presented in the plots
@@ -931,10 +937,13 @@ save(MeanAnomalyRich_0130, file = paste0(outDir, "/MeanAnomalyRich_0130.rdata"))
 
 # take a look at model outputs
 summary(MeanAnomalyRich_0105$model)
+# Species_richness ~ UI2 + UI2:poly(anomStd_0105RS, 1) + poly(anomStd_0105RS, 1) + (1 | SS) + (1 | SSB) + (1 | SSBS)
 summary(MeanAnomalyRich_0110$model)
+#Species_richness ~ UI2 + UI2:poly(anomStd_0110RS, 1) + poly(anomStd_0110RS,  1) + (1 | SS) + (1 | SSB) + (1 | SSBS)
 summary(MeanAnomalyRich_0120$model)
+# Species_richness ~ UI2 + UI2:poly(anomStd_0120RS, 1) + poly(anomStd_0120RS,  1) + (1 | SS) + (1 | SSB) + (1 | SSBS)
 summary(MeanAnomalyRich_0130$model)
-
+# Species_richness ~ UI2 + UI2:poly(anomStd_0130RS, 1) + poly(anomStd_0130RS,  1) + (1 | SS) + (1 | SSB) + (1 | SSBS)
 
 
 ######## plot figures ######## 
@@ -1362,7 +1371,6 @@ bio4_agg[bio4_agg == 0, ] <- 0.01
 
 
 # extract the bio4 value for each terrestrial cell
-
 temperatureVars$seas <- extract(bio4_agg, SP)
 
 # recalculate the anomaly for each cell
@@ -1422,13 +1430,7 @@ ggsave(filename = paste0(outDir, "/Extended_Data_anomaly_map_recentvar.pdf"), wi
 
 
 
-
-
-
-
 #### Get the anomalies for each predicts site ####
-
-
 
 # read in predicts data
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
@@ -1568,8 +1570,6 @@ p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 
 
 
-
-
 #### species richness models ####
 
 # 1. SR, mean anomaly 1901-1905 baseline
@@ -1684,3 +1684,12 @@ p2 <- ggplot(data = nd2, aes(x = StdTmeanAnomaly, y = PredMedian)) +
 plot_grid(p1, p2, ncol = 2)
 
 ggsave(filename = paste0(outDir, "SupplementaryFig_Baselines_recentvar.pdf"), width = 10, height = 5, units = "in")
+
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
+
+
