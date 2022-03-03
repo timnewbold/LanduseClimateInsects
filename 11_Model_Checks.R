@@ -9,17 +9,24 @@
 
 rm(list = ls())
 
-# load libraries
-library(cowplot)
-library(ggplot2)
-library(StatisticalModels)
-
 # directories
 LUclimmod <- "6_RunLUClimateModels/"
 nathabmod <- "7_RunLUClimateNHModels/"
 predictsDataDir <- "6_RunLUClimateModels/"
 outdir <- "11_Model_Checks/"
-dir.create(outdir)
+if(!dir.exists(outdir)) dir.create(outdir)
+
+
+sink(paste0(outdir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+# load libraries
+library(cowplot)
+library(ggplot2)
+library(StatisticalModels)
 
 # read in model files
 load(paste0(LUclimmod, "MeanAnomalyModelAbund.rdata"))
@@ -41,12 +48,11 @@ mod_list <- c("MeanAnomalyModelAbund", "MeanAnomalyModelRich", "MaxAnomalyModelA
 
 # load dataset
 predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
-
-
 predictsSites <- predictsSites[!is.na(predictsSites$StdTmeanAnomalyRS), ]
 
 #x <- mod_list[1]
 
+# loop through models and generate plots for checking assumptions etc
 for(x in mod_list){
 
 # only do this one if not SR model
@@ -100,9 +106,9 @@ if(grepl("Abun", x) == 1) {
   
  predData <- predictsSites[!is.na(predictsSites$LogAbund), ]
  
- # 4. plot of observed vs fitted values
  
- pdf(NULL)
+ # 4. plot of observed vs fitted values
+  pdf(NULL)
  dev.control(displaylist="enable")
  plot(predData$LogAbund,fitted(get(x)$model), 
       xlab = "Observed values", ylab = "Fitted values") 
@@ -228,3 +234,10 @@ cowplot::plot_grid(plots, legend,
                    rel_heights = c(6, 1))
 
 ggsave(filename = paste0(outdir, "Residual_plots_by_anom_All.pdf"), height = 7, width = 8)
+
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()

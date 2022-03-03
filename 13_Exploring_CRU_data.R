@@ -9,17 +9,23 @@
 
 rm(list = ls())
 
+
+# organise directories
+datadir <- "0_data/"
+outdir <- "13_Exploring_CRU_data/"
+dir.create(outdir)
+
+sink(paste0(outdir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 # load libraries
 library(raster)
 library(predictsFunctions)
 library(StatisticalModels)
 source("Functions.R")
-
-
-# organise directories
-datadir <- "0_data"
-outdir <- "13_Exploring_CRU_data"
-dir.create(outdir)
 
 # load in the stn data
 stn <- stack(paste0(datadir,"/cru_ts4.03.1901.2018.tmp.dat.nc"),varname = "stn")
@@ -274,15 +280,7 @@ for(i in vals){
   
   model_data <- droplevels(model_data)
   
-  # model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
-  #                             fitFamily = "poisson",fixedFactors = "UI2",
-  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
-  #                             randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-  #                             saveVars = c("SSBS"))
-  
-  #summary(model_output$model)
-  
+
   model_output <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
                                  fixedStruct = "UI2 * StdTmeanAnomalyRS",
                                  randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
@@ -421,15 +419,7 @@ for(i in vals){
   
   model_data <- droplevels(model_data)
   
-  # model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
-  #                             fitFamily = "gaussian",fixedFactors = "UI2",
-  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
-  #                             randomStruct = "(1|SS)+(1|SSB)",
-  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-  #                             saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
-  
-  #summary(model_output$model)
-  
+
   model_output <- GLMER(modelData = model_data,responseVar = "LogAbund", 
                         fitFamily = "gaussian",
                         fixedStruct = "UI2 * StdTmeanAnomalyRS",
@@ -561,16 +551,7 @@ for(i in vals){
   model_data <- trop_data[trop_data$nstn > i, ]
   
   model_data <- droplevels(model_data)
-  
-  # model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
-  #                             fitFamily = "poisson",fixedFactors = "UI2",
-  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
-  #                             randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"), 
-  #                             saveVars = c("SSBS"))
-  # 
-  #summary(model_output$model)
-  
+
   
   model_output <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
                         fixedStruct = "UI2 * StdTmeanAnomalyRS",
@@ -738,15 +719,7 @@ for(i in vals){
   
   model_data <- droplevels(model_data)
   
-  # model_output <- GLMERSelect(modelData = model_data,responseVar = "LogAbund",
-  #                             fitFamily = "gaussian",fixedFactors = "UI2",
-  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
-  #                             randomStruct = "(1|SS)+(1|SSB)",
-  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"),
-  #                             saveVars = c("Species_richness", "Total_abundance", "SSBS", "NH_3000"))
-  
-  #summary(model_output$model)
-  
+
   model_output <- GLMER(modelData = model_data,responseVar = "LogAbund", 
                         fitFamily = "gaussian",
                         fixedStruct = "UI2 * StdTmeanAnomalyRS",
@@ -879,16 +852,7 @@ for(i in vals){
   
   model_data <- droplevels(model_data)
   
-  # model_output <- GLMERSelect(modelData = model_data,responseVar = "Species_richness",
-  #                             fitFamily = "poisson",fixedFactors = "UI2",
-  #                             fixedTerms = list(StdTmeanAnomalyRS=1),
-  #                             randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",
-  #                             fixedInteractions = c("UI2:poly(StdTmeanAnomalyRS,1)"), 
-  #                             saveVars = c("SSBS"))
-  # 
-  #summary(model_output$model)
-  
-  
+
   model_output <- GLMER(modelData = model_data,responseVar = "Species_richness",fitFamily = "poisson",
                         fixedStruct = "UI2 * StdTmeanAnomalyRS",
                         randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
@@ -1088,3 +1052,9 @@ hist(trop_data[trop_data$nstn >5, "StdTmeanAnomaly"], main = "Sites supported by
 
 
 dev.off()
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
