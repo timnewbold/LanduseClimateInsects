@@ -12,15 +12,25 @@ rm(list = ls())
 #install_github(repo = "timnewbold/predicts-demo",subdir = "predictsFunctions")
 #install_github(repo = "timnewbold/StatisticalModels")
 
+
+# directories
+dataDir <- "0_data/"
+outDir <- "14_Additional_Tests2/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 # load required libraries
 library(predictsFunctions)
 library(ggplot2)
 library(StatisticalModels)
 source("Functions.R")
+library(cowplot)
 
-# directories
-dataDir <- "0_data/"
-outDir <- "14_Additional_Tests/"
 
 # Set the path to your local copy of the database
 predicts.path <- paste0(dataDir,"database.rds")
@@ -31,9 +41,6 @@ predicts <- ReadPREDICTS(predicts.path)
 # Select only data for insects
 predicts <- predicts[(predicts$Class=="Insecta"),]
 
-# hosts <- read.csv(paste0(dataDir,"HostSpecies_PREDICTS.csv"))
-# predicts <- predicts[(predicts$Best_guess_binomial %in% hosts$Host.binomial),]
-
 # Correct effort-sensitive abundance measures (assumes linear relationship between effort and recorded abundance)
 predicts <- CorrectSamplingEffort(diversity = predicts)
 # Correcting 870378 values for sensitivity to sampling effort (most of these are 0s, 19184 non-zero)
@@ -42,7 +49,7 @@ table(predicts$Diversity_metric)
 
 
 # insects should not have diversity metric "percent cover", this is a mistake in the database
-# remove those sites that are the problem
+# remove those sites that are the problem (issue reported to database ho)
 predicts <- predicts[!predicts$Diversity_metric == "percent cover", ]
 
 
@@ -104,9 +111,6 @@ sites$LandUse <- paste(sites$Predominant_land_use)
 
 # Drop classification where land use could not be identified
 sites$LandUse[(sites$LandUse=="Cannot decide")] <- NA
-
-# Drop classification where the stage of recovery of secondary vegetation is unknown
-# sites$LandUse[(sites$LandUse=="Secondary vegetation (indeterminate age)")] <- NA
 
 # Now make the variable a factor, and set the reference level to primary vegetation
 sites$LandUse <- factor(sites$LandUse)
@@ -398,9 +402,7 @@ p2 <- ggplot(data = nd2, aes(x = StdTmaxAnomaly, y = PredMedian)) +
   ggtitle("b.")
 
 
-
-library(cowplot)
-
+# combine plots
 plot_grid(p1, p2)
 
 ggsave2(filename = paste0(outDir, "Chao_Richness_LUCC_plots.pdf"), width = 8, height = 4)
@@ -434,3 +436,11 @@ table(sites2$Tropical)
 
 #Temperate  Tropical 
 #3287       981
+
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
+

@@ -13,7 +13,7 @@ rm(list = ls())
 # organise directories
 datadir <- "0_data/"
 outdir <- "13_Exploring_CRU_data/"
-dir.create(outdir)
+if(!dir.exists(outdir)) dir.create(outdir)
 
 sink(paste0(outdir,"log.txt"))
 

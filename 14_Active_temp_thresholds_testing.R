@@ -11,6 +11,18 @@
 rm(list = ls())
 
 
+# directories
+dataDir <- "0_data/"
+predictsDir <- "1_PreparePREDICTSData/"
+outDir <- "14_Additional_Tests"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 ##Read in packages
 library(raster)
 library(sp)
@@ -21,18 +33,11 @@ library(Rfast)
 library(snow)
 source("Functions.R")
 
-# directories
-dataDir <- "0_data/"
-predictsDir <- "1_PreparePREDICTSData/"
-outDir <- "14_Additional_Tests"
-
 ##Path for monthly mean temperature from CRUv4.03
 tmp.path <- "Data/cru_ts4.03.1901.2018.tmp.dat.nc"
 
 ##Path for mean monthly maximum from CRUv4.03
 tmx.path <- "Data/cru_ts4.03.1901.2018.tmx.dat.nc"
-
-#output <- "Outputs/predicts_climate_info.rds"
 
 ##Read in average temperature data from CRU v4.03
 tmp <- stack(paste0(dataDir,"cru_ts4.03.1901.2018.tmp.dat.nc"),varname = "tmp")
@@ -162,10 +167,7 @@ temperatureVars <- data.frame(t(parSapply(
       
       # calculate the "present day" mean and sd
       avg_temp <- mean(vals$V2)
-      #sd_temp <- sd(vals$V2) # don't actually use this
-      
-      
-      
+
       # get 3 hottest month vals for those months that meet the threshold
       
       # loop through each year, get the 3 hottest months
@@ -605,4 +607,8 @@ dev.off()
 
 
 
+t.end <- Sys.time()
 
+print(round(t.end - t.start,0))
+
+sink()
