@@ -9,6 +9,20 @@
 
 rm(list = ls())
 
+
+# directories 
+predictsDataDir <- "6_RunLUClimateModels/"
+outDir <- "14_Additional_Tests/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
+
 # load libraries
 library(devtools)
 #install_github("timnewbold/StatisticalModels")
@@ -17,10 +31,6 @@ library(StatisticalModels)
 library(predictsFunctions)
 source("Functions.R")
 library(sjPlot)
-
-# directories 
-predictsDataDir <- "6_RunLUClimateModels/"
-outDir <- "14_Additional_Tests/"
 
 
 # load data
@@ -192,7 +202,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-     ylim=c(-70,80),
+     ylim=c(-70,100),
      xlab="Standardised Temperature Anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("a", adj = 0, cex.main = 1)
@@ -303,7 +313,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-     ylim=c(-70,80),
+     ylim=c(-70,100),
      xlab="Standardised Temperature Anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("b", adj = 0, cex.main = 1)
@@ -434,7 +444,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$avg_temp),max(nd$avg_temp)),
-     ylim=c(-50,200),
+     ylim=c(-50,250),
      xlab="Mean temperature",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("a", adj = 0, cex.main = 1)
@@ -545,7 +555,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-     ylim=c(-70,80),
+     ylim=c(-70,100),
      xlab="Standardised Temperature Anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("b", adj = 0, cex.main = 1)
@@ -593,4 +603,9 @@ dev.off()
 
 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 

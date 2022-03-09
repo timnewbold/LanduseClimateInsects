@@ -14,7 +14,7 @@ rm(list = ls())
 # directories
 dataDir <- "0_data/"
 predictsDir <- "1_PreparePREDICTSData/"
-outDir <- "14_Additional_Tests"
+outDir <- "14_Additional_Tests/"
 if(!dir.exists(outDir)) dir.create(outDir)
 
 sink(paste0(outDir,"log.txt"))
