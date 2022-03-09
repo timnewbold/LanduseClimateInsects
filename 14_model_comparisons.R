@@ -5,9 +5,23 @@
 ##%######################################################%##
 
 # in this script we test models using average temperature, the anomaly 
-# (difference in temperature) and the standardused anomaly and compare them.
+# (difference in temperature) and the standardised anomaly and compare them.
 
 rm(list = ls())
+
+
+# directories 
+predictsDataDir <- "6_RunLUClimateModels/"
+outDir <- "14_Additional_Tests/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
 
 # load libraries
 library(devtools)
@@ -16,9 +30,6 @@ library(predictsFunctions)
 source("Functions.R")
 library(sjPlot)
 
-# directories 
-predictsDataDir <- "6_RunLUClimateModels/"
-outDir <- "14_Additional_Tests/"
 
 # load in the data
 predictsSites <- readRDS(file = paste0(predictsDataDir,"PREDICTSSiteData.rds"))
@@ -222,7 +233,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$avg_temp),30),
-     ylim=c(-70,150),
+     ylim=c(-70,250),
      xlab="Average Temperature",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("a", adj = 0, cex.main = 1)
@@ -257,7 +268,7 @@ abline(v=30,lty=1,col="#0000000C")
 
 # add legend
 legend(
-  x = 12, y = 150,bty="n",
+  x = 12, y = 200,bty="n",
   legend = c("Primary","Secondary",
              "Agriculture_Low",
              "Agriculture_High"),
@@ -335,7 +346,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$TmeanAnomaly),2.5),
-     ylim=c(-70,80),
+     ylim=c(-70,200),
      xlab=" Temperature Anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("b", adj = 0, cex.main = 1)
@@ -369,14 +380,14 @@ abline(v=1.5,lty=1,col="#0000000C")
 abline(v=2,lty=1,col="#0000000C")
 
 # add legend
-legend(
-  x = -0.1, y = 85,bty="n",
-  legend = c("Primary","Secondary",
-             "Agriculture_Low",
-             "Agriculture_High"),
-  col = c("#009E73", "#0072B2",
-          "#E69F00", "#D55E00"),
-  lty=1,lwd=2, cex = 0.8)
+# legend(
+#   x = -0.1, y = 85,bty="n",
+#   legend = c("Primary","Secondary",
+#              "Agriculture_Low",
+#              "Agriculture_High"),
+#   col = c("#009E73", "#0072B2",
+#           "#E69F00", "#D55E00"),
+#   lty=1,lwd=2, cex = 0.8)
 
 
 
@@ -448,7 +459,7 @@ nd$PredLower <- ((apply(X = a.preds.tmean,MARGIN = 1,
 
 # set up plotting window
 plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-     ylim=c(-70,80),
+     ylim=c(-70,200),
      xlab="Standardised Temperature Anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
 
 title("c", adj = 0, cex.main = 1)
@@ -482,14 +493,14 @@ abline(v=1.5,lty=1,col="#0000000C")
 abline(v=2,lty=1,col="#0000000C")
 
 # add legend
-legend(
-  x = -0.1, y = 80,bty="n",
-  legend = c("Primary","Secondary",
-             "Agriculture_Low",
-             "Agriculture_High"),
-  col = c("#009E73", "#0072B2",
-          "#E69F00", "#D55E00"),
-  lty=1,lwd=2, cex = 0.8)
+# legend(
+#   x = -0.1, y = 80,bty="n",
+#   legend = c("Primary","Secondary",
+#              "Agriculture_Low",
+#              "Agriculture_High"),
+#   col = c("#009E73", "#0072B2",
+#           "#E69F00", "#D55E00"),
+#   lty=1,lwd=2, cex = 0.8)
 
 dev.off()
 
@@ -846,4 +857,9 @@ dev.off()
 
 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 
