@@ -11,16 +11,24 @@
 
 rm(list = ls())
 
-library(StatisticalModels)
-library(ggplot2)
-library(cowplot)
-source('Functions.R')
-
 
 # directories
 predictsDataDir <- "6_RunLUClimateModels/"
 outDir <- "14_Additional_Tests/"
+if(!dir.exists(outDir)) dir.create(outDir)
 
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
+library(StatisticalModels)
+library(ggplot2)
+library(cowplot)
+source('Functions.R')
 
 ###Create Models for all insects in predicts for Standardised climate anomaly and Land interactions
 
@@ -29,7 +37,8 @@ predictsSites <- readRDS(paste0(predictsDataDir,"PREDICTSSiteData.rds"))
 
 #### Abundance models ####
 
-modelData <- predictsSites[!is.na(predictsSites$LogAbund), ] # 5735
+modelData <- predictsSites[!is.na(predictsSites$LogAbund), ] 
+modelData <- modelData[!is.na(modelData$StdTmeanAnomalyRS), ] # 5735
 
 AbundMeanAnomalyModel_1000 <- GLMER(modelData = modelData,responseVar = "LogAbund",fitFamily = "gaussian",
                                 fixedStruct = "UI2 * StdTmeanAnomalyRS * NH_1000.rs",
@@ -1014,4 +1023,10 @@ cowplot::plot_grid(p1, p2, p3, p4, nrow = 4, labels = c("1000m", "3000m", "5000m
 # save
 ggsave(filename = paste0(outDir, "Rich_buffers_plots.pdf"), height = 16, width = 9)
 
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 
