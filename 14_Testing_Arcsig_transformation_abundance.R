@@ -10,6 +10,18 @@
 rm(list = ls())
 
 
+# directories 
+dataDir <- "6_RunLUClimateModels/"
+outdir <- "14_Additional_Tests/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
 # load libraries
 library(devtools)
 #install_github("timnewbold/StatisticalModels")
@@ -19,9 +31,6 @@ library(predictsFunctions)
 source("Functions.R")
 library(sjPlot)
 
-# directories 
-dataDir <- "6_RunLUClimateModels/"
-outdir <- "14_Additional_Tests/"
 
 # load the data
 predictsSites <- readRDS(file = paste0(dataDir,"PREDICTSSiteData.rds"))
@@ -157,3 +166,10 @@ for(x in mod_list){
   }
   
 }
+
+
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()

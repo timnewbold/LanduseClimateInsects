@@ -5,27 +5,33 @@
 ##%######################################################%##
 
 
-# in this script, I will check for outliers in the models, remove
-# these from the dataset and rerun the models to see if they have
-# an effect on the results.
+# This script checks for outliers in the models, removes these from the 
+# dataset and reruns the models to see if they have an effect on the results.
 
  
-### The check_outliers function, from the performance package using cook's distance, doesn't find any outliers. ###
+# The check_outliers function, from the performance package using cook's distance, doesn't find any outliers.
+
+# An alternative approach is then used using the influence.ME package
 
 
 rm(list = ls())
+
+# directories
+moddir <- "6_RunLUClimateModels/"
+outdir <- "14_Additional_Tests/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
 
 # libraries
 library(performance)
 source("Functions.R")
 library(influence.ME)
 library(StatisticalModels)
-
-
-# directories
-moddir <- "6_RunLUClimateModels/"
-outdir <- "14_Additional_Tests/"
-
 
 
 # load in models
@@ -300,16 +306,7 @@ MaxAnomalyModelRich$model
 # set quantiles of predicted result to be presented in the plots
 exclQuantiles <- c(0.025,0.975)
 
-# 
-# pdf(file = paste0(outdir, "/Figure2_MeanAnom_Abun_Rich_outliersrem.pdf"), width = 8, height = 4)
-# 
-# par(mfrow=c(1,2))
-# par(las=1)
-# par(mgp=c(1.6,0.3,0)) # 
-# par(mar=c(2.6,2.6,1,1)) # margins around plot
-# par(tck=-0.01) # tick mark size
-# #par(pty="s") # set plot type to be square
-
+# matrix
 nd <- expand.grid(
   StdTmeanAnomalyRS=seq(from = min(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
                         to = max(MeanAnomalyModelAbund$data$StdTmeanAnomalyRS),
@@ -398,55 +395,6 @@ p1 <- ggplot(data = nd, aes(x = StdTmeanAnomaly, y = PredMedian)) +
         legend.background = element_blank()) + 
   ggtitle("a")
 
-
-# 
-# 
-# # plot #
-# 
-# # set up plotting window
-# plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-#      ylim=c(-70,80),
-#      xlab="Standardised Temperature Anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
-# 
-# title("a", adj = 0, cex.main = 1)
-# 
-# 
-# invisible(mapply(FUN = function(preds,col){
-#   
-#   preds <- na.omit(preds)
-#   
-#   X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
-#              rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
-#   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-#              rev(preds$PredUpper), (preds$PredLower)[1])
-#   
-#   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-#   
-#   points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-#   
-# },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
-# 
-# # add some gridlines
-# abline(h=150,lty=1,col="#0000000C")
-# abline(h=100,lty=1,col="#0000000C")
-# abline(h=50,lty=1,col="#0000000C")
-# abline(h=0,lty=2,col="#030303")
-# abline(h=-50,lty=1,col="#0000000C")
-# abline(v=0,lty=1,col="#0000000C")
-# abline(v=0.5,lty=1,col="#0000000C")
-# abline(v=1,lty=1,col="#0000000C")
-# abline(v=1.5,lty=1,col="#0000000C")
-# abline(v=2,lty=1,col="#0000000C")
-# 
-# # add legend
-# legend(
-#   x = -0.1, y = 80,bty="n",
-#   legend = c("Primary","Secondary",
-#              "Agriculture_Low",
-#              "Agriculture_High"),
-#   col = c("#009E73", "#0072B2",
-#           "#E69F00", "#D55E00"),
-#   lty=1,lwd=2, cex = 0.8)
 
 
 ## now the species richness plot 
@@ -543,70 +491,7 @@ plot_grid(p1, p2)
 
 ggsave(filename = paste0(outdir, "Extended_Data3_MeanAnom_outrem.jpeg"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
 
-
-# 
-# 
-# # set up plotting window
-# plot(-9e99,-9e99,xlim=c(min(nd$StdTmeanAnomaly),2),
-#      ylim=c(-70,80),
-#      xlab="Standardised Temperature Anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
-# 
-# title("b", adj = 0, cex.main = 1)
-# 
-# 
-# invisible(mapply(FUN = function(preds,col){
-#   
-#   preds <- na.omit(preds)
-#   
-#   X.Vec <- c(preds$StdTmeanAnomaly, max(preds$StdTmeanAnomaly), 
-#              rev(preds$StdTmeanAnomaly), min(preds$StdTmeanAnomaly))
-#   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-#              rev(preds$PredUpper), (preds$PredLower)[1])
-#   
-#   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-#   
-#   points(x = preds$StdTmeanAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-#   
-# },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
-# 
-# # add some gridlines
-# abline(h=150,lty=1,col="#0000000C")
-# abline(h=100,lty=1,col="#0000000C")
-# abline(h=50,lty=1,col="#0000000C")
-# abline(h=0,lty=2,col="#030303")
-# abline(h=-50,lty=1,col="#0000000C")
-# abline(v=0,lty=1,col="#0000000C")
-# abline(v=0.5,lty=1,col="#0000000C")
-# abline(v=1,lty=1,col="#0000000C")
-# abline(v=1.5,lty=1,col="#0000000C")
-# abline(v=2,lty=1,col="#0000000C")
-# 
-# # add legend
-# # legend(
-# #   x = 0,y = 90,bty="n",
-# #   legend = c("Primary","Secondary",
-# #              "Agriculture_Low",
-# #              "Agriculture_High"),
-# #   col = c("#009E73", "#0072B2",
-# #           "#E69F00", "#D55E00"),
-# #   lty=1,lwd=2, cex = 0.8)
-# 
-# 
-# dev.off()
-
-
-
-#### max anom figure ####
-# 
-# pdf(file = paste0(outdir,"Extended_Data3_MaxAnom_outliersrem.pdf"),width = 8,height = 4)
-# 
-# par(mfrow=c(1,2))
-# par(las=1)
-# par(mgp=c(1.6,0.3,0)) # 
-# par(mar=c(2.6,2.6,1,1)) # margins around plot
-# par(tck=-0.01) # tick mark size
-# #par(pty="s") # set plot type to be square
-
+### max anomlay abundance figure ###
 
 nd <- expand.grid(
   StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelAbund$data$StdTmaxAnomalyRS),
@@ -688,61 +573,14 @@ p1 <- ggplot(data = nd, aes(x = StdTmaxAnomaly, y = PredMedian)) +
         legend.background = element_blank()) + 
   ggtitle("a")
 
-
-# plot(-9e99,-9e99,xlim=c(-1,max(nd$StdTmaxAnomaly)),
-#      ylim=c(-60,60),
-#      xlab="Maximum temperature anomaly",ylab="Change in total abundance (%)", cex.lab = 0.8, cex.axis = 0.8)
-# 
-# title("a", adj = 0, cex.main = 1)
-# 
-# invisible(mapply(FUN = function(preds,col){
-#   
-#   preds <- na.omit(preds)
-#   
-#   X.Vec <- c(preds$StdTmaxAnomaly, max(preds$StdTmaxAnomaly), 
-#              rev(preds$StdTmaxAnomaly), min(preds$StdTmaxAnomaly))
-#   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-#              rev(preds$PredUpper), (preds$PredLower)[1])
-#   
-#   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-#   
-#   points(x = preds$StdTmaxAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-#   
-# },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
-# 
-# abline(h=40,lty=1,col="#0000000C")
-# abline(h=20,lty=1,col="#0000000C")
-# abline(h=0,lty=2,col="#030303")
-# abline(h=-20,lty=1,col="#0000000C")
-# abline(h=-40,lty=1,col="#0000000C")
-# abline(h=-60,lty=1,col="#0000000C")
-# abline(v=-1,lty=1,col="#0000000C")
-# abline(v=0,lty=1,col="#0000000C")
-# abline(v=1,lty=1,col="#0000000C")
-# abline(v=2,lty=1,col="#0000000C")
-# abline(v=3,lty=1,col="#0000000C")
-# abline(v=4,lty=1,col="#0000000C")
-# abline(v=5,lty=1,col="#0000000C")
-# 
-# legend(
-#   x = -1,y = 60 ,bty="n",
-#   legend = c("Primary","Secondary",
-#              "Agriculture_Low",
-#              "Agriculture_High"),
-#   col = c("#009E73", "#0072B2",
-#           "#E69F00", "#D55E00"),
-#   lty=1,lwd=2, cex = 0.8)
-# 
-# #p3 <- recordPlot()
-
-
+### max anomaly richness ###
 
 nd2 <- expand.grid(
-  StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelAbund$data$StdTmaxAnomalyRS),
-                       to = max(MaxAnomalyModelAbund$data$StdTmaxAnomalyRS),
+  StdTmaxAnomalyRS=seq(from = min(MaxAnomalyModelRich$data$StdTmaxAnomalyRS),
+                       to = max(MaxAnomalyModelRich$data$StdTmaxAnomalyRS),
                        length.out = 250),
   UI2=factor(c("Primary vegetation","Secondary vegetation","Agriculture_Low","Agriculture_High"),
-             levels = levels(MaxAnomalyModelAbund$data$UI2)))
+             levels = levels(MaxAnomalyModelRich$data$UI2)))
 
 nd2$StdTmaxAnomaly <- BackTransformCentreredPredictor(
   transformedX = nd2$StdTmaxAnomalyRS,
@@ -825,48 +663,11 @@ plot_grid(p1, p2)
 ggsave(filename = paste0(outdir, "Extended_Data4_MaxAnom_outrem.jpeg"), plot = last_plot(), width = 183, height = 150, units = "mm", dpi = 300)
 
 
-# 
-# plot(-9e99,-9e99,xlim=c(-1,max(nd$StdTmaxAnomaly)),
-#      ylim=c(-60,60),
-#      xlab="Maximum temperature anomaly",ylab="Change in species richness (%)", cex.lab = 0.8, cex.axis = 0.8)
-# 
-# title("b", adj = 0, cex.main = 1)
-# 
-# invisible(mapply(FUN = function(preds,col){
-#   
-#   preds <- na.omit(preds)
-#   
-#   X.Vec <- c(preds$StdTmaxAnomaly, max(preds$StdTmaxAnomaly), 
-#              rev(preds$StdTmaxAnomaly), min(preds$StdTmaxAnomaly))
-#   Y.Vec <- c(preds$PredLower, tail(preds$PredUpper, 1), 
-#              rev(preds$PredUpper), (preds$PredLower)[1])
-#   
-#   polygon(x = X.Vec,y = Y.Vec,col=paste0(col,"33"),border=NA)
-#   
-#   points(x = preds$StdTmaxAnomaly,y = preds$PredMedian,type="l",lwd=2,col=paste0(col))
-#   
-# },split(nd,nd$UI2),c("#009E73", "#D55E00", "#E69F00", "#0072B2")))
-# 
-# abline(h=40,lty=1,col="#0000000C")
-# abline(h=20,lty=1,col="#0000000C")
-# abline(h=0,lty=2,col="#030303")
-# abline(h=-20,lty=1,col="#0000000C")
-# abline(h=-40,lty=1,col="#0000000C")
-# abline(h=-60,lty=1,col="#0000000C")
-# abline(v=-1,lty=1,col="#0000000C")
-# abline(v=0,lty=1,col="#0000000C")
-# abline(v=1,lty=1,col="#0000000C")
-# abline(v=2,lty=1,col="#0000000C")
-# abline(v=3,lty=1,col="#0000000C")
-# abline(v=4,lty=1,col="#0000000C")
-# abline(v=5,lty=1,col="#0000000C")
-# #p4 <- recordPlot()
-# 
-# 
-# 
-# 
-# invisible(dev.off())
-# 
 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
 

@@ -11,6 +11,20 @@
 
 rm(list = ls())
 
+
+# directories 
+predictsDataDir <- "6_RunLUClimateModels/"
+outDir <- "14_Additional_Tests/"
+if(!dir.exists(outDir)) dir.create(outDir)
+
+
+sink(paste0(outDir,"log.txt"))
+
+t.start <- Sys.time()
+
+print(t.start)
+
+
 # load libraries
 library(devtools)
 library(StatisticalModels)
@@ -20,11 +34,6 @@ source("Functions.R")
 library(DHARMa)
 library(cowplot)
 library(sjPlot)
-
-
-# directories 
-predictsDataDir <- "6_RunLUClimateModels/"
-outDir <- "14_Additional_Tests/"
 
 
 # load in the data
@@ -50,9 +59,6 @@ load("6_RunLUClimateModels/MeanAnomalyModelAbund.rdata") # MeanAnomalyModelAbund
 
 summary(MeanAnomalyModelAbund$model)
 summary(abun_NB_mod)
-
-# are they comparable though?
-#AIC(MeanAnomalyModelAbund$model, abun_NB_mod, abunRS_NB_mod)
 
 
 # present model outputs
@@ -419,3 +425,8 @@ tab_model(Ab_Zinf_mod, MeanAnomalyModelAbund$model,
 
 
 
+t.end <- Sys.time()
+
+print(round(t.end - t.start,0))
+
+sink()
